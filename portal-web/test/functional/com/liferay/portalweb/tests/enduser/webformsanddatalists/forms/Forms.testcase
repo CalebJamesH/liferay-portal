@@ -2488,4 +2488,114 @@ definition {
 		FormFields.viewTextLabel(fieldLabel = "Text");
 	}
 
+	@description = "Access Portal Global Menu and validate CONFIGURATION string at Control Panel"
+    @priority = "5" \
+    test WriteNewForm {
+
+        FormsAdmin.addForm();
+
+		Form.editName();
+
+		Form.addTextField(fieldPositionNumber="0");
+
+		Form.editFieldLabelMetal(fieldValue = "Full Name");
+
+		Form.closeSidebar();
+
+		Form.gotoAddField(
+			fieldPositionNumber = 1,
+			fieldType = "Numeric");
+
+		Form.editFieldLabelMetal(fieldValue = "Age");
+
+		Form.addTranslation(localizedLanguage = "Portuguese (Brazil)");
+
+		FormViewBuilder.editFieldLabel(
+			fieldLabel = "Full Name",
+			label = "Nome Completo");
+
+		FormViewBuilder.editFieldLabel(
+			fieldLabel = "Age",
+			label = "Idade");
+
+		Form.save();
+	
+		Form.publishForm();
+
+		FormsAdminNavigator.gotoPublishedForm();
+
+		FormPortlet.waitFormRenderer(text = "Submit");
+
+		FormFields.viewTextField(
+			fieldLabel = "Full Name",
+			fieldName = "Text");
+
+		FormFields.editText(
+			fieldName = "Text",
+			fieldValue = "Caleb James Hall");
+
+		FormFields.viewTextField(
+			fieldLabel = "Age",
+			fieldName = "Numeric");
+
+		FormFields.editText(
+			fieldName = "Numeric",
+			fieldValue = "18");
+
+		FormPortlet.submitSuccessfully();
+
+		Navigator.openURL();
+
+        ProductMenu.gotoPortlet(
+			category = "Content & Data",
+			portlet = "Forms");
+	
+		FormsAdminNavigator.gotoEditFormByName(formName = "Created Form Name");
+
+		FormsAdminNavigator.gotoPublishedForm();
+
+		FormPortlet.waitFormRenderer(text = "Submit");
+	
+		FormPortlet.changeLocale(locale = "português-Brasil");
+	
+		FormFields.viewTextField(
+			fieldLabel = "Nome Completo",
+			fieldName = "Text");
+
+		FormFields.editText(
+			fieldName = "Text",
+			fieldValue = "Gabriel Fernando");
+
+		FormFields.viewTextField(
+			fieldLabel = "Idade",
+			fieldName = "Numeric");
+
+		FormFields.editText(
+			fieldName = "Numeric",
+			fieldValue = "18");
+
+		FormPortlet.submitSuccessfully();
+
+		Navigator.openURL();
+
+        ProductMenu.gotoPortlet(
+			category = "Content & Data",
+			portlet = "Forms");
+
+		FormsAdmin.viewForm(
+			formDescription = "",
+			formName = "Created Form Name");
+
+		FormsAdminNavigator.gotoViewEntries(formName = "Created Form Name");
+
+		FormsAdmin.viewFormTableEntry(
+			fieldLabel = "Full Name",
+			fieldValue = "Caleb James Hall");
+
+		FormsAdmin.viewFormTableEntry(
+			fieldLabel = "Full Name",
+			fieldValue = "Gabriel Fernando");
+
+		}
+
 }
