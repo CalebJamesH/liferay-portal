@@ -2598,4 +2598,16 @@ definition {
 
 		}
 
+	@description = "Access Portal Global Menu and validate CONFIGURATION string at Control Panel"
+    @priority = "5"
+    test ValidateConfigurationStringAtControlPanel {
+
+        Click(locator1="//button[@data-qa-id='applicationsMenu']");
+
+		Click(locator1="//button//span[contains(text(),'Control Panel')]");
+
+		AssertElementPresent(locator1="//h2[@id='nav_control_panel.configuration']");
+
+	}
+
 }
