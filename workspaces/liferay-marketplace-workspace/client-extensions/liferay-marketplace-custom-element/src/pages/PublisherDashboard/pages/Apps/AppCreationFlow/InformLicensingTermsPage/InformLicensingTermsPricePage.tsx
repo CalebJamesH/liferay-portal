@@ -40,8 +40,11 @@ export function InformLicensingTermsPricePage({
 	onClickBack,
 	onClickContinue,
 }: InformLicensingTermsPricePageProps) {
-	const [{appLicensePrice, appProductId}, dispatch] = useAppContext();
+	const [{appLicensePrice, appProductId, appType}, dispatch] =
+		useAppContext();
 	const [isProcessing, setProcessing] = useState(false);
+
+	const isDXP = appType.value === 'dxp';
 
 	const handleAddPriceTier = (licenseTier: LicenseTier) =>
 		dispatch({
@@ -168,37 +171,44 @@ export function InformLicensingTermsPricePage({
 				/>
 			</Section>
 
-			<Section
-				label="Developer License prices"
-				tooltip="Developer licenses are limited to 5 unique addresses and should not be used for full scale production deployments."
-				tooltipText="More Info"
-			>
-				{appLicensePrice.developer.length ? (
-					<LicensePriceCard
-						licensePrices={appLicensePrice.developer}
-						onAdd={() => handleAddPriceTier(LicenseTier.DEVELOPER)}
-						onChange={(index: number, price: LicensePrice) =>
-							handleEditPriceTier(
-								LicenseTier.DEVELOPER,
-								index,
-								price
-							)
-						}
-						onDelete={(key: number) =>
-							handleDeletePriceTier(LicenseTier.DEVELOPER, key)
-						}
-					/>
-				) : (
-					<IconButton
-						className="icon-button py-3 w-100"
-						onClick={() =>
-							handleAddPriceTier(LicenseTier.DEVELOPER)
-						}
-					>
-						Add Developer Licenses
-					</IconButton>
-				)}
-			</Section>
+			{isDXP && (
+				<Section
+					label="Developer License prices"
+					tooltip="Developer licenses are limited to 5 unique addresses and should not be used for full scale production deployments."
+					tooltipText="More Info"
+				>
+					{appLicensePrice.developer.length ? (
+						<LicensePriceCard
+							licensePrices={appLicensePrice.developer}
+							onAdd={() =>
+								handleAddPriceTier(LicenseTier.DEVELOPER)
+							}
+							onChange={(index: number, price: LicensePrice) =>
+								handleEditPriceTier(
+									LicenseTier.DEVELOPER,
+									index,
+									price
+								)
+							}
+							onDelete={(key: number) =>
+								handleDeletePriceTier(
+									LicenseTier.DEVELOPER,
+									key
+								)
+							}
+						/>
+					) : (
+						<IconButton
+							className="icon-button py-3 w-100"
+							onClick={() =>
+								handleAddPriceTier(LicenseTier.DEVELOPER)
+							}
+						>
+							Add Developer Licenses
+						</IconButton>
+					)}
+				</Section>
+			)}
 
 			<NewAppPageFooterButtons
 				disableContinueButton={isProcessing || !appLicensePrice}

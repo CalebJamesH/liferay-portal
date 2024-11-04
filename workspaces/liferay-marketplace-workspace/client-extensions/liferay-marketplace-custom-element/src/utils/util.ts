@@ -32,6 +32,29 @@ export function createSkuName(
 	}`;
 }
 
+export function getCloudOptionBody() {
+	return {
+		fieldType: 'radio',
+		key: 'cloud-license-usage-type',
+		name: {en_US: 'Cloud License Usage Type'},
+	};
+}
+
+export function getCloudProductOptionBody(newOptionId: number) {
+	return {
+		facetable: false,
+		fieldType: 'radio',
+		key: 'cloud-license-usage-type',
+		name: {
+			en_US: 'Cloud License Usage Type',
+		},
+		optionId: newOptionId,
+		productOptionValues: [],
+		required: true,
+		skuContributor: true,
+	};
+}
+
 export function getDxpOptionBody() {
 	return {
 		fieldType: 'radio',
