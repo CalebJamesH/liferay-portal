@@ -33,16 +33,18 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
  * @author Keven Leone
  */
+@RequestMapping("/object/action/product/purchase")
 @RestController
 public class ObjectActionProductPurchaseRestController
 	extends BaseRestController {
 
-	@PostMapping("/object/action/product/purchase")
+	@PostMapping
 	public void post(@AuthenticationPrincipal Jwt jwt, @RequestBody String json)
 		throws Exception {
 
