@@ -1,0 +1,426 @@
+/**
+ * SPDX-FileCopyrightText: (c) 2024 Liferay, Inc. https://liferay.com
+ * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
+ */
+
+package com.liferay.marketplace.service;
+
+import com.liferay.client.extension.util.spring.boot3.client.LiferayOAuth2AccessTokenManager;
+import com.liferay.client.extension.util.spring.boot3.service.BaseService;
+import com.liferay.headless.admin.user.client.dto.v1_0.UserAccount;
+import com.liferay.headless.commerce.admin.order.client.dto.v1_0.Order;
+import com.liferay.headless.portal.instances.client.dto.v1_0.Admin;
+import com.liferay.headless.portal.instances.client.dto.v1_0.PortalInstance;
+import com.liferay.headless.portal.instances.client.pagination.Page;
+import com.liferay.headless.portal.instances.client.resource.v1_0.PortalInstanceResource;
+import com.liferay.marketplace.constants.MarketplaceConstants;
+import com.liferay.petra.string.StringBundler;
+import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.HashMapBuilder;
+
+import java.net.URI;
+
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpHeaders;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
+
+/**
+ * @author Caleb Hall
+ */
+@Component
+public class TrialService extends BaseService {
+
+	public void deletePortalInstance(
+			long orderId, JSONObject trialProvisioningContextJSONObject,
+			String virtualHost)
+		throws Exception {
+
+		PortalInstanceResource portalInstanceResource =
+			getPortalInstanceResource(trialProvisioningContextJSONObject);
+
+		Page<PortalInstance> page =
+			portalInstanceResource.getPortalInstancesPage(true);
+
+		for (PortalInstance portalInstance : page.getItems()) {
+			if (Objects.equals(portalInstance.getVirtualHost(), virtualHost)) {
+				portalInstanceResource.deletePortalInstance(
+					portalInstance.getPortalInstanceId());
+
+				break;
+			}
+		}
+
+		if (_log.isInfoEnabled()) {
+			_log.info("Portal instance deleted for order " + orderId);
+		}
+	}
+
+	public PortalInstanceResource getPortalInstanceResource(
+			JSONObject trialProvisioningContextJSONObject)
+		throws Exception {
+
+		return PortalInstanceResource.builder(
+		).endpoint(
+			new URI(
+				trialProvisioningContextJSONObject.getString("trialHomePageURL")
+			).toURL()
+		).header(
+			HttpHeaders.AUTHORIZATION,
+			_liferayOAuth2AccessTokenManager.getAuthorization(
+				trialProvisioningContextJSONObject.getString(
+					"trialAuthorizationERC"))
+		).build();
+	}
+
+	public Page<PortalInstance> getPortalInstancesPage(
+			JSONObject trialProvisioningContextJSONObject)
+		throws Exception {
+
+		PortalInstanceResource portalInstanceResource =
+			getPortalInstanceResource(trialProvisioningContextJSONObject);
+
+		return portalInstanceResource.getPortalInstancesPage(true);
+	}
+
+	public JSONObject getTrialProvisioningContextJSONObject(Order order) {
+		JSONObject trialSettingsJSONObject = _getTrialSettingsJSONObject(order);
+
+		String projectId = trialSettingsJSONObject.optString(
+			"projectId", String.valueOf(order.getId()));
+
+		if (Objects.equals(
+				order.getOrderTypeExternalReferenceCode(), "SOLUTIONS7")) {
+
+			return new JSONObject(
+			).put(
+				"cluster", _consoleTrialCluster
+			).put(
+				"deployable", true
+			).put(
+				"domain", _trialDXPDomain
+			).put(
+				"dxpProjectUid", _consoleTrialProjectUid
+			).put(
+				"projectId", _consoleTrialProjectPrefix + "-ext" + projectId
+			).put(
+				"trialAuthorizationERC", "external-trial"
+			).put(
+				"trialHomePageURL", _externalTrialHomePageURL
+			);
+		}
+
+		if (Objects.equals(
+				order.getOrderTypeExternalReferenceCode(), "SSA_SAAS")) {
+
+			return new JSONObject(
+			).put(
+				"cluster", _consoleSSACluster
+			).put(
+				"deployable", false
+			).put(
+				"domain", _trialSSADXPDomain
+			).put(
+				"dxpProjectUid", _consoleSSAProjectUid
+			).put(
+				"projectId", _consoleSSAProjectPrefix + "-ext" + projectId
+			).put(
+				"trialAuthorizationERC", "external-ssa"
+			).put(
+				"trialHomePageURL", _externalSSAHomePageURL
+			);
+		}
+
+		throw new IllegalArgumentException(
+			"Unsupported order type: " +
+				order.getOrderTypeExternalReferenceCode());
+	}
+
+	public void post(Jwt jwt, JSONObject jsonObject) throws Exception {
+		long orderId = jsonObject.getLong("classPK");
+
+		if (_log.isInfoEnabled()) {
+			_log.info("Provisioning order " + orderId);
+		}
+
+		Order order = _marketplaceService.getOrder(orderId);
+
+		JSONObject trialProvisioningContextJSONObject =
+			getTrialProvisioningContextJSONObject(order);
+
+		Page<PortalInstance> portalInstancesPage = getPortalInstancesPage(
+			trialProvisioningContextJSONObject);
+
+		if (portalInstancesPage.getTotalCount() == _TRIAL_MAX_INSTANCES) {
+			_log.error("Order is on hold");
+
+			_marketplaceService.updateOrder(
+				null, orderId, MarketplaceConstants.ORDER_STATUS_ON_HOLD);
+
+			return;
+		}
+
+		JSONObject modelDTOOrderJSONObject = jsonObject.getJSONObject(
+			"modelDTOOrder");
+
+		if (modelDTOOrderJSONObject.getInt("orderStatus") ==
+				MarketplaceConstants.ORDER_STATUS_OPEN) {
+
+			_marketplaceService.updateOrder(
+				null, orderId, MarketplaceConstants.ORDER_STATUS_PENDING);
+		}
+
+		_marketplaceService.updateOrder(
+			null, orderId, MarketplaceConstants.ORDER_STATUS_PROCESSING);
+
+		UserAccount userAccount = _marketplaceService.getUserAccount(
+			order.getCreatorEmailAddress());
+
+		JSONObject trialSettingsJSONObject = _getTrialSettingsJSONObject(order);
+
+		boolean sendNotificationEmail = trialSettingsJSONObject.optBoolean(
+			"sendNotificationEmail", true);
+
+		if (sendNotificationEmail) {
+			_marketplaceService.postNotificationQueueEntry(
+				order.getCreatorEmailAddress(), "TRIAL-PROCESSING-ORDER",
+				new HashMapBuilder<String, Object>().put(
+					"[%COMMERCEORDER_AUTHOR_FIRST_NAME%]",
+					userAccount.getGivenName()
+				).put(
+					"[%COMMERCEORDER_ID%]", String.valueOf(orderId)
+				).build());
+		}
+
+		PortalInstance portalInstance = null;
+
+		try {
+			portalInstance = _postPortalInstance(
+				jwt, order.getCreatorEmailAddress(),
+				trialSettingsJSONObject.optString(
+					"projectId", String.valueOf(orderId)),
+				trialSettingsJSONObject.optString("siteInitializerKey", null),
+				trialProvisioningContextJSONObject);
+		}
+		catch (Exception exception) {
+			_log.error(
+				"Unable to provision portal instance for order " + orderId,
+				exception);
+
+			_marketplaceService.updateOrder(
+				null, orderId, MarketplaceConstants.ORDER_STATUS_CANCELLED);
+
+			throw exception;
+		}
+
+		try {
+			_consoleService.setUpProject(
+				trialProvisioningContextJSONObject.getString("cluster"),
+				trialProvisioningContextJSONObject.getBoolean("deployable"),
+				trialProvisioningContextJSONObject.getString("dxpProjectUid"),
+				portalInstance.getVirtualHost(),
+				_toStringArray(
+					trialSettingsJSONObject.optJSONArray(
+						"consoleInviteEmailAddresses", new JSONArray())),
+				orderId,
+				trialProvisioningContextJSONObject.getString("projectId"));
+
+			_marketplaceService.updateOrder(
+				HashMapBuilder.put(
+					"trial-end-date",
+					ZonedDateTime.now(
+					).plusDays(
+						trialSettingsJSONObject.optInt("duration", 7)
+					).format(
+						DateTimeFormatter.ISO_INSTANT
+					)
+				).put(
+					"trial-start-date",
+					ZonedDateTime.now(
+					).format(
+						DateTimeFormatter.ISO_INSTANT
+					)
+				).put(
+					"trial-virtual-host", portalInstance.getVirtualHost()
+				).build(),
+				orderId, MarketplaceConstants.ORDER_STATUS_IN_PROGRESS);
+
+			if (sendNotificationEmail) {
+				_marketplaceService.postNotificationQueueEntry(
+					order.getCreatorEmailAddress(), "TRIAL-COMPLETED-ORDER",
+					new HashMapBuilder<String, Object>().put(
+						"%EMAIL%", order.getCreatorEmailAddress()
+					).put(
+						"%NAME%", userAccount.getGivenName()
+					).put(
+						"%URL%", portalInstance.getVirtualHost()
+					).build());
+			}
+		}
+		catch (WebClientResponseException webClientResponseException) {
+			_rollBackTrial(
+				webClientResponseException.getResponseBodyAsString(), orderId,
+				portalInstance, trialProvisioningContextJSONObject);
+		}
+		catch (Exception exception) {
+			_rollBackTrial(
+				exception.getMessage(), orderId, portalInstance,
+				trialProvisioningContextJSONObject);
+		}
+	}
+
+	private JSONObject _getTrialSettingsJSONObject(Order order) {
+		Map<String, String> customFields =
+			(Map<String, String>)order.getCustomFields();
+
+		return new JSONObject(
+			customFields.getOrDefault("trial-settings", "{}"));
+	}
+
+	private PortalInstance _postPortalInstance(
+			Jwt jwt, String emailAddress, String projectId,
+			String siteInitializerKey,
+			JSONObject trialProvisioningContextJSONObject)
+		throws Exception {
+
+		PortalInstanceResource portalInstanceResource =
+			getPortalInstanceResource(trialProvisioningContextJSONObject);
+
+		PortalInstance portalInstance = new PortalInstance();
+
+		Admin admin = new Admin();
+
+		admin.setEmailAddress(() -> emailAddress);
+		admin.setFamilyName(
+			() -> jwt.getClaim(
+				"username"
+			).toString());
+		admin.setGivenName(
+			() -> jwt.getClaim(
+				"username"
+			).toString());
+
+		portalInstance.setAdmin(() -> admin);
+
+		portalInstance.setDomain(() -> "lxc.app");
+		portalInstance.setSiteInitializerKey(() -> siteInitializerKey);
+
+		String domain =
+			projectId + "." +
+				trialProvisioningContextJSONObject.getString("domain");
+
+		portalInstance.setPortalInstanceId(() -> domain);
+		portalInstance.setVirtualHost(() -> domain);
+
+		portalInstance = portalInstanceResource.postPortalInstance(
+			portalInstance);
+
+		if (_log.isInfoEnabled()) {
+			_log.info("Created portal instance " + portalInstance);
+		}
+
+		return portalInstance;
+	}
+
+	private void _rollBackTrial(
+			String errorMessage, long orderId, PortalInstance portalInstance,
+			JSONObject trialProvisioningContextJSONObject)
+		throws Exception {
+
+		_log.error(
+			StringBundler.concat(
+				"Unable to set up project for order ", orderId, ": \n",
+				errorMessage));
+
+		deletePortalInstance(
+			orderId, trialProvisioningContextJSONObject,
+			portalInstance.getVirtualHost());
+
+		_marketplaceService.updateOrder(
+			HashMapBuilder.put(
+				"trial-error", errorMessage
+			).put(
+				"trial-error-date",
+				ZonedDateTime.now(
+				).format(
+					DateTimeFormatter.ISO_INSTANT
+				)
+			).put(
+				"trial-virtual-host", portalInstance.getVirtualHost()
+			).build(),
+			orderId, MarketplaceConstants.ORDER_STATUS_CANCELLED);
+	}
+
+	private String[] _toStringArray(JSONArray jsonArray) {
+		List<String> list = new ArrayList<>();
+
+		for (int i = 0; i < jsonArray.length(); i++) {
+			list.add(jsonArray.getString(i));
+		}
+
+		return list.toArray(new String[0]);
+	}
+
+	private static final int _TRIAL_MAX_INSTANCES = GetterUtil.getInteger(
+		System.getenv(
+			"LIFERAY_MARKETPLACE_ETC_SPRING_BOOT_TRIAL_MAX_INSTANCES"),
+		50);
+
+	private static final Log _log = LogFactory.getLog(TrialService.class);
+
+	@Autowired
+	private ConsoleService _consoleService;
+
+	@Value("${liferay.marketplace.console.ssa.cluster}")
+	private String _consoleSSACluster;
+
+	@Value("${liferay.marketplace.console.ssa.project.prefix}")
+	private String _consoleSSAProjectPrefix;
+
+	@Value("${liferay.marketplace.console.ssa.project.uid}")
+	private String _consoleSSAProjectUid;
+
+	@Value("${liferay.marketplace.console.cluster}")
+	private String _consoleTrialCluster;
+
+	@Value("${liferay.marketplace.console.project.prefix}")
+	private String _consoleTrialProjectPrefix;
+
+	@Value("${liferay.marketplace.console.project.uid}")
+	private String _consoleTrialProjectUid;
+
+	@Value("${external.ssa.oauth2.headless.server.home.page.url}")
+	private String _externalSSAHomePageURL;
+
+	@Value("${external.trial.oauth2.headless.server.home.page.url}")
+	private String _externalTrialHomePageURL;
+
+	@Autowired
+	private LiferayOAuth2AccessTokenManager _liferayOAuth2AccessTokenManager;
+
+	@Autowired
+	private MarketplaceService _marketplaceService;
+
+	@Value("${liferay.marketplace.trial.dxp.domain}")
+	private String _trialDXPDomain;
+
+	@Value("${liferay.marketplace.trial.ssa.dxp.domain}")
+	private String _trialSSADXPDomain;
+
+}
