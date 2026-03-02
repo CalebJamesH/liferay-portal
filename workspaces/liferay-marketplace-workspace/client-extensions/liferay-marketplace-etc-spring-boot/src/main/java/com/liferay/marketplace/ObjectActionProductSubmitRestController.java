@@ -10,9 +10,19 @@ import com.liferay.headless.commerce.admin.catalog.client.dto.v1_0.Product;
 import com.liferay.marketplace.service.MarketplaceService;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.util.HashMapBuilder;
+
+import java.net.URL;
+
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+
+import java.util.Date;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.json.JSONObject;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -21,90 +31,87 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.net.URL;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.Date;
-
 /**
  * @author Caleb Hall
  */
 @RequestMapping("/object/action/product/submit")
 @RestController
-public class ObjectActionProductSubmitRestController extends BaseRestController {
-    @PostMapping("product/submit")
-    public void postProductSubmit(
-            @AuthenticationPrincipal Jwt jwt, @RequestBody String json)
-            throws Exception {
+public class ObjectActionProductSubmitRestController
+	extends BaseRestController {
 
-        if (_log.isInfoEnabled()) {
-            _log.info("POST product submit " + json);
-        }
+	@PostMapping("product/submit")
+	public void postProductSubmit(
+			@AuthenticationPrincipal Jwt jwt, @RequestBody String json)
+		throws Exception {
 
-        JSONObject jsonObject = new JSONObject(json);
+		if (_log.isInfoEnabled()) {
+			_log.info("POST product submit " + json);
+		}
 
-        JSONObject modelCPDefinitionJSONObject = jsonObject.getJSONObject(
-                "modelCPDefinition");
+		JSONObject jsonObject = new JSONObject(json);
 
-        Product product = _marketplaceService.getProduct(
-                modelCPDefinitionJSONObject.getLong("CProductId"));
+		JSONObject modelCPDefinitionJSONObject = jsonObject.getJSONObject(
+			"modelCPDefinition");
 
-        _marketplaceService.postNotificationQueueEntry(
-                null, "MARKETPLACE-PRODUCT-SUBMIT-TEMPLATE",
-                new HashMapBuilder<String, Object>().put(
-                        "[%CPDEFINITION_NAME%]",
-                        product.getName(
-                        ).get(
-                                modelCPDefinitionJSONObject.getString("defaultLanguageId")
-                        )
-                ).put(
-                        "[%CPDEFINITION_THUMBNAIL%]",
-                        new URL(
-                                "http://" + lxcDXPMainDomain + product.getThumbnail()
-                        ).toString()
-                ).put(
-                        "[%CPDEFINITION_DEVELOPER_NAME%]",
-                        _marketplaceService.getCatalog(
-                                product.getCatalogId()
-                        ).getName()
-                ).put(
-                        "[%CPDEFINITION_URL%]",
-                        new URL(
-                                StringBundler.concat(
-                                        lxcDXPServerProtocol, "://", lxcDXPMainDomain,
-                                        "/web/marketplace/administrator-dashboard#/apps/",
-                                        modelCPDefinitionJSONObject.getLong("CProductId"))
-                        ).toString()
-                ).put(
-                        "[%CPDEFINITION_CREATEDATE%]", _format(product.getCreateDate())
-                ).put(
-                        "[%CPDEFINITION_ID%]",
-                        String.valueOf(
-                                modelCPDefinitionJSONObject.getLong("CPDefinitionId"))
-                ).build());
-    }
+		Product product = _marketplaceService.getProduct(
+			modelCPDefinitionJSONObject.getLong("CProductId"));
 
-    private String _format(Date date) {
-        return _format(date, "Not Applicable");
-    }
+		_marketplaceService.postNotificationQueueEntry(
+			null, "MARKETPLACE-PRODUCT-SUBMIT-TEMPLATE",
+			new HashMapBuilder<String, Object>().put(
+				"[%CPDEFINITION_NAME%]",
+				product.getName(
+				).get(
+					modelCPDefinitionJSONObject.getString("defaultLanguageId")
+				)
+			).put(
+				"[%CPDEFINITION_THUMBNAIL%]",
+				new URL(
+					"http://" + lxcDXPMainDomain + product.getThumbnail()
+				).toString()
+			).put(
+				"[%CPDEFINITION_DEVELOPER_NAME%]",
+				_marketplaceService.getCatalog(
+					product.getCatalogId()
+				).getName()
+			).put(
+				"[%CPDEFINITION_URL%]",
+				new URL(
+					StringBundler.concat(
+						lxcDXPServerProtocol, "://", lxcDXPMainDomain,
+						"/web/marketplace/administrator-dashboard#/apps/",
+						modelCPDefinitionJSONObject.getLong("CProductId"))
+				).toString()
+			).put(
+				"[%CPDEFINITION_CREATEDATE%]", _format(product.getCreateDate())
+			).put(
+				"[%CPDEFINITION_ID%]",
+				String.valueOf(
+					modelCPDefinitionJSONObject.getLong("CPDefinitionId"))
+			).build());
+	}
 
-    private String _format(Date date, String defaultValue) {
-        if (date == null) {
-            return defaultValue;
-        }
+	private String _format(Date date) {
+		return _format(date, "Not Applicable");
+	}
 
-        return date.toInstant(
-        ).atZone(
-                ZoneId.of("UTC")
-        ).format(
-                DateTimeFormatter.ofPattern("MMMM d, yyyy")
-        );
-    }
+	private String _format(Date date, String defaultValue) {
+		if (date == null) {
+			return defaultValue;
+		}
 
+		return date.toInstant(
+		).atZone(
+			ZoneId.of("UTC")
+		).format(
+			DateTimeFormatter.ofPattern("MMMM d, yyyy")
+		);
+	}
 
-    private static final Log _log = LogFactory.getLog(
-            ObjectActionProductSubmitRestController.class);
+	private static final Log _log = LogFactory.getLog(
+		ObjectActionProductSubmitRestController.class);
 
-    @Autowired
-    private MarketplaceService _marketplaceService;
+	@Autowired
+	private MarketplaceService _marketplaceService;
+
 }
