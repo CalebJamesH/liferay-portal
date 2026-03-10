@@ -93,14 +93,24 @@ public class MarketplaceTopicSubscriber {
 
 		_subscribe(
 			credentialsProvider,
-			MarketplaceConstants.PUBSUB_TOPIC_NAME_KORONEIKI_ACCOUNT_CREATE);
-		_subscribe(
-			credentialsProvider,
-			MarketplaceConstants.PUBSUB_TOPIC_NAME_KORONEIKI_ACCOUNT_UPDATE);
+			MarketplaceConstants.
+				PUBSUB_TOPIC_NAME_KORONEIKI_ACCOUNT_CONTACT_ASSIGNED);
 		_subscribe(
 			credentialsProvider,
 			MarketplaceConstants.
-				PUBSUB_TOPIC_NAME_KORONEIKI_PRODUCT_PURCHASE_CREATE);
+				PUBSUB_TOPIC_NAME_KORONEIKI_ACCOUNT_CONTACT_UNASSIGNED);
+				_subscribe(
+					credentialsProvider,
+					MarketplaceConstants.PUBSUB_TOPIC_NAME_KORONEIKI_ACCOUNT_CREATE);
+				_subscribe(
+					credentialsProvider,
+					MarketplaceConstants.PUBSUB_TOPIC_NAME_KORONEIKI_ACCOUNT_UPDATE);
+				_subscribe(
+					credentialsProvider,
+
+		 			MarketplaceConstants.
+
+						PUBSUB_TOPIC_NAME_KORONEIKI_PRODUCT_PURCHASE_CREATE);
 	}
 
 	private void _subscribe(

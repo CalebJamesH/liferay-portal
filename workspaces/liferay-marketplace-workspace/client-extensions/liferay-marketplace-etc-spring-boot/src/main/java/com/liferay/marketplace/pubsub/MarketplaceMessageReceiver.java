@@ -19,6 +19,7 @@ import com.liferay.headless.admin.user.client.pagination.Page;
 import com.liferay.headless.admin.user.client.pagination.Pagination;
 import com.liferay.headless.admin.user.client.resource.v1_0.AccountResource;
 import com.liferay.headless.admin.user.client.resource.v1_0.PostalAddressResource;
+import com.liferay.headless.admin.user.client.resource.v1_0.UserAccountResource;
 import com.liferay.headless.commerce.admin.channel.client.dto.v1_0.Channel;
 import com.liferay.headless.commerce.admin.channel.client.resource.v1_0.ChannelResource;
 import com.liferay.headless.commerce.admin.order.client.dto.v1_0.Order;
@@ -65,11 +66,55 @@ public class MarketplaceMessageReceiver implements MessageReceiver {
 
 		JSONObject jsonObject = new JSONObject(byteString.toStringUtf8());
 
+		System.out.println(_topicName + ":    " +jsonObject);
+
 		try {
 			if (Objects.equals(
 					_topicName,
 					MarketplaceConstants.
-						PUBSUB_TOPIC_NAME_KORONEIKI_ACCOUNT_CREATE)) {
+						PUBSUB_TOPIC_NAME_KORONEIKI_ACCOUNT_CONTACT_ASSIGNED)) {
+
+				Contact contact = Contact.toDTO(
+					jsonObject.getJSONObject(
+						"contact"
+					).toString());
+
+				com.liferay.osb.koroneiki.phloem.rest.client.dto.v1_0.Account
+					koroneikiAccount =
+						com.liferay.osb.koroneiki.phloem.rest.client.dto.v1_0.
+							Account.toDTO(
+								jsonObject.getJSONObject(
+									"account"
+								).toString());
+
+				_processKoroneikiAccountContactAssigned(
+					koroneikiAccount, contact);
+			}
+			else if (Objects.equals(
+						_topicName,
+						MarketplaceConstants.
+							PUBSUB_TOPIC_NAME_KORONEIKI_ACCOUNT_CONTACT_UNASSIGNED)) {
+
+				Contact contact = Contact.toDTO(
+					jsonObject.getJSONObject(
+						"contact"
+					).toString());
+
+				com.liferay.osb.koroneiki.phloem.rest.client.dto.v1_0.Account
+					koroneikiAccount =
+						com.liferay.osb.koroneiki.phloem.rest.client.dto.v1_0.
+							Account.toDTO(
+								jsonObject.getJSONObject(
+									"account"
+								).toString());
+
+				_processKoroneikiAccountContactUnassigned(
+					koroneikiAccount, contact);
+			}
+			else if (Objects.equals(
+						_topicName,
+						MarketplaceConstants.
+							PUBSUB_TOPIC_NAME_KORONEIKI_ACCOUNT_CREATE)) {
 
 				com.liferay.osb.koroneiki.phloem.rest.client.dto.v1_0.Account
 					koroneikiAccount =
@@ -203,6 +248,59 @@ public class MarketplaceMessageReceiver implements MessageReceiver {
 				return postalAddress;
 			},
 			PostalAddress.class);
+	}
+
+	private void _processKoroneikiAccountContactAssigned(
+			com.liferay.osb.koroneiki.phloem.rest.client.dto.v1_0.Account
+				koroneikiAccount,
+			Contact contact)
+		throws Exception {
+
+		UserAccountResource userAccountResource =
+			_marketplaceService.getUserAccountResource();
+
+		Page<UserAccount> userAccountsPage =
+			userAccountResource.getUserAccountsPage(
+				"", "emailAddress eq '" + contact.getEmailAddress() + "'",
+				Pagination.of(1, 1), "");
+
+		if (userAccountsPage.fetchFirstItem() == null) {
+			_marketplaceService.postUserAccount(
+				new UserAccount() {
+					{
+						setEmailAddress(contact::getEmailAddress);
+						setFamilyName(contact::getLastName);
+						setGivenName(contact::getFirstName);
+					}
+				});
+		}
+
+		userAccountResource.
+			postAccountUserAccountByExternalReferenceCodeByEmailAddress(
+				koroneikiAccount.getKey(), contact.getEmailAddress());
+	}
+
+	private void _processKoroneikiAccountContactUnassigned(
+			com.liferay.osb.koroneiki.phloem.rest.client.dto.v1_0.Account
+				koroneikiAccount,
+			Contact contact)
+		throws Exception {
+
+		UserAccountResource userAccountResource =
+				_marketplaceService.getUserAccountResource();
+
+		Page<UserAccount> userAccountsPage =
+				userAccountResource.getUserAccountsPage(
+						"", "emailAddress eq '" + contact.getEmailAddress() + "'",
+						Pagination.of(1, 1), "");
+
+		if (userAccountsPage.fetchFirstItem() == null) {
+			return;
+		}
+
+		userAccountResource.
+			deleteAccountUserAccountByExternalReferenceCodeByEmailAddress(
+				koroneikiAccount.getKey(), contact.getEmailAddress());
 	}
 
 	private void _processKoroneikiAccountCreate(

@@ -64,6 +64,14 @@ public class MarketplaceConstants {
 
 	public static final String ORDER_STATUS_PROCESSING_LABEL = "Processing";
 
+	public static final String
+		PUBSUB_TOPIC_NAME_KORONEIKI_ACCOUNT_CONTACT_ASSIGNED =
+			"koroneiki.account.contact.assigned";
+
+	public static final String
+		PUBSUB_TOPIC_NAME_KORONEIKI_ACCOUNT_CONTACT_UNASSIGNED =
+			"koroneiki.account.contact.unassigned";
+
 	public static final String PUBSUB_TOPIC_NAME_KORONEIKI_ACCOUNT_CREATE =
 		"koroneiki.account.create";
 
