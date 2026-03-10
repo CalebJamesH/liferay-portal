@@ -66,8 +66,6 @@ public class MarketplaceMessageReceiver implements MessageReceiver {
 
 		JSONObject jsonObject = new JSONObject(byteString.toStringUtf8());
 
-		System.out.println(_topicName + ":    " +jsonObject);
-
 		try {
 			if (Objects.equals(
 					_topicName,
@@ -250,10 +248,7 @@ public class MarketplaceMessageReceiver implements MessageReceiver {
 			PostalAddress.class);
 	}
 
-	private void _processKoroneikiAccountContactAssigned(
-			com.liferay.osb.koroneiki.phloem.rest.client.dto.v1_0.Account
-				koroneikiAccount,
-			Contact contact)
+	private UserAccount _getUserAccountByEmailAddress(String emailAddress)
 		throws Exception {
 
 		UserAccountResource userAccountResource =
@@ -261,10 +256,20 @@ public class MarketplaceMessageReceiver implements MessageReceiver {
 
 		Page<UserAccount> userAccountsPage =
 			userAccountResource.getUserAccountsPage(
-				"", "emailAddress eq '" + contact.getEmailAddress() + "'",
+				"", "emailAddress eq '" + emailAddress + "'",
 				Pagination.of(1, 1), "");
 
-		if (userAccountsPage.fetchFirstItem() == null) {
+		return userAccountsPage.fetchFirstItem();
+	}
+
+	private void _postAccountUserAccountByExternalReferenceCodeByEmailAddress(
+			Contact contact, String externalReferenceCode)
+		throws Exception {
+
+		UserAccount userAccount = _getUserAccountByEmailAddress(
+			contact.getEmailAddress());
+
+		if (userAccount == null) {
 			_marketplaceService.postUserAccount(
 				new UserAccount() {
 					{
@@ -275,9 +280,22 @@ public class MarketplaceMessageReceiver implements MessageReceiver {
 				});
 		}
 
+		UserAccountResource userAccountResource =
+			_marketplaceService.getUserAccountResource();
+
 		userAccountResource.
 			postAccountUserAccountByExternalReferenceCodeByEmailAddress(
-				koroneikiAccount.getKey(), contact.getEmailAddress());
+				externalReferenceCode, contact.getEmailAddress());
+	}
+
+	private void _processKoroneikiAccountContactAssigned(
+			com.liferay.osb.koroneiki.phloem.rest.client.dto.v1_0.Account
+				koroneikiAccount,
+			Contact contact)
+		throws Exception {
+
+		_postAccountUserAccountByExternalReferenceCodeByEmailAddress(
+			contact, koroneikiAccount.getKey());
 	}
 
 	private void _processKoroneikiAccountContactUnassigned(
@@ -286,17 +304,12 @@ public class MarketplaceMessageReceiver implements MessageReceiver {
 			Contact contact)
 		throws Exception {
 
-		UserAccountResource userAccountResource =
-				_marketplaceService.getUserAccountResource();
-
-		Page<UserAccount> userAccountsPage =
-				userAccountResource.getUserAccountsPage(
-						"", "emailAddress eq '" + contact.getEmailAddress() + "'",
-						Pagination.of(1, 1), "");
-
-		if (userAccountsPage.fetchFirstItem() == null) {
+		if (_getUserAccountByEmailAddress(contact.getEmailAddress()) == null) {
 			return;
 		}
+
+		UserAccountResource userAccountResource =
+			_marketplaceService.getUserAccountResource();
 
 		userAccountResource.
 			deleteAccountUserAccountByExternalReferenceCodeByEmailAddress(
@@ -330,26 +343,8 @@ public class MarketplaceMessageReceiver implements MessageReceiver {
 					Pagination.of(1, -1));
 
 		for (Contact contact : contactsPage.getItems()) {
-			String emailAddress = contact.getEmailAddress();
-
-			Page<UserAccount> userAccountsPage =
-				_marketplaceService.getUserAccountsPage(
-					"emailAddress eq '" + emailAddress + "'",
-					Pagination.of(1, 1), "", "");
-
-			if (userAccountsPage.fetchFirstItem() == null) {
-				_marketplaceService.postUserAccount(
-					new UserAccount() {
-						{
-							setEmailAddress(contact::getEmailAddress);
-							setFamilyName(contact::getLastName);
-							setGivenName(contact::getFirstName);
-						}
-					});
-			}
-
-			_marketplaceService.postAccountUserAccountByEmailAddress(
-				account.getId(), emailAddress);
+			_postAccountUserAccountByExternalReferenceCodeByEmailAddress(
+				contact, account.getExternalReferenceCode());
 		}
 	}
 
