@@ -329,7 +329,7 @@ public class MarketplaceMessageReceiver implements MessageReceiver {
 
 					Channel channel =
 						channelResource.getChannelByExternalReferenceCode(
-							"MARKETPLACE-CHANNEL");
+							_MARKETPLACE_CHANNEL);
 
 					_channelId = channel.getId();
 				}
@@ -339,14 +339,37 @@ public class MarketplaceMessageReceiver implements MessageReceiver {
 		String opportunityId = null;
 
 		for (ExternalLink externalLink : productPurchase.getExternalLinks()) {
-			if (Objects.equals(externalLink.getEntityName(), "opportunity")) {
+			if (Objects.equals(externalLink.getEntityName(), _OPPORTUNITY)) {
 				opportunityId = externalLink.getEntityId();
 
 				break;
 			}
 		}
 
-		final String finalOpportunityId = opportunityId;
+		if (opportunityId == null) {
+			if (_log.isInfoEnabled()) {
+				_log.info("Skipping product purchase: missing opportunity Id");
+			}
+
+			return;
+		}
+
+		String finalOpportunityId = opportunityId;
+
+		String accountKey = productPurchase.getAccountKey();
+
+		if (Objects.equals(
+				productPurchase.getProduct(
+				).getName(),
+				_LIFERAY_DATA_PLATFORM)) {
+
+			com.liferay.osb.koroneiki.phloem.rest.client.dto.v1_0.Account
+				account = _koroneikiService.getKoroneikiAccount(accountKey);
+
+			accountKey = account.getParentAccountKey();
+		}
+
+		String finalAccountKey = accountKey;
 
 		OrderResource orderResource = _marketplaceService.getOrderResource();
 
@@ -363,8 +386,7 @@ public class MarketplaceMessageReceiver implements MessageReceiver {
 			order = orderResource.postOrder(
 				new Order() {
 					{
-						setAccountExternalReferenceCode(
-							productPurchase::getAccountKey);
+						setAccountExternalReferenceCode(() -> finalAccountKey);
 						setChannelId(() -> _channelId);
 						setCurrencyCode(() -> "USD");
 						setExternalReferenceCode(() -> finalOpportunityId);
@@ -396,14 +418,22 @@ public class MarketplaceMessageReceiver implements MessageReceiver {
 				order.getId(),
 				new Order() {
 					{
-						setAccountExternalReferenceCode(
-							productPurchase::getAccountKey);
+						setAccountExternalReferenceCode(() -> finalAccountKey);
+						setOrderStatus(
+							() -> MarketplaceConstants.ORDER_STATUS_COMPLETED);
 					}
 				});
 		}
 
 		_provisioningHubService.provision(order, productPurchase);
 	}
+
+	private static final String _LIFERAY_DATA_PLATFORM =
+		"Liferay Data Platform";
+
+	private static final String _MARKETPLACE_CHANNEL = "MARKETPLACE-CHANNEL";
+
+	private static final String _OPPORTUNITY = "opportunity";
 
 	private static final Log _log = LogFactory.getLog(
 		MarketplaceMessageReceiver.class);

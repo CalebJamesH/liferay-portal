@@ -23,11 +23,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  * @author Caleb Hall
  */
+@Component
 public class AnalyticsService extends BaseService {
 
 	public String getAuthorization() {
@@ -54,7 +56,7 @@ public class AnalyticsService extends BaseService {
 		).build(
 		).post(
 		).uri(
-			"/o/faro/main/project/provisioned"
+			"/o/faro/main/project/unprovisioned"
 		).contentType(
 			MediaType.APPLICATION_FORM_URLENCODED
 		).body(
