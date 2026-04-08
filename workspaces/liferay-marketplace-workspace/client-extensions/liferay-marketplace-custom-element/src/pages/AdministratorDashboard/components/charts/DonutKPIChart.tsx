@@ -157,7 +157,7 @@ const DonutKPIChart: React.FC<DonutKPIChartProps> = ({
 											symbol={
 												monthlyIncreaseValueIsGrowing
 													? 'order-arrow-up'
-													: 'order-arrow-donw'
+													: 'order-arrow-down'
 											}
 										/>
 										<span className="ml-1">{`${monthlyIncreasePct} % `}</span>

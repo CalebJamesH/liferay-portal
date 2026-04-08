@@ -74,8 +74,8 @@ export default function AdministratorSummary() {
 			<div className="d-flex flex-column">
 				<div className="d-flex flex-wrap mb-4" style={{gap: '20px'}}>
 					<ErrorBoundary className="ml-5">
-						{kpis.map((chart, index) => (
-							<DonutKPIChart {...chart} key={index} />
+						{kpis.map((kpi, index) => (
+							<DonutKPIChart {...kpi} key={index} />
 						))}
 					</ErrorBoundary>
 				</div>

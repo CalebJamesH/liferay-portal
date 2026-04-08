@@ -22,7 +22,7 @@ const baseSearchBuilder = new SearchBuilder()
 	.in('statusCode', [ProductWorkflowStatusCode.APPROVED])
 	.and();
 
-const appsAndConnectorSupportingQReleaseFilter = baseSearchBuilder
+const appsAndConnectorsSupportingQReleaseFilter = baseSearchBuilder
 	.clone()
 	.group('OPEN')
 	.lambdaContains('specificationValues', '2025 Q')
@@ -65,7 +65,7 @@ const queries = [
 	HeadlessCommerceAdminCatalog.getProductsDashboardKPI(
 		{
 			appsAndConnectorSupportingQRelease:
-				appsAndConnectorSupportingQReleaseFilter,
+				appsAndConnectorsSupportingQReleaseFilter,
 			lowCodeConfigurationsPublished:
 				lowCodeConfigurationsPublishedFilter,
 			partnershipIntegration: technologyPartnershipIntegrationFilter,
@@ -101,6 +101,8 @@ const queries = [
 	),
 ] as const;
 
+
+// right here is where we get the information for the tables
 const useKPI = () => {
 	const {data: liferayVersionsPicklist} =
 		useListTypeDefinition('LIFERAY-VERSIONS');
@@ -119,7 +121,7 @@ const useKPI = () => {
 	});
 
 	const {
-		properties: {kpi: anualTargetKPIs},
+		properties: {kpi: annualTargetKPIs},
 	} = useMarketplaceContext();
 
 	const {
@@ -128,7 +130,7 @@ const useKPI = () => {
 		kpiPartnershipIntegration,
 		kpiProjectUsingMarketplaceApps,
 		kpiQuartelyReleaseApps,
-	} = anualTargetKPIs;
+	} = annualTargetKPIs;
 
 	return useSWR('metrics/kpi', async () => {
 		const [
