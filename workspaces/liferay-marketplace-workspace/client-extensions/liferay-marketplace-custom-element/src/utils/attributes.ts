@@ -32,11 +32,11 @@ const baseKPIAttributes = [
 ] as const;
 
 function getAttribute<T extends readonly string[]>(
-	element: HTMLElement,
-	attrs: T
+	attributes: T,
+	element: HTMLElement
 ): Record<T[number], string> {
 	return Object.fromEntries(
-		attrs.map((key) => [key, element.getAttribute(key) ?? ''])
+		attributes.map((attribute) => [attribute, element.getAttribute(attribute) ?? ''])
 	) as Record<T[number], string>;
 }
 
@@ -49,10 +49,10 @@ function parseArray(element: string | null) {
 
 export function getAttributes(element: HTMLElement) {
 	return {
-		...getAttribute(element, baseAttributes),
+		...getAttribute(baseAttributes, element),
 		featureFlags: parseArray(element.getAttribute('featureFlags')),
 		featurePreview: parseArray(element.getAttribute('featurePreview')),
-		kpi: getAttribute(element, baseKPIAttributes),
+		kpi: getAttribute(baseKPIAttributes, element),
 		useSiteTaxonomyVocabularyQuery:
 			element.getAttribute('useSiteTaxonomyVocabularyQuery') === 'true',
 	};

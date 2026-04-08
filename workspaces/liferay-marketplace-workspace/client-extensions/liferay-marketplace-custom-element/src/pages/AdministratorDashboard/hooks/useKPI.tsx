@@ -101,8 +101,6 @@ const queries = [
 	),
 ] as const;
 
-
-// right here is where we get the information for the tables
 const useKPI = () => {
 	const {data: liferayVersionsPicklist} =
 		useListTypeDefinition('LIFERAY-VERSIONS');
