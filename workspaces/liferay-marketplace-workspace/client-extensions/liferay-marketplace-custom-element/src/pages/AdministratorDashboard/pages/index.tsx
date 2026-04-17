@@ -15,7 +15,7 @@ import {formatCurrency} from '../../../utils/currencies';
 import InfoCard from '../components/InfoCard';
 import DonutKPIChart from '../components/charts/DonutKPIChart';
 import useAccountsMetrics from '../hooks/useAccountsMetrics';
-import useKPI from '../hooks/useKPI';
+import useKPI from '../hooks/useKPI/useKPI';
 import useOrderMetrics from '../hooks/useOrderMetrics';
 import AdministratorAppsListView from './Apps/AdministratorAppsListView';
 import {AdministratorOrdersListView} from './Orders';

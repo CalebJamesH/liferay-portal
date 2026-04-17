@@ -19,6 +19,7 @@ type DonutKPIChartProps = {
 	annualTargetTotal: number | string;
 	colors: string[];
 	externalPage?: boolean;
+	lastYearValue: number;
 	monthlyIncreasePct?: number;
 	monthlyIncreaseValue?: number;
 	monthlyIncreaseValueIsGrowing?: number;
@@ -31,6 +32,7 @@ const DonutKPIChart: React.FC<DonutKPIChartProps> = ({
 	annualTargetTotal,
 	colors,
 	externalPage,
+	lastYearValue,
 	monthlyIncreasePct = 0,
 	monthlyIncreaseValue = 0,
 	monthlyIncreaseValueIsGrowing = false,
@@ -130,6 +132,13 @@ const DonutKPIChart: React.FC<DonutKPIChartProps> = ({
 							</div>
 							<span className="text-small">
 								{i18n.translate('of-target')}
+							</span>
+						</div>
+						<div className="align-items-center d-flex flex-row">
+							<span className="d-flex text-small">
+								<span> 2025 Results </span>
+								<span>{lastYearValue || 0}</span> /
+								<span>{annualTargetTotal || 0}</span>
 							</span>
 						</div>
 					</div>
