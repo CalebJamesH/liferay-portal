@@ -36,7 +36,10 @@ function getAttribute<T extends readonly string[]>(
 	element: HTMLElement
 ): Record<T[number], string> {
 	return Object.fromEntries(
-		attributes.map((attribute) => [attribute, element.getAttribute(attribute) ?? ''])
+		attributes.map((attribute) => [
+			attribute,
+			element.getAttribute(attribute) ?? '',
+		])
 	) as Record<T[number], string>;
 }
 

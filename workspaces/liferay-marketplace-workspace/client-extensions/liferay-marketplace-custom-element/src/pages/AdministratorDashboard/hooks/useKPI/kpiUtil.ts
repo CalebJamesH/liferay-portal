@@ -73,7 +73,7 @@ export const filterProjectsByYear = (
 		(project) => {
 			const [_, value] = project;
 
-			return value.orders.length > 0;
+			return !!value.orders.length;
 		}
 	);
 

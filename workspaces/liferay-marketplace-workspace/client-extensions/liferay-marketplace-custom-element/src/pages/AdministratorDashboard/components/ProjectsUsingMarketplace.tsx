@@ -21,12 +21,9 @@ type ProjectOrder = {
 export type ProjectData = {
 	accountName: string;
 	orders: ProjectOrder[];
-}
+};
 
-export type ProjectUsingMarketplace = [
-	string,
-	ProjectData,
-];
+export type ProjectUsingMarketplace = [string, ProjectData];
 
 type ProjectsUsingMarketplaceModalBodyProps = {
 	projectsUsingMarkeplaceApps: ProjectUsingMarketplace[];

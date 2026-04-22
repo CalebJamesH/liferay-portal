@@ -17,7 +17,11 @@ import ProjectsUsingMarketplaceModalBody, {
 	ProjectData,
 } from '../../components/ProjectsUsingMarketplace';
 import {kpiQueries} from './kpiQueries';
-import {filterProjectsByYear, getAnnualTargetValues, groupCatalogs} from './kpiUtil';
+import {
+	filterProjectsByYear,
+	getAnnualTargetValues,
+	groupCatalogs,
+} from './kpiUtil';
 
 const useKPI = () => {
 	const modal = useModalContext();
@@ -66,12 +70,12 @@ const useKPI = () => {
 			{}
 		) as {[key: string]: ProjectData};
 
-		const projectsUsingMarketplace = Object.entries(parsedProjects)
+		const projectsUsingMarketplace = Object.entries(parsedProjects);
 
 		const projectsUsingMarketplace2025 = filterProjectsByYear(
 			projectsUsingMarketplace,
 			2025
-		);		
+		);
 		const projectsUsingMarketplace2026 = filterProjectsByYear(
 			projectsUsingMarketplace,
 			2026
