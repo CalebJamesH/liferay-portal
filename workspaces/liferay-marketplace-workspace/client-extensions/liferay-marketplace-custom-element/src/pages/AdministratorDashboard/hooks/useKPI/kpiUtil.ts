@@ -3,6 +3,11 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
+import {
+	ProjectData,
+	ProjectUsingMarketplace,
+} from '../../components/ProjectsUsingMarketplace';
+
 export const getAnnualTargetValues = (
 	currentYearValue: number,
 	kpiTarget: string,
@@ -38,4 +43,39 @@ export const groupCatalogs = (catalogs: Catalog[], products: Product[]) => {
 		})),
 		({catalogName}) => catalogName
 	);
+};
+
+export const filterProjectsByYear = (
+	projects: [string, ProjectData][],
+	year: number
+): ProjectUsingMarketplace[] => {
+	const projectsWithFilteredOrders = projects.map((project) => {
+		const [key, value] = project;
+
+		const ordersFromTargetYear = value.orders.filter((order) => {
+			const orderYear = new Date(order.createDate).getFullYear();
+
+			return orderYear === year;
+		});
+
+		const updatedProject: ProjectUsingMarketplace = [
+			key,
+			{
+				...value,
+				orders: ordersFromTargetYear,
+			},
+		];
+
+		return updatedProject;
+	});
+
+	const projectsWithValidOrders = projectsWithFilteredOrders.filter(
+		(project) => {
+			const [_, value] = project;
+
+			return value.orders.length > 0;
+		}
+	);
+
+	return projectsWithValidOrders;
 };

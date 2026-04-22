@@ -9,6 +9,7 @@ import {orderTypeLabel} from '../../../enums/Order';
 
 type ProjectOrder = {
 	creatorEmailAddress: string;
+	createDate: string;
 	id: number;
 	orderTypeExternalReferenceCode: string;
 	projects: {
@@ -17,14 +18,18 @@ type ProjectOrder = {
 	}[];
 };
 
+export type ProjectData = {
+	accountName: string;
+	orders: ProjectOrder[];
+}
+
+export type ProjectUsingMarketplace = [
+	string,
+	ProjectData,
+];
+
 type ProjectsUsingMarketplaceModalBodyProps = {
-	projectsUsingMarkeplaceApps: [
-		string,
-		{
-			accountName: string;
-			orders: ProjectOrder[];
-		},
-	][];
+	projectsUsingMarkeplaceApps: ProjectUsingMarketplace[];
 };
 
 type ProjectUsingMarketplaceProps = {

@@ -13,9 +13,11 @@ import {ProductType} from '../../../../enums/Product';
 import useListTypeDefinition from '../../../../hooks/useListTypeDefinition';
 import useModalContext from '../../../../hooks/useModalContext';
 import {safeJSONParse} from '../../../../utils/util';
-import ProjectsUsingMarketplaceModalBody from '../../components/ProjectsUsingMarketplace';
+import ProjectsUsingMarketplaceModalBody, {
+	ProjectData,
+} from '../../components/ProjectsUsingMarketplace';
 import {kpiQueries} from './kpiQueries';
-import {getAnnualTargetValues, groupCatalogs} from './kpiUtil';
+import {filterProjectsByYear, getAnnualTargetValues, groupCatalogs} from './kpiUtil';
 
 const useKPI = () => {
 	const modal = useModalContext();
@@ -58,14 +60,21 @@ const useKPI = () => {
 			partnershipsLastYear,
 		} = marketplaceApps.data.metrics;
 
-		console.log(projectsKPI)
+		const parsedProjects = safeJSONParse(
+			projectsKPI?.data?.metrics?.projectsUsingMarketplace?.items?.[0]
+				?.value,
+			{}
+		) as {[key: string]: ProjectData};
 
-		const projectsUsingMarketplace = Object.entries(
-			safeJSONParse(
-				projectsKPI?.data?.metrics?.projectsUsingMarketplace?.items?.[0]
-					?.value,
-				{}
-			)
+		const projectsUsingMarketplace = Object.entries(parsedProjects)
+
+		const projectsUsingMarketplace2025 = filterProjectsByYear(
+			projectsUsingMarketplace,
+			2025
+		);		
+		const projectsUsingMarketplace2026 = filterProjectsByYear(
+			projectsUsingMarketplace,
+			2026
 		);
 
 		const catalogProductsMapCurrentYear = groupCatalogs(
@@ -81,9 +90,9 @@ const useKPI = () => {
 			kpis: [
 				{
 					...getAnnualTargetValues(
-						projectsUsingMarketplace.length,
+						projectsUsingMarketplace2026.length,
 						kpiProjectUsingMarketplaceApps,
-						projectsUsingMarketplace.length
+						projectsUsingMarketplace2025.length
 					),
 					colors: ['#9CE269', '#D4F3BE'],
 					onClick: projectsUsingMarketplace.length
@@ -92,9 +101,7 @@ const useKPI = () => {
 									body: (
 										<ProjectsUsingMarketplaceModalBody
 											projectsUsingMarkeplaceApps={
-												projectsUsingMarketplace as ComponentProps<
-													typeof ProjectsUsingMarketplaceModalBody
-												>['projectsUsingMarkeplaceApps']
+												projectsUsingMarketplace2026
 											}
 										/>
 									),
@@ -123,19 +130,23 @@ const useKPI = () => {
 						modal.onOpenModal({
 							body: (
 								<ol>
-									{Object.entries(catalogProductsMapCurrentYear).map(
-										([catalog, products = []], index) => (
-											<li key={index}>
-												<span className="font-weight-bold">{catalog}</span>
+									{Object.entries(
+										catalogProductsMapCurrentYear
+									).map(([catalog, products = []], index) => (
+										<li key={index}>
+											<span className="font-weight-bold">
+												{catalog}
+											</span>
 
-												<ol>
-													{products.map(({id, name}) => (
-														<li key={id}>{name?.en_US}</li>
-													))}
-												</ol>
-											</li>
-										)
-									)}
+											<ol>
+												{products.map(({id, name}) => (
+													<li key={id}>
+														{name?.en_US}
+													</li>
+												))}
+											</ol>
+										</li>
+									))}
 								</ol>
 							),
 							header: `Publisher With Apps Supporting Quarterly Release (${Object.keys(catalogProductsMapCurrentYear).length})`,
