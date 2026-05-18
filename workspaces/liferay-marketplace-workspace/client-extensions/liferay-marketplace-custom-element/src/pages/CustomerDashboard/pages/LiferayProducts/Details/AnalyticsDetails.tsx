@@ -26,11 +26,13 @@ const AnalyticsDetails = () => {
 		? JSON.parse(placedOrder.customFields[OrderCustomFields.ORDER_METADATA])
 		: {};
 
+	const {analyticsProject} = orderMetadata;
+
 	const allowedEmailDomains =
-		orderMetadata?.provisioning?.allowedEmailDomains || [];
+		analyticsProject?.allowedEmailDomains || [];
 
 	const incidentReportEmailAddresses =
-		orderMetadata?.provisioning?.incidentReportEmailAddresses || [];
+		analyticsProject?.incidentReportEmailAddresses || [];
 
 	return (
 		<PageRenderer>
@@ -61,7 +63,7 @@ const AnalyticsDetails = () => {
 							},
 							{
 								title: i18n.translate('customer-project'),
-								value: '',
+								value:  analyticsProject.corpProjectName,
 							},
 							{
 								title: i18n.translate('purchased-by'),
@@ -69,7 +71,7 @@ const AnalyticsDetails = () => {
 							},
 							{
 								title: i18n.translate('purchase-number'),
-								value: '',
+								value: placedOrder.id,
 							},
 							{
 								title: i18n.translate('subscription-type'),
@@ -88,27 +90,26 @@ const AnalyticsDetails = () => {
 						items={[
 							{
 								title: i18n.translate('workspace-name'),
-								value: orderMetadata?.provisioning
+								value: analyticsProject
 									?.corpProjectName,
 							},
 							{
 								title: i18n.translate('workspace-owner-email'),
-								value: orderMetadata?.provisioning
+								value: analyticsProject
 									?.ownerEmailAddress,
 							},
 							{
 								title: i18n.translate('data-center-location'),
-								value: orderMetadata?.provisioning
+								value: analyticsProject
 									?.serverLocation,
 							},
 							{
 								title: i18n.translate('timezone'),
-								value: orderMetadata?.provisioning
-									?.serverLocation,
+								value: analyticsProject.timeZone.displayTimeZone,
 							},
 							{
 								title: i18n.translate('workspace-friendly-url'),
-								value: orderMetadata?.provisioning?.friendlyURL,
+								value: analyticsProject?.friendlyURL,
 							},
 							{
 								title: i18n.translate('allowed-email-domains'),

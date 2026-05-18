@@ -245,12 +245,6 @@ public class MarketplaceMessageReceiver implements MessageReceiver {
 			PostalAddress.class);
 	}
 
-	private String _getSkuExternalReferenceCode(Product product) {
-		Map<String, String> properties = product.getProperties();
-
-		return "SF-" + properties.get("salesforce-product-id");
-	}
-
 	private UserAccount _getUserAccount(String emailAddress) throws Exception {
 		Page<UserAccount> userAccountsPage =
 			_marketplaceService.getUserAccountsPage(
@@ -355,9 +349,7 @@ public class MarketplaceMessageReceiver implements MessageReceiver {
 
 			com.liferay.headless.commerce.admin.catalog.client.http.HttpInvoker.
 				HttpResponse httpResponse =
-					skuResource.getSkuByExternalReferenceCodeHttpResponse(
-						_getSkuExternalReferenceCode(
-							productPurchase.getProduct()));
+					skuResource.getSkuByExternalReferenceCodeHttpResponse(productPurchase.getProductKey());
 
 			if (!_isOKStatusCode(httpResponse.getStatusCode())) {
 				if (_log.isInfoEnabled()) {
@@ -396,9 +388,7 @@ public class MarketplaceMessageReceiver implements MessageReceiver {
 										setQuantity(
 											() -> new BigDecimal(
 												productPurchase.getQuantity()));
-										setSkuExternalReferenceCode(
-											() -> _getSkuExternalReferenceCode(
-												productPurchase.getProduct()));
+										setSkuExternalReferenceCode(productPurchase::getProductKey);
 									}
 								}
 							});
