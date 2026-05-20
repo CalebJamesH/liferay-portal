@@ -143,12 +143,12 @@ public class ProvisioningHubService extends BaseService {
 				securityContactEmailAddress.split(","));
 		}
 
-		String emailAddress = securityContactEmailAddress;
-
 		Contact contact = _getContact(koroneikiAccount.getKey());
 
+		String ownerEmailAddress = securityContactEmailAddress;
+
 		if (contact != null) {
-			emailAddress = contact.getEmailAddress();
+			ownerEmailAddress = contact.getEmailAddress();
 		}
 
 		String analyticsProject = _analyticsService.provision(
@@ -163,7 +163,7 @@ public class ProvisioningHubService extends BaseService {
 			).put(
 				"name", properties.get("ldpWorkspaceName")
 			).put(
-				"ownerEmailAddress", emailAddress
+				"ownerEmailAddress", ownerEmailAddress
 			).put(
 				"serverLocation",
 				_getServerLocation(properties.get("dataCenterLocation"))

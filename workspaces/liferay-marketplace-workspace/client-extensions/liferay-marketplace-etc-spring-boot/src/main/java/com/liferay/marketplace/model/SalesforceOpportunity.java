@@ -150,11 +150,9 @@ public class SalesforceOpportunity {
 	}
 
 	private JSONArray _getLineItemsJSONArray() {
-		CustomField[] customFields = _sku.getCustomFields();
-
 		String productId = null;
 
-		for (CustomField customField : customFields) {
+		for (CustomField customField : _sku.getCustomFields()) {
 			if (Objects.equals(
 					customField.getName(), "salesforce-product-id")) {
 
@@ -198,12 +196,8 @@ public class SalesforceOpportunity {
 		return jsonArray;
 	}
 
-	private JSONObject _getPrimaryContactJSONObject() {
-		Map<String, String> customFields =
-			(Map<String, String>)_order.getCustomFields();
-
-		JSONObject orderMetadataJSONObject = new JSONObject(
-			customFields.getOrDefault("order-metadata", "{}"));
+	private JSONObject _getPrimaryContactJSONObject() {		
+		JSONObject orderMetadataJSONObject = MarketplaceUtil.getOrderMetadata(_order);
 
 		JSONObject provisioningFormJSONObject =
 			orderMetadataJSONObject.getJSONObject("provisioningForm");
