@@ -1,0 +1,16 @@
+.sv-list .sv-list-header {
+	background: linear-gradient(to bottom, #00256C 3%, #0038A3 23%, #0B5FFF 42%, #00A4FA 61%, #2EB7FFCC 74%, #FFFFFF80 94%);
+	
+	.sv-gradient {
+		right: 0;
+	}
+}
+
+.sv-priority-summary-column {
+	min-width: 320px !important;
+}
+
+.sv-wrap-text {
+	white-space: normal;
+	word-wrap: break-word;
+}
