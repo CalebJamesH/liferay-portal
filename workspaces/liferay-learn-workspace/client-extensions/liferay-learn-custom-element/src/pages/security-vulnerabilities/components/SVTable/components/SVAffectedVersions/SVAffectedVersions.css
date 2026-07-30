@@ -1,0 +1,9 @@
+.sv-affected-version {
+	background-color: #E2E2E4;
+	border: none;
+	font-weight: var(--font-weight-normal, 400);
+}
+
+.sv-affected-versions-remaining {
+	cursor: pointer;
+}
