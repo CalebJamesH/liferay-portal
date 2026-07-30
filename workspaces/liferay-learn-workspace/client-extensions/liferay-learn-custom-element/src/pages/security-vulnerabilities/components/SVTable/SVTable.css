@@ -1,0 +1,29 @@
+.sv-table {
+	.sv-name {
+		color: #0B5FFF;
+	}
+
+	.sv-row {
+		cursor: pointer;
+	}
+
+	.sv-severity {
+		background-color: var(--color-neutral-5);
+		border-radius: 4px;
+		color: var(--color-neutral-0);
+		font-size: var(--font-size-sm);
+		min-width: var(--spacer-6);
+	}
+
+	.sv-severity-critical {
+		background-color: var(--color-state-error);
+	}
+
+	.sv-severity-high {
+		background-color: #B95000;
+	}
+
+	.sv-severity-medium {
+		background-color: var(--color-state-info);
+	}
+}
