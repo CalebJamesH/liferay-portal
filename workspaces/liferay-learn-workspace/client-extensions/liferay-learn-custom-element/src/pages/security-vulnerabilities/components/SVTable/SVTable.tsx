@@ -9,7 +9,6 @@ import './SVTable.css';
 
 import Table from '~/components/Table';
 
-
 export interface IColumn {
 	columnKey: string;
 	label: string;

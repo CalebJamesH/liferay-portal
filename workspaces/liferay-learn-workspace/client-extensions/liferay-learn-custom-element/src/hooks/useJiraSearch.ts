@@ -5,14 +5,14 @@
 
 import {useCallback, useEffect, useState} from 'react';
 import {useSearchParams} from 'react-router-dom';
-
+import {searchSecurityVulnerabilities} from '~/services/rest/jira';
+import {JiraEnum} from '~/utils/constants/JiraEnum';
 import {
 	FILTER_MAP,
 	IProps as IFilterOptions,
 } from '~/utils/constants/filterOptions';
+
 import {IJiraIssue} from './useJiraIssue';
-import { JiraEnum } from '~/utils/constants/JiraEnum';
-import { searchSecurityVulnerabilities } from '~/services/rest/jira';
 
 export interface IJiraResponse {
 	[JiraEnum.ISSUES]?: IJiraIssue[];

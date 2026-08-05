@@ -3,31 +3,30 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
-import {useMemo} from 'react';
 import {ClayPaginationBarWithBasicItems} from '@clayui/pagination-bar';
+import {useMemo} from 'react';
+import {SVWaves} from '~/assets/SVWaves';
+import i18n from '~/utils/I18n';
+import {getFormattedDate} from '~/utils/getFormattedDate';
 
+import {IJiraIssue} from '../../../hooks/useJiraIssue';
+import useJiraSearch, {
+	IProps as IJiraSearch,
+} from '../../../hooks/useJiraSearch';
+import useJiraVersions from '../../../hooks/useJiraVersions';
+import {JiraEnum} from '../../../utils/constants/JiraEnum';
+import {FILTER_OPTIONS} from '../../../utils/constants/filterOptions';
+import {
+	paginationDeltas,
+	paginationLabels,
+} from '../../../utils/constants/paginationOptions';
+import {SORT_OPTIONS} from '../../../utils/constants/sortOptions';
 import SVFilter from '../components/SVFilter';
 import SVPanel from '../components/SVPanel';
 import SVSearch from '../components/SVSearch';
 import SVTable from '../components/SVTable';
 import {IRow} from '../components/SVTable/SVTable';
 import SVAffectedVersions from '../components/SVTable/components/SVAffectedVersions';
-
-import i18n from '~/utils/I18n';
-import {SVWaves} from '~/assets/SVWaves';
-
-import {JiraEnum} from '../../../utils/constants/JiraEnum';
-import {SORT_OPTIONS} from '../../../utils/constants/sortOptions';
-
-import {IJiraIssue} from '../../../hooks/useJiraIssue';
-import useJiraSearch, {IProps as IJiraSearch} from '../../../hooks/useJiraSearch';
-import {FILTER_OPTIONS} from '../../../utils/constants/filterOptions';
-import useJiraVersions from '../../../hooks/useJiraVersions';
-import {
-	paginationDeltas,
-	paginationLabels,
-} from '../../../utils/constants/paginationOptions';
-import {getFormattedDate} from '~/utils/getFormattedDate';
 
 import './SecurityVulnerabilitiesList.css';
 
