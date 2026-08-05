@@ -6,12 +6,11 @@
 import {Button as ClayButton} from '@clayui/core';
 import {ClayCheckbox, ClayRadio} from '@clayui/form';
 import {useState} from 'react';
-import {IProps as IFilterOptions} from '~/utils/constants/filterOptions';
-import {JiraEnum} from '~/utils/constants/JiraEnum';
-import {IProps as ISortOptions} from '~/utils/constants/sortOptions';
-import i18n from '~/utils/I18n';
-
 import {IProps as IJiraSearch} from '~/hooks/useJiraSearch';
+import i18n from '~/utils/I18n';
+import {JiraEnum} from '~/utils/constants/JiraEnum';
+import {IProps as IFilterOptions} from '~/utils/constants/filterOptions';
+import {IProps as ISortOptions} from '~/utils/constants/sortOptions';
 
 import './SVFilter.css';
 

@@ -4,6 +4,7 @@
  */
 
 import {Liferay} from '~/services/liferay';
+
 import en_US from './Language.json';
 import es_ES from './Language_es_ES.json';
 import ja_JP from './Language_ja_JP.json';

@@ -20,17 +20,17 @@ declare global {
 }
 
 export const Liferay = window.Liferay || {
+	BREAKPOINTS: {
+		PHONE: 0,
+		TABLET: 0,
+	},
+	FeatureFlags: {},
 	OAuth2Client: {
 		FromUserAgentApplication: () => ({
 			_getOrRequestToken: () => Promise.resolve(''),
 			fetch: () => Promise.resolve(new Response()),
 		}),
 	},
-	BREAKPOINTS: {
-		PHONE: 0,
-		TABLET: 0,
-	},
-	FeatureFlags: {},
 	ThemeDisplay: {
 		getBCP47LanguageId: () => 'en-US',
 		getCanonicalURL: () => window.location.href,
