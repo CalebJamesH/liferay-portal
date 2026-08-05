@@ -4,6 +4,7 @@
  */
 
 import {Liferay} from '~/services/liferay';
+
 import {FORMAT_DATE_TYPES} from './constants/formatDateTypes';
 
 export function getFormattedDate(

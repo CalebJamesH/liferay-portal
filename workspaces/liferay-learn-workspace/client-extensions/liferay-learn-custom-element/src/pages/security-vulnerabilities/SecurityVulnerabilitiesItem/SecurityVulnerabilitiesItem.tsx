@@ -3,20 +3,24 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
-import {Link, useParams} from 'react-router-dom';
-import {useMemo} from 'react';
 import {ClayPaginationBarWithBasicItems} from '@clayui/pagination-bar';
-
-import useJiraIssue, {IJiraIssue} from '../../../hooks/useJiraIssue';
+import {useMemo} from 'react';
+import {Link, useParams} from 'react-router-dom';
+import {SVWaves} from '~/assets/SVWaves';
 import i18n from '~/utils/I18n';
 
+import useJiraIssue, {IJiraIssue} from '../../../hooks/useJiraIssue';
+import useJiraSearch, {
+	IProps as IJiraSearch,
+} from '../../../hooks/useJiraSearch';
+import {JiraEnum} from '../../../utils/constants/JiraEnum';
+import {
+	paginationDeltas,
+	paginationLabels,
+} from '../../../utils/constants/paginationOptions';
 import SVTable from '../components/SVTable';
 import {IRow} from '../components/SVTable/SVTable';
 import SVAffectedVersions from '../components/SVTable/components/SVAffectedVersions';
-import useJiraSearch, {IProps as IJiraSearch} from '../../../hooks/useJiraSearch';
-import {JiraEnum} from '../../../utils/constants/JiraEnum';
-import { SVWaves } from '~/assets/SVWaves';
-import { paginationDeltas, paginationLabels } from '../../../utils/constants/paginationOptions';
 
 import './SecurityVulnerabilitiesItem.css';
 

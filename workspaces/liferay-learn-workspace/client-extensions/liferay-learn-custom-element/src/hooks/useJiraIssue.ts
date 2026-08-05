@@ -4,9 +4,9 @@
  */
 
 import {useCallback, useEffect, useState} from 'react';
+import {getIssue} from '~/services/rest/jira';
 
 import {JiraEnum} from '../utils/constants/JiraEnum';
-import {getIssue} from '~/services/rest/jira';
 
 export interface IJiraFields {
 	[JiraEnum.AFFECTED_VERSIONS]?: string[];

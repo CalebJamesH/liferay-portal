@@ -4,7 +4,7 @@
  */
 
 import {useCallback, useEffect, useState} from 'react';
-import { getSecurityVulnerabilityAffectedVersions } from '~/services/rest/jira';
+import {getSecurityVulnerabilityAffectedVersions} from '~/services/rest/jira';
 
 const useJiraVersions = () => {
 	const [jiraVersions, setJiraVersions] = useState<string[] | undefined>(
