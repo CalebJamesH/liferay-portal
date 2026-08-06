@@ -134,7 +134,7 @@ const SecurityVulnerabilitiesList = () => {
 	return (
 		<>
 			<div className="sv-list">
-				<div className="align-items-center d-flex flex-column mt-3 sv-list-header">
+				<div className="align-items-center d-flex flex-column sv-list-header">
 					<div className="align-items-center d-flex flex-column justify-content-center my-5 sv-search text-center">
 						<h1 className="my-4 text-neutral-0">
 							{i18n.translate('liferay-security-reports')}
