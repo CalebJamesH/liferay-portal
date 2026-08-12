@@ -1,0 +1,20 @@
+.sv-header {
+    gap: 32px;
+}
+
+.sv-header-description {
+    color: #ffffff;
+    max-width: 800px;
+}
+
+.sv-header-pill {
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.sv-header-icon {
+    width: 48px;
+    height: 48px;
+    margin-right: 16px;
+}
