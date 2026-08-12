@@ -13,12 +13,12 @@
 		.custom-control-label {
 			color: #282934;
 			font-size: 18px;
+			font-weight: 600;
 			height: 1.5rem;
 			left: 0;
 			padding-left: var(--spacer-4);
 			position: absolute;
 			width: 100%;
-			font-weight: 600;
 
 			&:before {
 				border-color: var(--color-neutral-10);
@@ -26,9 +26,9 @@
 		}
 
 		.custom-control-label-text {
-			line-height: 1.5rem;
 			font-size: 13px;
 			font-weight: 400;
+			line-height: 1.5rem;
 			position: relative;
 		}
 	}
@@ -36,8 +36,8 @@
 	.sv-filter-section-header {
 		background-color: transparent;
 		border: none;
-		cursor: pointer;
 		color: #332B4A;
+		cursor: pointer;
 
 		.lexicon-icon {
 			transition: transform 0.15s ease;

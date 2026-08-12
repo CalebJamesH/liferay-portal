@@ -14,12 +14,12 @@
 	}
 
 	.sv-badge {
-		color: #1c3667;
 		background-color: #e6ebf5;
 		border-radius: 4px;
-		padding: 4px 8px;
+		color: #1c3667;
 		font-size: 11px;
 		line-height: 1.4;
+		padding: 4px 8px;
 	}
 	.sv-item-details {
 		background-color: var(--color-neutral-1);

@@ -14,9 +14,9 @@
 	.sv-severity {
 		border-radius: 4px;
 		color: #54555f;
-		padding: 4px 8px;
 		font-size: var(--font-size-sm);
 		min-width: var(--spacer-6);
+		padding: 4px 8px;
 	}
 
 	.sv-severity-low {

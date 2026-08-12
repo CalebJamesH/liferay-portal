@@ -47,7 +47,9 @@ const SVMobileTable = ({rows}: IProps) => {
 
 				const mobileAffectedVersions = `${versions
 					.slice(0, 1)
-					.join(', ')}${remaining > 0 ? ` +${remaining} others` : ''}`;
+					.join(
+						', '
+					)}${remaining > 0 ? ` +${remaining} others` : ''}`;
 
 				return {
 					content: (

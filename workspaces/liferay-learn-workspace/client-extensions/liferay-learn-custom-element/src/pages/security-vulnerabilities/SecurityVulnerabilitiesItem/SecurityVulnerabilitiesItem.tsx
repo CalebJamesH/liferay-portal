@@ -4,12 +4,11 @@
  */
 
 import {Link, useParams} from 'react-router-dom';
-
-import useJiraIssue from '../../../hooks/useJiraIssue';
+import {SVWaves} from '~/assets/SVWaves';
 import i18n from '~/utils/I18n';
 
+import useJiraIssue from '../../../hooks/useJiraIssue';
 import {JiraEnum} from '../../../utils/constants/JiraEnum';
-import {SVWaves} from '~/assets/SVWaves';
 
 import './SecurityVulnerabilitiesItem.css';
 
