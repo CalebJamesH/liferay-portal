@@ -9,11 +9,11 @@ import i18n from '~/utils/I18n';
 import './SVHeader.css';
 
 type SVHeaderProps = {
-	className?: string;
 	children: ReactNode;
+	className?: string;
 	description: string;
-	title: string;
 	icon?: JSX.Element;
+	title: string;
 };
 
 const SVHeader = ({
