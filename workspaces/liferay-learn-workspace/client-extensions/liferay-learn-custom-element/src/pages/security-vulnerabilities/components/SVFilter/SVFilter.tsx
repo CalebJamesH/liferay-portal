@@ -5,6 +5,7 @@
 
 import {Button as ClayButton} from '@clayui/core';
 import {ClayCheckbox, ClayRadio} from '@clayui/form';
+import ClayIcon from '@clayui/icon';
 import {useState} from 'react';
 import {IProps as IJiraSearch} from '~/hooks/useJiraSearch';
 import i18n from '~/utils/I18n';
@@ -23,6 +24,10 @@ interface IProps {
 
 const SVFilter = ({filterOptions, onChange, params, sortOptions}: IProps) => {
 	const [expandedFilters, setExpandedFilters] = useState<{
+		[key in keyof IFilterOptions]?: boolean;
+	}>({});
+
+	const [viewAllFilters, setViewAllFilters] = useState<{
 		[key in keyof IFilterOptions]?: boolean;
 	}>({});
 
@@ -53,10 +58,17 @@ const SVFilter = ({filterOptions, onChange, params, sortOptions}: IProps) => {
 		});
 	};
 
-	const handleViewAll = (filterKey: keyof IFilterOptions) => {
+	const handleSectionToggle = (filterKey: keyof IFilterOptions) => {
 		setExpandedFilters((prevExpanded) => ({
 			...prevExpanded,
 			[filterKey]: !prevExpanded[filterKey],
+		}));
+	};
+
+	const handleViewAll = (filterKey: keyof IFilterOptions) => {
+		setViewAllFilters((prevViewAll) => ({
+			...prevViewAll,
+			[filterKey]: !prevViewAll[filterKey],
 		}));
 	};
 
@@ -64,68 +76,91 @@ const SVFilter = ({filterOptions, onChange, params, sortOptions}: IProps) => {
 		filterKey: keyof IFilterOptions,
 		languageKey: string
 	) => {
-		const isExpanded = expandedFilters[filterKey];
+		const isExplicitlyOpen = expandedFilters[filterKey] === true;
 
-		const displayedOptions = isExpanded
+		const isExplicitlyClosed = expandedFilters[filterKey] === false;
+
+		const isExpanded = isExplicitlyOpen || !isExplicitlyClosed;
+
+		const isViewAll = viewAllFilters[filterKey];
+
+		const displayedOptions = isViewAll
 			? filterOptions[filterKey]
 			: (filterOptions[filterKey] as string[])?.slice(0, 8);
 
 		return (
-			<div className="sv-filter-box">
-				<h5>{i18n.translate(languageKey)}</h5>
+			<div
+				className={`sv-filter-box${isExplicitlyOpen ? ' sv-filter-box-open' : ''}${isExplicitlyClosed ? ' sv-filter-box-closed' : ''}`}
+			>
+				<button
+					aria-controls={`${filterKey}-options`}
+					aria-expanded={isExpanded}
+					className="align-items-center d-flex justify-content-between sv-filter-section-header w-100 p-0"
+					onClick={() => handleSectionToggle(filterKey)}
+				>
+					<h5 className="m-0">{i18n.translate(languageKey)}</h5>
 
-				<div className="d-flex my-2">
-					<ClayButton
-						aria-label={i18n.translate('select-all')}
-						className="mr-3 p-0 sv-link sv-select-all-button"
-						displayType="link"
-						onClick={() =>
-							handleFilterChange(
-								filterKey,
-								filterOptions[filterKey] as string[]
-							)
-						}
-					>
-						{i18n.translate('select-all')}
-					</ClayButton>
+					<ClayIcon symbol="angle-down" />
+				</button>
 
-					<ClayButton
-						aria-label={i18n.translate('clear')}
-						className="p-0 sv-clear-button sv-link"
-						displayType="link"
-						onClick={() => handleFilterChange(filterKey, [])}
-					>
-						{i18n.translate('clear')}
-					</ClayButton>
-				</div>
+				<div className="sv-filter-box-body" id={`${filterKey}-options`}>
+					<div className="d-flex my-2">
+						<ClayButton
+							aria-label={i18n.translate('select-all')}
+							className="mr-3 p-0 sv-link sv-select-all-button"
+							displayType="link"
+							onClick={() =>
+								handleFilterChange(
+									filterKey,
+									filterOptions[filterKey] as string[]
+								)
+							}
+						>
+							{i18n.translate('select-all')}
+						</ClayButton>
 
-				{displayedOptions?.map((value) => (
-					<ClayCheckbox
-						aria-label={i18n.translate(value)}
-						checked={!!params.getAll(filterKey)[0]?.includes(value)}
-						key={value}
-						label={i18n.translate(value)}
-						onChange={() => handleFilterChange(filterKey, [value])}
-						value={value}
-					/>
-				))}
+						<ClayButton
+							aria-label={i18n.translate('clear')}
+							className="p-0 sv-clear-button sv-link"
+							displayType="link"
+							onClick={() => handleFilterChange(filterKey, [])}
+						>
+							{i18n.translate('clear')}
+						</ClayButton>
+					</div>
 
-				{(filterOptions?.[filterKey]?.length ?? 0) > 8 && (
-					<ClayButton
-						aria-label={
-							isExpanded
+					{displayedOptions?.map((value) => (
+						<ClayCheckbox
+							aria-label={i18n.translate(value)}
+							checked={
+								!!params.getAll(filterKey)[0]?.includes(value)
+							}
+							key={value}
+							label={i18n.translate(value)}
+							onChange={() =>
+								handleFilterChange(filterKey, [value])
+							}
+							value={value}
+						/>
+					))}
+
+					{(filterOptions?.[filterKey]?.length ?? 0) > 8 && (
+						<ClayButton
+							aria-label={
+								isViewAll
+									? i18n.translate('view-less')
+									: i18n.translate('view-all')
+							}
+							className="p-0 sv-link sv-view-all-button"
+							displayType="link"
+							onClick={() => handleViewAll(filterKey)}
+						>
+							{isViewAll
 								? i18n.translate('view-less')
-								: i18n.translate('view-all')
-						}
-						className="p-0 sv-link sv-view-all-button"
-						displayType="link"
-						onClick={() => handleViewAll(filterKey)}
-					>
-						{isExpanded
-							? i18n.translate('view-less')
-							: i18n.translate('view-all')}
-					</ClayButton>
-				)}
+								: i18n.translate('view-all')}
+						</ClayButton>
+					)}
+				</div>
 			</div>
 		);
 	};
