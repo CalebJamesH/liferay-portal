@@ -3,24 +3,13 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
-import {ClayPaginationBarWithBasicItems} from '@clayui/pagination-bar';
-import {useMemo} from 'react';
 import {Link, useParams} from 'react-router-dom';
-import {SVWaves} from '~/assets/SVWaves';
+
+import useJiraIssue from '../../../hooks/useJiraIssue';
 import i18n from '~/utils/I18n';
 
-import useJiraIssue, {IJiraIssue} from '../../../hooks/useJiraIssue';
-import useJiraSearch, {
-	IProps as IJiraSearch,
-} from '../../../hooks/useJiraSearch';
 import {JiraEnum} from '../../../utils/constants/JiraEnum';
-import {
-	paginationDeltas,
-	paginationLabels,
-} from '../../../utils/constants/paginationOptions';
-import SVTable from '../components/SVTable';
-import {IRow} from '../components/SVTable/SVTable';
-import SVAffectedVersions from '../components/SVTable/components/SVAffectedVersions';
+import {SVWaves} from '~/assets/SVWaves';
 
 import './SecurityVulnerabilitiesItem.css';
 
@@ -28,101 +17,6 @@ const SecurityVulnerabilitiesItem = () => {
 	const {id} = useParams();
 
 	const {jiraIssue, loading: issueLoading} = useJiraIssue(id);
-
-	const defaultParams: IJiraSearch = useMemo(
-		() => ({
-			[JiraEnum.FILTERS]: {
-				[JiraEnum.FIX_VERSIONS]:
-					jiraIssue?.[JiraEnum.FIELDS]?.[JiraEnum.FIX_VERSIONS],
-			},
-			[JiraEnum.PAGE]: 1,
-			[JiraEnum.PAGE_SIZE]: 15,
-		}),
-		[jiraIssue]
-	);
-
-	const {
-		jiraSearch,
-		loading: searchLoading,
-		updateSearchParams,
-	} = useJiraSearch(defaultParams);
-
-	const setPage = (page: number) => {
-		updateSearchParams({
-			[JiraEnum.PAGE]: page,
-		});
-	};
-
-	const setPageSize = (pageSize: number) => {
-		updateSearchParams({
-			[JiraEnum.PAGE_SIZE]: pageSize,
-		});
-	};
-
-	const columns = [
-		{
-			columnKey: 'prioritySummary',
-			label: i18n.translate('priority-summary'),
-		},
-		{
-			columnKey: 'category',
-			label: i18n.translate('category'),
-		},
-		{
-			columnKey: 'issueClassification',
-			label: i18n.translate('classification'),
-		},
-		{
-			columnKey: 'affectedVersion',
-			label: i18n.translate('affected-version'),
-		},
-	];
-
-	const rows = useMemo(() => {
-		if (jiraSearch?.[JiraEnum.ISSUES]) {
-			return jiraSearch?.[JiraEnum.ISSUES].map((issue: IJiraIssue) => ({
-				affectedVersion: (
-					<div>
-						<SVAffectedVersions
-							affectedVersions={
-								issue[JiraEnum.FIELDS]?.[
-									JiraEnum.AFFECTED_VERSIONS
-								]
-							}
-						/>
-					</div>
-				),
-				category: issue[JiraEnum.FIELDS]?.[JiraEnum.CATEGORIES]
-					?.map(String)
-					.join(', '),
-				issueClassification:
-					issue[JiraEnum.FIELDS]?.[JiraEnum.ISSUE_CLASSIFICATION],
-				link: `/${issue?.[JiraEnum.KEY]}`,
-				prioritySummary: (
-					<div className="sv-priority-summary">
-						<div className="align-items-center d-flex">
-							<div
-								className={`mr-1 px-2 sv-severity sv-severity-${issue[JiraEnum.FIELDS]?.[JiraEnum.SEVERITY]?.toLowerCase()} text-center`}
-							>
-								{issue[JiraEnum.FIELDS]?.[JiraEnum.SEVERITY]}
-							</div>
-
-							<div className="font-weight-bold sv-name">
-								{issue[JiraEnum.FIELDS]?.[JiraEnum.CVE_IDS]}
-							</div>
-						</div>
-
-						<div className="sv-summary">
-							{issue[JiraEnum.FIELDS]?.[JiraEnum.SUMMARY]}
-						</div>
-					</div>
-				),
-			}));
-		}
-		else {
-			return undefined;
-		}
-	}, [jiraSearch]);
 
 	if (!id) {
 		return <div>{i18n.translate('sorry-there-are-no-results-found')}</div>;
@@ -199,7 +93,20 @@ const SecurityVulnerabilitiesItem = () => {
 									{i18n.translate('affects')}
 								</h5>
 
-								{jiraIssue[JiraEnum.FIELDS]?.[JiraEnum.AFFECTS]}
+								<div className="sv-badge-list">
+									{jiraIssue[JiraEnum.FIELDS]?.[
+										JiraEnum.AFFECTS
+									]
+										.split(',')
+										.map((affectedVersion) => (
+											<span
+												className="sv-badge"
+												key={affectedVersion.trim()}
+											>
+												{affectedVersion.trim()}
+											</span>
+										))}
+								</div>
 							</div>
 						)}
 
@@ -211,11 +118,15 @@ const SecurityVulnerabilitiesItem = () => {
 										{i18n.translate('category')}
 									</h5>
 
-									{jiraIssue[JiraEnum.FIELDS]?.[
-										JiraEnum.CATEGORIES
-									]
-										?.map(String)
-										.join(', ')}
+									<div className="sv-badge-list">
+										{jiraIssue[JiraEnum.FIELDS]?.[
+											JiraEnum.CATEGORIES
+										]?.map((category) => (
+											<span className="sv-badge">
+												{category}
+											</span>
+										))}
+									</div>
 								</div>
 							)}
 
@@ -227,104 +138,18 @@ const SecurityVulnerabilitiesItem = () => {
 									{i18n.translate('classification')}
 								</h5>
 
-								{
-									jiraIssue[JiraEnum.FIELDS]?.[
-										JiraEnum.ISSUE_CLASSIFICATION
-									]
-								}
+								<span className="sv-badge">
+									{
+										jiraIssue[JiraEnum.FIELDS]?.[
+											JiraEnum.ISSUE_CLASSIFICATION
+										]
+									}
+								</span>
 							</div>
 						)}
-
-						{jiraIssue[JiraEnum.FIELDS]?.[
-							JiraEnum.AFFECTED_VERSIONS
-						] &&
-							jiraIssue[JiraEnum.FIELDS]?.[
-								JiraEnum.AFFECTED_VERSIONS
-							].length > 0 && (
-								<div className="mb-4">
-									<h5 className="text-neutral-10">
-										{i18n.translate('affected-version')}
-									</h5>
-
-									{jiraIssue[JiraEnum.FIELDS]?.[
-										JiraEnum.AFFECTED_VERSIONS
-									]?.map((version) => (
-										<div key={version}>{version}</div>
-									))}
-								</div>
-							)}
-
-						{jiraIssue[JiraEnum.FIELDS]?.[JiraEnum.FIX_VERSIONS] &&
-							jiraIssue[JiraEnum.FIELDS]?.[JiraEnum.FIX_VERSIONS]
-								.length > 0 && (
-								<div className="mb-4">
-									<h5 className="text-neutral-10">
-										{i18n.translate('fix-version')}
-									</h5>
-
-									{jiraIssue[JiraEnum.FIELDS]?.[
-										JiraEnum.FIX_VERSIONS
-									]?.map((version) => (
-										<div key={version}>{version}</div>
-									))}
-								</div>
-							)}
 					</div>
 				</div>
 			</div>
-
-			{jiraIssue[JiraEnum.FIELDS]?.[JiraEnum.FIX_VERSIONS] &&
-				jiraIssue[JiraEnum.FIELDS]?.[JiraEnum.FIX_VERSIONS].length >
-					0 &&
-				jiraSearch && (
-					<div className="p-4 sv-item-table">
-						<h4 className="mb-3">
-							{i18n.sub('additional-reports-fixed-in-x', [
-								jiraIssue[JiraEnum.FIELDS]?.[
-									JiraEnum.FIX_VERSIONS
-								]
-									?.map(
-										(version, index, array) =>
-											`${version}${index < array.length - 1 ? ', ' : ''}`
-									)
-									.join(''),
-							])}
-						</h4>
-
-						{searchLoading ? (
-							<span className="cp-spinner ml-2 spinner-border spinner-border-sm"></span>
-						) : rows?.length ? (
-							<>
-								<SVTable
-									columns={columns}
-									rows={rows as unknown as IRow[]}
-								/>
-
-								<ClayPaginationBarWithBasicItems
-									active={jiraSearch?.[JiraEnum.PAGE]}
-									activeDelta={
-										jiraSearch?.[JiraEnum.PAGE_SIZE]
-									}
-									deltas={paginationDeltas}
-									labels={paginationLabels}
-									onActiveChange={(value: number) =>
-										setPage(value)
-									}
-									onDeltaChange={(value: number) =>
-										setPageSize(value)
-									}
-									totalItems={jiraSearch?.[JiraEnum.TOTAL]!}
-								/>
-							</>
-						) : (
-							<div className="py-2">
-								{i18n.translate(
-									'the-requested-search-does-not-exist-in-our-database-please-try-again-with-different-criteria'
-								)}
-							</div>
-						)}
-					</div>
-				)}
 		</div>
 	);
 };
