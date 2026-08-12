@@ -22,11 +22,12 @@ import {
 } from '../../../utils/constants/paginationOptions';
 import {SORT_OPTIONS} from '../../../utils/constants/sortOptions';
 import SVFilter from '../components/SVFilter';
-import SVPanel from '../components/SVPanel';
+import SVMobileTable from '../components/SVMobileTable';
 import SVSearch from '../components/SVSearch';
-import SVTable from '../components/SVTable';
-import {IRow} from '../components/SVTable/SVTable';
-import SVAffectedVersions from '../components/SVTable/components/SVAffectedVersions';
+import SVTable, {ISVRow} from '../components/SVTable/SVTable';
+
+import CloudLockIcon from '~/assets/CloudLock';
+import SVHeader from '../components/SVHeader';
 
 import './SecurityVulnerabilitiesList.css';
 
@@ -57,74 +58,29 @@ const SecurityVulnerabilitiesList = () => {
 		});
 	};
 
-	const columns = [
-		{
-			className: 'sv-priority-summary-column',
-			columnKey: 'prioritySummary',
-			label: i18n.translate('priority-summary'),
-		},
-		{
-			columnKey: 'category',
-			label: i18n.translate('category'),
-		},
-		{
-			columnKey: 'issueClassification',
-			label: i18n.translate('classification'),
-		},
-		{
-			columnKey: 'affectedVersion',
-			label: i18n.translate('affected-version'),
-		},
-		{
-			columnKey: 'published',
-			label: i18n.translate('published'),
-		},
-	];
-
-	const rows = useMemo(() => {
+	const rows = useMemo<ISVRow[] | undefined>(() => {
 		if (jiraSearch?.[JiraEnum.ISSUES]) {
-			return jiraSearch?.[JiraEnum.ISSUES].map((issue: IJiraIssue) => ({
-				affectedVersion: (
-					<div>
-						<SVAffectedVersions
-							affectedVersions={
-								issue[JiraEnum.FIELDS]?.[
-									JiraEnum.AFFECTED_VERSIONS
-								]
-							}
-						/>
-					</div>
-				),
-				category: issue[JiraEnum.FIELDS]?.[JiraEnum.CATEGORIES]
-					?.map(String)
-					.join(', '),
-				issueClassification:
-					issue[JiraEnum.FIELDS]?.[JiraEnum.ISSUE_CLASSIFICATION],
-				link: `/${issue?.[JiraEnum.KEY]}`,
-				prioritySummary: (
-					<div>
-						<div className="align-items-center d-flex">
-							<div
-								className={`mr-2 px-2 sv-severity sv-severity-${issue[JiraEnum.FIELDS]?.[JiraEnum.SEVERITY]?.toLowerCase()} text-center`}
-							>
-								{issue[JiraEnum.FIELDS]?.[JiraEnum.SEVERITY]}
-							</div>
+			return jiraSearch?.[JiraEnum.ISSUES].map((issue: IJiraIssue) => {
+				const fields = issue[JiraEnum.FIELDS];
 
-							<div className="font-weight-bold sv-name sv-wrap-text">
-								{issue[JiraEnum.FIELDS]?.[JiraEnum.CVE_IDS]}
-							</div>
-						</div>
-
-						<div className="sv-summary sv-wrap-text text-neutral-8">
-							{issue[JiraEnum.FIELDS]?.[JiraEnum.SUMMARY]}
-						</div>
-					</div>
-				),
-				published: getFormattedDate(
-					issue[JiraEnum.FIELDS]?.[JiraEnum.PUBLISHED_DATE],
-					'day2DMonthSYearN'
-				),
-			}));
+				return {
+					affectedVersions:
+						fields?.[JiraEnum.AFFECTED_VERSIONS] ?? [],
+					category: fields?.[JiraEnum.CATEGORIES]
+						?.map(String)
+						.join(', '),
+					cveIds: fields?.[JiraEnum.CVE_IDS],
+					issueClassification:
+						fields?.[JiraEnum.ISSUE_CLASSIFICATION],
+					link: `/${issue?.[JiraEnum.KEY]}`,
+					published: getFormattedDate(
+						fields?.[JiraEnum.PUBLISHED_DATE],
+						'day2DMonthSYearN'
+					),
+					severity: fields?.[JiraEnum.SEVERITY],
+					summary: fields?.[JiraEnum.SUMMARY],
+				};
+			});
 		}
 		else {
 			return undefined;
@@ -134,21 +90,33 @@ const SecurityVulnerabilitiesList = () => {
 	return (
 		<>
 			<div className="sv-list">
-				<div className="align-items-center d-flex flex-column sv-list-header">
-					<div className="align-items-center d-flex flex-column justify-content-center my-5 sv-search text-center">
-						<h1 className="my-4 text-neutral-0">
-							{i18n.translate('liferay-security-reports')}
-						</h1>
-
-						<SVSearch
-							keywords={searchParams.get(JiraEnum.KEYWORDS) || ''}
-							onChange={(keywords) =>
-								updateSearchParams({
-									[JiraEnum.KEYWORDS]: keywords,
-									[JiraEnum.PAGE]: 1,
-								})
-							}
-						/>
+				<div className="align-items-start d-flex flex-column justify-content-center sv-list-header text-left mb-5">
+					<div className="container-fluid-max-xl sv-search-container">
+						<SVHeader
+							title="security-advisories"
+							description="Welcome to the Liferay Security Advisories
+							dashboard. Use this tool to search and monitor
+							documented security vulnerabilities, CVE
+							identifiers, and classification statuses across
+							Liferay products, including DXP, PaaS, and SaaS. For
+							detailed information regarding our triage protocols,
+							patching timelines, or to responsibly report a
+							security issue, please visit the official Liferay
+							Security Statement"
+							icon={<CloudLockIcon className='cloud-lock-icon'/>}
+						>
+							<SVSearch
+								keywords={
+									searchParams.get(JiraEnum.KEYWORDS) || ''
+								}
+								onChange={(keywords) =>
+									updateSearchParams({
+										[JiraEnum.KEYWORDS]: keywords,
+										[JiraEnum.PAGE]: 1,
+									})
+								}
+							/>
+						</SVHeader>
 					</div>
 
 					<div className="align-items-end d-flex justify-content-end position-absolute sv-gradient">
@@ -158,7 +126,7 @@ const SecurityVulnerabilitiesList = () => {
 
 				<div className="container-fluid container-fluid-max-xl">
 					<div className="row sv-table-content">
-						<div className="col-12 col-md-3">
+						<div className="col-12 col-lg-3">
 							<SVFilter
 								filterOptions={{
 									...FILTER_OPTIONS,
@@ -173,23 +141,20 @@ const SecurityVulnerabilitiesList = () => {
 								params={searchParams}
 								sortOptions={SORT_OPTIONS}
 							/>
-
-							<SVPanel
-								link="https://www.subscribepage.com/liferay"
-								linkText="subscribe-here"
-								text="for-the-latest-support-announcements-on-critical-security-vulnerabilities-x"
-							/>
 						</div>
 
-						<div className="col-12 col-md-9">
+						<div className="col-12 col-lg-9">
 							{loading ? (
 								<span className="cp-spinner ml-2 spinner-border spinner-border-sm"></span>
 							) : rows?.length ? (
 								<>
-									<SVTable
-										columns={columns}
-										rows={rows as unknown as IRow[]}
-									/>
+									<div className="sv-desktop-table">
+										<SVTable rows={rows} />
+									</div>
+
+									<div className="sv-mobile-table">
+										<SVMobileTable rows={rows} />
+									</div>
 
 									<ClayPaginationBarWithBasicItems
 										active={jiraSearch?.[JiraEnum.PAGE]}
