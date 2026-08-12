@@ -1,6 +1,10 @@
 .sv-table {
 	.sv-name {
-		color: #0B5FFF;
+		color: #0b5fff;
+	}
+	
+	.be-header-label {
+		color: #54555F;
 	}
 
 	.sv-row {
@@ -8,22 +12,29 @@
 	}
 
 	.sv-severity {
-		background-color: var(--color-neutral-5);
 		border-radius: 4px;
-		color: var(--color-neutral-0);
+		color: #54555f;
+		padding: 4px 8px;
 		font-size: var(--font-size-sm);
 		min-width: var(--spacer-6);
 	}
 
+	.sv-severity-low {
+		background-color: #e1e1e4;
+	}
+
 	.sv-severity-critical {
-		background-color: var(--color-state-error);
+		background-color: #fbe3e3;
+		color: #830c0c;
 	}
 
 	.sv-severity-high {
-		background-color: #B95000;
+		background-color: #F7EAE0;
+		color: #6F3000;
 	}
 
 	.sv-severity-medium {
-		background-color: var(--color-state-info);
+		background-color: #e6ebf5;
+		color: #1c3667;
 	}
 }

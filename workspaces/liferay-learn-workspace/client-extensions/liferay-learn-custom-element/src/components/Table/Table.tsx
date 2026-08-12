@@ -38,7 +38,7 @@ const Table = ({className, columns, onRowClick, rows}: IProps) => {
 					{columns.map((column) => (
 						<ClayTable.Cell
 							className={classNames(
-								'font-weight-semi-bold text-neutral-10',
+								'text-neutral-10 font-weight-semi-bold',
 								column.className
 							)}
 							key={column.columnKey}
