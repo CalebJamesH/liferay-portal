@@ -5,10 +5,8 @@
 
 import {useMemo} from 'react';
 import {useNavigate} from 'react-router-dom';
-
-import i18n from '~/utils/I18n';
-
 import Table, {IRow} from '~/components/Table';
+import i18n from '~/utils/I18n';
 
 import SVAffectedVersions from './components/SVAffectedVersions';
 

@@ -95,7 +95,7 @@ const SVFilter = ({filterOptions, onChange, params, sortOptions}: IProps) => {
 				<button
 					aria-controls={`${filterKey}-options`}
 					aria-expanded={isExpanded}
-					className="align-items-center d-flex justify-content-between sv-filter-section-header w-100 p-0"
+					className="align-items-center d-flex justify-content-between p-0 sv-filter-section-header w-100"
 					onClick={() => handleSectionToggle(filterKey)}
 				>
 					<h5 className="m-0">{i18n.translate(languageKey)}</h5>
