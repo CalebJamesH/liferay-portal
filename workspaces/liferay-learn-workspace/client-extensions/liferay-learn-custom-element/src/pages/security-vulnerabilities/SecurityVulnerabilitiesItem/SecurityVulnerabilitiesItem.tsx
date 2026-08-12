@@ -121,7 +121,10 @@ const SecurityVulnerabilitiesItem = () => {
 										{jiraIssue[JiraEnum.FIELDS]?.[
 											JiraEnum.CATEGORIES
 										]?.map((category) => (
-											<span className="sv-badge">
+											<span
+												className="sv-badge"
+												key={category}
+											>
 												{category}
 											</span>
 										))}
