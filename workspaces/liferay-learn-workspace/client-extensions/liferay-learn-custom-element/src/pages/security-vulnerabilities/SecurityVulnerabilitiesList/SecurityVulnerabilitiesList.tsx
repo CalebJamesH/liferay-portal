@@ -5,6 +5,7 @@
 
 import {ClayPaginationBarWithBasicItems} from '@clayui/pagination-bar';
 import {useMemo} from 'react';
+import CloudLockIcon from '~/assets/CloudLock';
 import {SVWaves} from '~/assets/SVWaves';
 import i18n from '~/utils/I18n';
 import {getFormattedDate} from '~/utils/getFormattedDate';
@@ -22,12 +23,10 @@ import {
 } from '../../../utils/constants/paginationOptions';
 import {SORT_OPTIONS} from '../../../utils/constants/sortOptions';
 import SVFilter from '../components/SVFilter';
+import SVHeader from '../components/SVHeader';
 import SVMobileTable from '../components/SVMobileTable';
 import SVSearch from '../components/SVSearch';
 import SVTable, {ISVRow} from '../components/SVTable/SVTable';
-
-import CloudLockIcon from '~/assets/CloudLock';
-import SVHeader from '../components/SVHeader';
 
 import './SecurityVulnerabilitiesList.css';
 
@@ -90,10 +89,9 @@ const SecurityVulnerabilitiesList = () => {
 	return (
 		<>
 			<div className="sv-list">
-				<div className="align-items-start d-flex flex-column justify-content-center sv-list-header text-left mb-5">
+				<div className="align-items-start d-flex flex-column justify-content-center mb-5 sv-list-header text-left">
 					<div className="container-fluid-max-xl sv-search-container">
 						<SVHeader
-							title="security-advisories"
 							description="Welcome to the Liferay Security Advisories
 							dashboard. Use this tool to search and monitor
 							documented security vulnerabilities, CVE
@@ -103,7 +101,8 @@ const SecurityVulnerabilitiesList = () => {
 							patching timelines, or to responsibly report a
 							security issue, please visit the official Liferay
 							Security Statement"
-							icon={<CloudLockIcon className='cloud-lock-icon'/>}
+							icon={<CloudLockIcon className="cloud-lock-icon" />}
+							title="security-advisories"
 						>
 							<SVSearch
 								keywords={
