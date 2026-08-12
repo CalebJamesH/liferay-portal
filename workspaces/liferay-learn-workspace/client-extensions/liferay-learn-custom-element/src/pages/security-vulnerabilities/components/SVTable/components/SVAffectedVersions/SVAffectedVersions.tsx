@@ -28,14 +28,14 @@ const SVAffectedVersions = ({
 
 	return (
 		<div>
-			<span className="label sv-affected-version">
+			<span className="label sv-affected-version font-weight-semi-bold">
 				{firstAffectedVersion}
 			</span>
 
 			{otherAffectedVersions && (
 				<ClayTooltipProvider>
 					<span
-						className="label sv-affected-version sv-affected-versions-remaining"
+						className="label sv-affected-version sv-affected-versions-remaining font-weight-semi-bold"
 						title={remainingVersions.join('\n')}
 					>
 						{remainingCount > 1
