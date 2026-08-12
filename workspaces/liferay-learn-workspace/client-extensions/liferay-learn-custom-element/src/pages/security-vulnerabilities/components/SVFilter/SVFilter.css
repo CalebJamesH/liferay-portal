@@ -1,6 +1,6 @@
 .sv-filter-content {
 	.sv-filter-box {
-		background-color: var(--color-neutral-1);
+		background-color: #F7F7F8;
 		border-radius: var(--border-radius-lg);
 		margin-bottom: var(--spacer-3);
 		padding: var(--spacer-3);
@@ -11,13 +11,14 @@
 		}
 
 		.custom-control-label {
-			color: var(--color-neutral-10);
-			font-size: var(--font-size-sm);
+			color: #282934;
+			font-size: 18px;
 			height: 1.5rem;
 			left: 0;
 			padding-left: var(--spacer-4);
 			position: absolute;
 			width: 100%;
+			font-weight: 600;
 
 			&:before {
 				border-color: var(--color-neutral-10);
@@ -26,12 +27,49 @@
 
 		.custom-control-label-text {
 			line-height: 1.5rem;
+			font-size: 13px;
+			font-weight: 400;
 			position: relative;
 		}
 	}
 
+	.sv-filter-section-header {
+		background-color: transparent;
+		border: none;
+		cursor: pointer;
+		color: #332B4A;
+
+		.lexicon-icon {
+			transition: transform 0.15s ease;
+		}
+	}
+
+	.sv-filter-box-body {
+		display: block;
+	}
+
+	.sv-filter-box.sv-filter-box-closed .sv-filter-box-body {
+		display: none;
+	}
+
+	.sv-filter-box.sv-filter-box-closed .sv-filter-section-header .lexicon-icon {
+		transform: rotate(-90deg);
+	}
+
+	@media (max-width: 992px) {
+		.sv-filter-box:not(.sv-filter-box-open) .sv-filter-box-body {
+			display: none;
+		}
+
+		.sv-filter-box:not(.sv-filter-box-open)
+			.sv-filter-section-header
+			.lexicon-icon {
+			transform: rotate(-90deg);
+		}
+	}
+
 	.sv-link {
-		color: var(--color-action-neutral-default);
+		color: #282934;
 		font-size: var(--font-size-sm);
 		font-weight: 600;
 
