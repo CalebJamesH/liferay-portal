@@ -8,24 +8,24 @@
 	& tbody tr:hover {
 		background-color: #EDF3FE;
 	}
-	
-	& td, th {
-		padding: var(--spacer-3);
-		
-		&:first-child {
-			border-radius: 4px 0 0 4px !important;
-		}
-		
-		&:last-child {
-			border-radius: 0 4px 4px 0 !important;
-		}
-	}
-	
+
 	& td {
 		border-width: 0;
 		color: #54555F;
 	}
-	
+
+	& td, th {
+		padding: var(--spacer-3);
+
+		&:first-child {
+			border-radius: 4px 0 0 4px !important;
+		}
+
+		&:last-child {
+			border-radius: 0 4px 4px 0 !important;
+		}
+	}
+
 	& thead, .confluenceTh {
 		background-color: #F7F7F8;
 		color: #6C6C75;
