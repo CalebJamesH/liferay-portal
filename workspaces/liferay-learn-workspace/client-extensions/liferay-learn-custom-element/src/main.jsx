@@ -24,6 +24,7 @@ class WebComponent extends HTMLElement {
 		}
 	}
 }
+
 const ELEMENT_ID = 'liferay-learn-custom-element';
 
 if (!customElements.get(ELEMENT_ID)) {

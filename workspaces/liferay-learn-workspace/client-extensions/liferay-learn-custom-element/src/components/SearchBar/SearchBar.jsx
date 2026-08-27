@@ -87,4 +87,5 @@ const SearchBar = ({isBusinessEvent, onSearchSubmit}) => {
 		</ClayInput.Group>
 	);
 };
+
 export default memo(SearchBar);
