@@ -22,10 +22,10 @@ import {
 	paginationLabels,
 } from '../../../utils/constants/paginationOptions';
 import {SORT_OPTIONS} from '../../../utils/constants/sortOptions';
-import SVFilter from '../components/SVFilter';
-import SVHeader from '../components/SVHeader';
-import SVMobileTable from '../components/SVMobileTable';
-import SVSearch from '../components/SVSearch';
+import SVFilter from '../components/SVFilter/SVFilter';
+import SVHeader from '../components/SVHeader/SVHeader';
+import SVMobileTable from '../components/SVMobileTable/SVMobileTable';
+import SVSearch from '../components/SVSearch/SVSearch';
 import SVTable, {ISVRow} from '../components/SVTable/SVTable';
 
 import './SecurityVulnerabilitiesList.css';

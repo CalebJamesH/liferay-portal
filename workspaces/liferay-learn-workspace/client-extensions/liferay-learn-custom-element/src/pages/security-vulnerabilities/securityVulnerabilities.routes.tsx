@@ -5,8 +5,8 @@
 
 import {HashRouter, Route, Routes} from 'react-router-dom';
 
-import SecurityVulnerabilitiesItem from './SecurityVulnerabilitiesItem';
-import SecurityVulnerabilitiesList from './SecurityVulnerabilitiesList';
+import SecurityVulnerabilitiesItem from './SecurityVulnerabilitiesItem/SecurityVulnerabilitiesItem';
+import SecurityVulnerabilitiesList from './SecurityVulnerabilitiesList/SecurityVulnerabilitiesList';
 
 import './SecurityVulnerabilities.css';
 
