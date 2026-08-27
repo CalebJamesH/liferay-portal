@@ -7,8 +7,8 @@ import {Button as ClayButton} from '@clayui/core';
 import ClayIcon from '@clayui/icon';
 import i18n from '~/utils/I18n';
 
-import FilterDropdown from './components/FilterDropdown';
-import FilterContent from './components/FilterDropdown/components/FilterContent';
+import FilterContent from './components/FilterDropdown/components/FilterContent/FilterContent';
+import FilterDropdown from './components/FilterDropdown/FilterDropdown';
 
 export interface IFilterOption {
 	key: string;
