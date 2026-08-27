@@ -17,6 +17,63 @@ export interface IColumn {
 	label: string;
 }
 
+const MobileContent = ({
+	mobileAffectedVersions,
+	row,
+}: {
+	mobileAffectedVersions: string;
+	row: ISVRow;
+}) => {
+	return (
+		<div>
+			<div>
+				<div className="d-flex justify-content-between">
+					<div className="align-items-center d-flex">
+						<div className="font-weight-bold sv-name sv-wrap-text">
+							{row.cveIds}
+						</div>
+
+						<div
+							className={`ml-2 px-2 sv-severity sv-severity-${row.severity?.toLowerCase()} text-center`}
+						>
+							{row.severity}
+						</div>
+					</div>
+
+					<div>{row.published}</div>
+				</div>
+
+				<div className="sv-summary sv-wrap-text text-neutral-8">
+					{row.summary}
+				</div>
+			</div>
+
+			<div className="d-flex flex-column mt-2">
+				<div>
+					<span className="text-secondary">
+						{i18n.translate('category')}:
+					</span>{' '}
+					{row.category}
+				</div>
+
+				<div>
+					<span className="text-secondary">
+						{i18n.translate('classification')}:
+					</span>{' '}
+					{row.issueClassification}
+				</div>
+
+				<div>
+					<span className="text-secondary">
+						{i18n.translate('affected-version')}:
+					</span>{' '}
+					{mobileAffectedVersions}
+				</div>
+			</div>
+		</div>
+	);
+};
+
 interface IProps {
 	rows: ISVRow[];
 }
@@ -53,52 +110,10 @@ const SVMobileTable = ({rows}: IProps) => {
 
 				return {
 					content: (
-						<div>
-							<div>
-								<div className="d-flex justify-content-between">
-									<div className="align-items-center d-flex">
-										<div className="font-weight-bold sv-name sv-wrap-text">
-											{row.cveIds}
-										</div>
-
-										<div
-											className={`ml-2 px-2 sv-severity sv-severity-${row.severity?.toLowerCase()} text-center`}
-										>
-											{row.severity}
-										</div>
-									</div>
-
-									<div>{row.published}</div>
-								</div>
-
-								<div className="sv-summary sv-wrap-text text-neutral-8">
-									{row.summary}
-								</div>
-							</div>
-
-							<div className="d-flex flex-column mt-2">
-								<div>
-									<span className="text-secondary">
-										{i18n.translate('category')}:
-									</span>{' '}
-									{row.category}
-								</div>
-
-								<div>
-									<span className="text-secondary">
-										{i18n.translate('classification')}:
-									</span>{' '}
-									{row.issueClassification}
-								</div>
-
-								<div>
-									<span className="text-secondary">
-										{i18n.translate('affected-version')}:
-									</span>{' '}
-									{mobileAffectedVersions}
-								</div>
-							</div>
-						</div>
+						<MobileContent
+							mobileAffectedVersions={mobileAffectedVersions}
+							row={row}
+						/>
 					),
 					link: row.link,
 				};
