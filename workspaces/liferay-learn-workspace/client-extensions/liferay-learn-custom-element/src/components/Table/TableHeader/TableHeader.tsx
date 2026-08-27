@@ -8,10 +8,10 @@ import Button from '@clayui/button';
 import './TableHeader.css';
 
 import {Link} from 'react-router-dom';
-import Filter from '~/components/Filter';
+import Filter from '~/components/Filter/Filter';
 import {IFilterOption} from '~/components/Filter/Filter';
 import FilterResults from '~/components/Filter/components/FilterResults/FilterResults';
-import SearchBar from '~/components/SearchBar';
+import SearchBar from '~/components/SearchBar/SearchBar';
 import i18n from '~/utils/I18n';
 
 interface IProps {
