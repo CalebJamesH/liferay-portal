@@ -15,6 +15,7 @@ const SecurityVulnerabilitiesRoutes = () => {
 		<HashRouter>
 			<Routes>
 				<Route element={<SecurityVulnerabilitiesList />} path="/" />
+
 				<Route element={<SecurityVulnerabilitiesItem />} path="/:id" />
 			</Routes>
 		</HashRouter>
