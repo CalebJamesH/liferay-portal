@@ -33,17 +33,6 @@
 		}
 	}
 
-	.sv-filter-section-header {
-		background-color: transparent;
-		border: none;
-		color: #332B4A;
-		cursor: pointer;
-
-		.lexicon-icon {
-			transition: transform 0.15s ease;
-		}
-	}
-
 	.sv-filter-box-body {
 		display: block;
 	}
@@ -56,15 +45,14 @@
 		transform: rotate(-90deg);
 	}
 
-	@media (max-width: 992px) {
-		.sv-filter-box:not(.sv-filter-box-open) .sv-filter-box-body {
-			display: none;
-		}
+	.sv-filter-section-header {
+		background-color: transparent;
+		border: none;
+		color: #332B4A;
+		cursor: pointer;
 
-		.sv-filter-box:not(.sv-filter-box-open)
-			.sv-filter-section-header
-			.lexicon-icon {
-			transform: rotate(-90deg);
+		.lexicon-icon {
+			transition: transform 0.15s ease;
 		}
 	}
 
@@ -75,6 +63,18 @@
 
 		&.disabled {
 			color: var(--color-action-neutral-disabled);
+		}
+	}
+
+	@media (max-width: 992px) {
+		.sv-filter-box:not(.sv-filter-box-open) .sv-filter-box-body {
+			display: none;
+		}
+
+		.sv-filter-box:not(.sv-filter-box-open)
+			.sv-filter-section-header
+			.lexicon-icon {
+			transform: rotate(-90deg);
 		}
 	}
 }

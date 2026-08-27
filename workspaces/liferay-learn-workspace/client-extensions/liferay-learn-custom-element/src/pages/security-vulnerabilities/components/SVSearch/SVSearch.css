@@ -8,7 +8,7 @@
 	.sv-search {
 		max-width: 700px;
 	}
-	
+
 	.sv-search-icon {
 		bottom: calc(50% - var(--font-size-base)/2);
 		font-size: var(--font-size-base);
