@@ -24,6 +24,7 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.HexFormat;
 import java.util.Map;
 import java.util.Objects;
@@ -40,7 +41,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -404,42 +404,6 @@ public class ObjectActionExamResultsSynchronizationRestController
 		return sourceJSONObject.getString("key");
 	}
 
-	private boolean _hasExamResult(
-		String emailAddress, String externalReferenceCode) {
-
-		try {
-			JSONObject jsonObject = new JSONObject(
-				get(
-					_getAuthorization(),
-					UriComponentsBuilder.fromPath(
-						"/o/c/p2s3examresults/by-external-reference-code/" +
-							externalReferenceCode
-					).queryParam(
-						"fields", "emailAddress"
-					).build(
-					).toUri()));
-
-			String existingEmailAddress = jsonObject.optString("emailAddress");
-
-			return StringUtil.equalsIgnoreCase(
-				emailAddress, existingEmailAddress.trim());
-		}
-		catch (WebClientResponseException webClientResponseException) {
-			HttpStatusCode httpStatusCode =
-				webClientResponseException.getStatusCode();
-
-			if (!httpStatusCode.isSameCodeAs(HttpStatus.NOT_FOUND)) {
-				throw webClientResponseException;
-			}
-
-			if (_log.isDebugEnabled()) {
-				_log.debug(webClientResponseException);
-			}
-
-			return false;
-		}
-	}
-
 	private int _importCertificationExamReports(OffsetDateTime offsetDateTime)
 		throws Exception {
 
@@ -452,24 +416,8 @@ public class ObjectActionExamResultsSynchronizationRestController
 			JSONObject jsonObject = jsonArray.getJSONObject(i);
 
 			try {
-				JSONObject examResultJSONObject = _getExamResultJSONObject(
-					jsonObject);
-
-				long examInstanceTokenId = jsonObject.optLong(
-					"examInstanceTokenId");
-
-				if ((examInstanceTokenId > 0) &&
-					_retry(
-						() -> _hasExamResult(
-							examResultJSONObject.getString("emailAddress"),
-							String.valueOf(examInstanceTokenId)))) {
-
-					examResultJSONObject.put(
-						"externalReferenceCode",
-						String.valueOf(examInstanceTokenId));
-				}
-
-				_retry(() -> _putExamResult(examResultJSONObject));
+				_retry(
+					() -> _putExamResult(_getExamResultJSONObject(jsonObject)));
 			}
 			catch (Exception exception) {
 				failedAmount++;
@@ -558,6 +506,7 @@ public class ObjectActionExamResultsSynchronizationRestController
 	private int _reimportMissedPrerequisiteExamResults() throws Exception {
 		int examResultAmount = 0;
 
+		Set<String> externalReferenceCodes = new HashSet<>();
 		Set<LocalDate> localDates = new TreeSet<>();
 
 		int lastPage = 1;
@@ -569,7 +518,7 @@ public class ObjectActionExamResultsSynchronizationRestController
 					UriComponentsBuilder.fromPath(
 						"/o/c/p2s3examresults"
 					).queryParam(
-						"fields", "date"
+						"fields", "date,externalReferenceCode"
 					).queryParam(
 						"filter",
 						"missedPrerequisite eq true and result eq 'pass'"
@@ -584,6 +533,9 @@ public class ObjectActionExamResultsSynchronizationRestController
 
 			for (int i = 0; i < itemsJSONArray.length(); i++) {
 				JSONObject itemJSONObject = itemsJSONArray.getJSONObject(i);
+
+				externalReferenceCodes.add(
+					itemJSONObject.getString("externalReferenceCode"));
 
 				OffsetDateTime offsetDateTime = OffsetDateTime.parse(
 					itemJSONObject.getString("date"));
@@ -603,10 +555,27 @@ public class ObjectActionExamResultsSynchronizationRestController
 				continue;
 			}
 
-			examResultAmount += _importCertificationExamReports(
+			JSONArray jsonArray = _getCertificationExamReportsJSONArray(
 				OffsetDateTime.of(
 					localDate.minusDays(1), LocalTime.MIDNIGHT,
 					ZoneOffset.UTC));
+
+			for (int i = 0; i < jsonArray.length(); i++) {
+				JSONObject examResultJSONObject = _getExamResultJSONObject(
+					jsonArray.getJSONObject(i));
+
+				if (examResultJSONObject.getBoolean("missedPrerequisite") ||
+					!externalReferenceCodes.contains(
+						examResultJSONObject.getString(
+							"externalReferenceCode"))) {
+
+					continue;
+				}
+
+				_retry(() -> _putExamResult(examResultJSONObject));
+
+				examResultAmount++;
+			}
 
 			endLocalDate = localDate.plusDays(12);
 		}
