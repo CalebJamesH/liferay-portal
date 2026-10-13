@@ -220,7 +220,8 @@
 					"externalReferenceCode": "DISCARDED",
 					"key": "discarded",
 					"name": "Discarded"
-				},{
+				},
+				{
 					"externalReferenceCode": "FAILED",
 					"key": "failed",
 					"name": "Failed"

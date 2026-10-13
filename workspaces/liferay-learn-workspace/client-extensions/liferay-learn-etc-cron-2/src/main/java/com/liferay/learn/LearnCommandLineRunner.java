@@ -33,15 +33,15 @@ public class LearnCommandLineRunner
 	private void _postP2S3ExamResultsSynchronization(String source) {
 		post(
 			_liferayOAuth2AccessTokenManager.getAuthorization(
-					_liferayOAuthApplicationExternalReferenceCodes),
+				_liferayOAuthApplicationExternalReferenceCodes),
 			new JSONObject(
 			).put(
-					"source", source
+				"source", source
 			).put(
-					"synchronizationStatus", "InProgress"
+				"synchronizationStatus", "InProgress"
 			).toString(),
 			UriComponentsBuilder.fromPath(
-					"/o/c/p2s3examresultssynchronizations"
+				"/o/c/p2s3examresultssynchronizations"
 			).build(
 			).toUri());
 	}

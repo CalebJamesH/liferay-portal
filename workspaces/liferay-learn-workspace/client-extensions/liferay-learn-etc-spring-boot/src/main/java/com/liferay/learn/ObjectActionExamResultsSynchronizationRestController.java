@@ -556,6 +556,8 @@ public class ObjectActionExamResultsSynchronizationRestController
 	}
 
 	private int _reimportMissedPrerequisiteExamResults() throws Exception {
+		int examResultAmount = 0;
+
 		Set<LocalDate> localDates = new TreeSet<>();
 
 		int lastPage = 1;
@@ -594,7 +596,6 @@ public class ObjectActionExamResultsSynchronizationRestController
 			lastPage = jsonObject.getInt("lastPage");
 		}
 
-		int examResultAmount = 0;
 		LocalDate endLocalDate = LocalDate.MIN;
 
 		for (LocalDate localDate : localDates) {
