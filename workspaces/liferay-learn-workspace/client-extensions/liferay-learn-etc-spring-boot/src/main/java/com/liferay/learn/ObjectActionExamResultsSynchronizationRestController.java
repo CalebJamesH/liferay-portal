@@ -73,13 +73,13 @@ public class ObjectActionExamResultsSynchronizationRestController
 		String status = "Failed";
 
 		try {
-			JSONObject objectEntryJSONObject = jsonObject.getJSONObject(
-				"objectEntry");
-
-			JSONObject valuesJSONObject = objectEntryJSONObject.getJSONObject(
-				"values");
-
-			String source = valuesJSONObject.optString("source");
+			String source = jsonObject.getJSONObject(
+				"objectEntry"
+			).getJSONObject(
+				"values"
+			).optString(
+				"source"
+			);
 
 			if (Validator.isNull(source)) {
 				source = "webassessor";
@@ -543,19 +543,18 @@ public class ObjectActionExamResultsSynchronizationRestController
 	}
 
 	private String _putExamResult(JSONObject jsonObject) {
-		String externalReferenceCode = jsonObject.getString(
-			"externalReferenceCode");
-
 		return put(
 			_getAuthorization(), jsonObject.toString(),
 			UriComponentsBuilder.fromPath(
 				"/o/c/p2s3examresults/by-external-reference-code/" +
-					externalReferenceCode
+					jsonObject.getString("externalReferenceCode")
 			).build(
 			).toUri());
 	}
 
 	private int _reimportMissedPrerequisiteExamResults() throws Exception {
+		int examResultAmount = 0;
+
 		Set<LocalDate> localDates = new TreeSet<>();
 
 		int lastPage = 1;
@@ -594,7 +593,6 @@ public class ObjectActionExamResultsSynchronizationRestController
 			lastPage = jsonObject.getInt("lastPage");
 		}
 
-		int examResultAmount = 0;
 		LocalDate endLocalDate = LocalDate.MIN;
 
 		for (LocalDate localDate : localDates) {
@@ -616,7 +614,7 @@ public class ObjectActionExamResultsSynchronizationRestController
 	private <T> T _retry(UnsafeSupplier<T, Exception> unsafeSupplier)
 		throws Exception {
 
-		for (long delay : _RETRY_DELAYS) {
+		for (long delay : new long[] {5000, 15000, 30000}) {
 			try {
 				return unsafeSupplier.get();
 			}
@@ -654,8 +652,6 @@ public class ObjectActionExamResultsSynchronizationRestController
 			).build(
 			).toUri());
 	}
-
-	private static final long[] _RETRY_DELAYS = {5000, 15000, 30000};
 
 	private static final Log _log = LogFactory.getLog(
 		ObjectActionExamResultsSynchronizationRestController.class);
