@@ -30,6 +30,7 @@
 	"liferay-dxp-release-notes": "Liferay DXP Release Notes",
 	"liferay-security-reports": "Liferay Security Reports",
 	"loading": "Loading",
+	"module-changes": "Module Changes",
 	"module-changes-are-not-available-for-the-selected-releases": "Module changes are not available for the selected releases.",
 	"module-version-changes": "Module Version Changes",
 	"name": "Name",

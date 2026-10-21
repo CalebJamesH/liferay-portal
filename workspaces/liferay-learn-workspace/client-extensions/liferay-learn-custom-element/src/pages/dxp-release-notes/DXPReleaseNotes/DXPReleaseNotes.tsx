@@ -21,7 +21,10 @@ export type ReleaseNotesOutletContext = {
 	toRelease: IRelease;
 };
 
-const TABS = [{label: 'highlights', path: '/'}];
+const TABS = [
+	{label: 'highlights', path: '/'},
+	{label: 'module-changes', path: '/module-changes'},
+];
 
 const DXPReleaseNotes = () => {
 	const {error, loading, productVersions} = useReleases();
