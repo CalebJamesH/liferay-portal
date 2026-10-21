@@ -367,7 +367,14 @@ public class ReleaseNotesService extends BaseService {
 			Matcher updateMatcher = _updatePattern.matcher(
 				targetPlatformVersion);
 
-			if (!quarterlyMatcher.matches() && !updateMatcher.matches()) {
+			if (updateMatcher.matches()) {
+				if (GetterUtil.getInteger(updateMatcher.group(1)) >
+						_LAST_UPDATE_7_4) {
+
+					continue;
+				}
+			}
+			else if (!quarterlyMatcher.matches()) {
 				continue;
 			}
 
@@ -448,6 +455,8 @@ public class ReleaseNotesService extends BaseService {
 	}
 
 	private static final Duration _CACHE_DURATION = Duration.ofHours(1);
+
+	private static final int _LAST_UPDATE_7_4 = 92;
 
 	private static final String _PRODUCT_DXP = "dxp";
 
