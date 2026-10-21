@@ -7,6 +7,7 @@ import React, {Suspense} from 'react';
 
 const lazyRoutes = {
 	'certification-list': React.lazy(() => import('./components/Certification/CertificationList')),
+	'commerce-release-notes': React.lazy(() => import('./pages/commerce-release-notes/commerceReleaseNotes.routes')),
 	'course-list': React.lazy(() => import('./components/Course/CoursesList')),
 	'dxp-release-notes': React.lazy(() => import('./pages/dxp-release-notes/dxpReleaseNotes.routes')),
 	'landing-page-view': React.lazy(() => import('./components/LandingPageView')),
