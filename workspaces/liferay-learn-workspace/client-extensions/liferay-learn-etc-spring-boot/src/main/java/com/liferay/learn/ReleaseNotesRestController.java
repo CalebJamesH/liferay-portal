@@ -8,11 +8,13 @@ package com.liferay.learn;
 import com.liferay.client.extension.util.spring.boot3.BaseRestController;
 import com.liferay.learn.constants.RoleConstants;
 import com.liferay.learn.service.ModuleChangesService;
+import com.liferay.learn.service.ReleaseChangelogService;
 import com.liferay.learn.service.ReleaseHighlightsService;
 import com.liferay.learn.service.ReleaseNotesService;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -28,6 +30,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -40,6 +43,81 @@ import org.springframework.web.util.UriComponentsBuilder;
 @RequestMapping("/release-notes")
 @RestController
 public class ReleaseNotesRestController extends BaseRestController {
+
+	@GetMapping("/changelog")
+	public ResponseEntity<String> getChangelog(
+		@AuthenticationPrincipal Jwt jwt, @RequestParam String from,
+		@RequestParam(defaultValue = "", required = false) String keywords,
+		@RequestParam(defaultValue = "1", required = false) int page,
+		@RequestParam(defaultValue = "15", required = false) int pageSize,
+		@RequestParam MultiValueMap<String, String> parameters,
+		@RequestParam String to) {
+
+		try {
+			if (!_hasReleaseNotesPermission(jwt)) {
+				return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+			}
+
+			if ((page < 1) || (pageSize < 1) || (pageSize > 100)) {
+				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+			}
+
+			JSONObject changelogJSONObject =
+				_releaseChangelogService.getChangelogJSONObject(
+					from, to,
+					parameters.getOrDefault(
+						"components", Collections.emptyList()),
+					keywords, page, pageSize);
+
+			if (changelogJSONObject == null) {
+				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+			}
+
+			return new ResponseEntity<>(
+				changelogJSONObject.toString(), HttpStatus.OK);
+		}
+		catch (PrincipalException principalException) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(principalException);
+			}
+
+			return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+		}
+		catch (Exception exception) {
+			_log.error(exception);
+
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	@GetMapping("/changelog/components")
+	public ResponseEntity<String> getChangelogComponents(
+		@AuthenticationPrincipal Jwt jwt) {
+
+		try {
+			if (!_hasReleaseNotesPermission(jwt)) {
+				return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+			}
+
+			return new ResponseEntity<>(
+				new JSONArray(
+					_releaseChangelogService.getComponentNames()
+				).toString(),
+				HttpStatus.OK);
+		}
+		catch (PrincipalException principalException) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(principalException);
+			}
+
+			return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+		}
+		catch (Exception exception) {
+			_log.error(exception);
+
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
 
 	@GetMapping("/highlights")
 	public ResponseEntity<String> getHighlights(
@@ -224,6 +302,9 @@ public class ReleaseNotesRestController extends BaseRestController {
 
 	@Autowired
 	private ModuleChangesService _moduleChangesService;
+
+	@Autowired
+	private ReleaseChangelogService _releaseChangelogService;
 
 	@Autowired
 	private ReleaseHighlightsService _releaseHighlightsService;

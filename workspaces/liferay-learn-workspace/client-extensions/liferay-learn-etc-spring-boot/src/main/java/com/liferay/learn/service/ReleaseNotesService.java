@@ -42,6 +42,31 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Component
 public class ReleaseNotesService extends BaseService {
 
+	public JSONObject getProductVersionJSONObject(String releaseKey)
+		throws Exception {
+
+		JSONArray productVersionsJSONArray = getProductVersionsJSONArray();
+
+		for (int i = 0; i < productVersionsJSONArray.length(); i++) {
+			JSONObject productVersionJSONObject =
+				productVersionsJSONArray.getJSONObject(i);
+
+			JSONArray releasesJSONArray = productVersionJSONObject.getJSONArray(
+				"releases");
+
+			for (int j = 0; j < releasesJSONArray.length(); j++) {
+				JSONObject releaseJSONObject = releasesJSONArray.getJSONObject(
+					j);
+
+				if (releaseKey.equals(releaseJSONObject.getString("key"))) {
+					return productVersionJSONObject;
+				}
+			}
+		}
+
+		return null;
+	}
+
 	public synchronized JSONArray getProductVersionsJSONArray()
 		throws Exception {
 
