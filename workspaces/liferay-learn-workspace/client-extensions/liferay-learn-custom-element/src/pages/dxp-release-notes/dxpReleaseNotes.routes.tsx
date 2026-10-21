@@ -13,9 +13,9 @@ import {
 	useOutletContext,
 } from 'react-router-dom';
 
-import DXPReleaseNotes, {
+import ReleaseNotes, {
 	ReleaseNotesOutletContext,
-} from './DXPReleaseNotes/DXPReleaseNotes';
+} from '../release-notes/ReleaseNotes/ReleaseNotes';
 import Changelog from '../release-notes/components/Changelog/Changelog';
 import Highlights from '../release-notes/components/Highlights/Highlights';
 
@@ -71,7 +71,10 @@ const DXPReleaseNotesRoutes = () => {
 	return (
 		<HashRouter>
 			<Routes>
-				<Route element={<DXPReleaseNotes />} path="/">
+				<Route
+					element={<ReleaseNotes title="liferay-dxp-release-notes" />}
+					path="/"
+				>
 					<Route element={<HighlightsRoute />} index />
 
 					<Route element={<ChangelogRoute />} path="changelog" />

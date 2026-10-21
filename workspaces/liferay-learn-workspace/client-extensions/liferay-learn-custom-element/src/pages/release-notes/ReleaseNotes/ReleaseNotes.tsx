@@ -12,13 +12,18 @@ import useReleases from '../../../hooks/useReleases';
 import ReleaseRangeFilters, {
 	ReleaseRange,
 	getToReleaseGroups,
-} from '../../release-notes/components/ReleaseRangeFilters/ReleaseRangeFilters';
+} from '../components/ReleaseRangeFilters/ReleaseRangeFilters';
 
-import './DXPReleaseNotes.css';
+import './ReleaseNotes.css';
 
 export type ReleaseNotesOutletContext = {
 	fromRelease: IRelease;
 	toRelease: IRelease;
+};
+
+type ReleaseNotesProps = {
+	productLines?: string[];
+	title: string;
 };
 
 const TABS = [
@@ -27,10 +32,24 @@ const TABS = [
 	{label: 'module-changes', path: '/module-changes'},
 ];
 
-const DXPReleaseNotes = () => {
-	const {error, loading, productVersions} = useReleases();
+const ReleaseNotes = ({productLines, title}: ReleaseNotesProps) => {
+	const {
+		error,
+		loading,
+		productVersions: releasesProductVersions,
+	} = useReleases();
 	const location = useLocation();
 	const [searchParams, setSearchParams] = useSearchParams();
+
+	const productVersions = useMemo(
+		() =>
+			productLines
+				? releasesProductVersions.filter((productVersion) =>
+						productLines.includes(productVersion.line)
+					)
+				: releasesProductVersions,
+		[productLines, releasesProductVersions]
+	);
 
 	const releaseRange = useMemo<ReleaseRange>(() => {
 		const productVersion = productVersions.find(
@@ -104,7 +123,7 @@ const DXPReleaseNotes = () => {
 	return (
 		<div className="container-fluid container-fluid-max-xl release-notes">
 			<div className="release-notes-header">
-				<h1>{i18n.translate('liferay-dxp-release-notes')}</h1>
+				<h1>{i18n.translate(title)}</h1>
 
 				<p className="text-secondary">
 					{i18n.translate(
@@ -163,4 +182,4 @@ const DXPReleaseNotes = () => {
 	);
 };
 
-export default DXPReleaseNotes;
+export default ReleaseNotes;
