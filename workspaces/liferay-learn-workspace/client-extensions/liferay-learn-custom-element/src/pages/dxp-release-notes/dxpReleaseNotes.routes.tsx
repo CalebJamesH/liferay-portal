@@ -16,11 +16,11 @@ import {
 import DXPReleaseNotes, {
 	ReleaseNotesOutletContext,
 } from './DXPReleaseNotes/DXPReleaseNotes';
-import Changelog from './components/Changelog/Changelog';
-import Highlights from './components/Highlights/Highlights';
+import Changelog from '../release-notes/components/Changelog/Changelog';
+import Highlights from '../release-notes/components/Highlights/Highlights';
 
 const ModuleChanges = lazy(
-	() => import('./components/ModuleChanges/ModuleChanges')
+	() => import('../release-notes/components/ModuleChanges/ModuleChanges')
 );
 
 const ChangelogRoute = () => {

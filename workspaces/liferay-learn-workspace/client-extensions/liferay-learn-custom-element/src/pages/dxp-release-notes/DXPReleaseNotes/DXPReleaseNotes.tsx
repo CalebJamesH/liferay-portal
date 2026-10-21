@@ -12,7 +12,7 @@ import useReleases from '../../../hooks/useReleases';
 import ReleaseRangeFilters, {
 	ReleaseRange,
 	getToReleaseGroups,
-} from '../components/ReleaseRangeFilters/ReleaseRangeFilters';
+} from '../../release-notes/components/ReleaseRangeFilters/ReleaseRangeFilters';
 
 import './DXPReleaseNotes.css';
 
