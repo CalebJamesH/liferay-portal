@@ -90,6 +90,10 @@ async function releaseNotesFetchJSON<T = any>(path: string): Promise<T> {
 	return response.json();
 }
 
+export async function getChangelogComponents(): Promise<string[]> {
+	return releaseNotesFetchJSON('/changelog/components');
+}
+
 export async function getHighlights({
 	from,
 	to,
