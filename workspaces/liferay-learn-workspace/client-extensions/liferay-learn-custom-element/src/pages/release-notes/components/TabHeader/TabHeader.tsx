@@ -13,10 +13,10 @@ type TabHeaderProps = {
 };
 
 const TabHeader = ({description, title}: TabHeaderProps) => (
-	<div className="dxp-release-notes-tab-header">
+	<div className="release-notes-tab-header">
 		<h2>{i18n.translate(title)}</h2>
 
-		<p className="dxp-release-notes-tab-header-description text-secondary">
+		<p className="release-notes-tab-header-description text-secondary">
 			{i18n.translate(description)}
 		</p>
 	</div>

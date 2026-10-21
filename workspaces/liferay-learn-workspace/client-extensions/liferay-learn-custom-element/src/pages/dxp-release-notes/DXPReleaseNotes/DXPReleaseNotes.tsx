@@ -69,7 +69,7 @@ const DXPReleaseNotes = () => {
 	}, [productVersions, releaseRange]);
 
 	const tabs = (
-		<ul className="dxp-release-notes-tabs nav nav-tabs">
+		<ul className="nav nav-tabs release-notes-tabs">
 			{TABS.map(({label, path}) => (
 				<li className="nav-item" key={label}>
 					<NavLink
@@ -102,8 +102,8 @@ const DXPReleaseNotes = () => {
 	};
 
 	return (
-		<div className="container-fluid container-fluid-max-xl dxp-release-notes">
-			<div className="dxp-release-notes-header">
+		<div className="container-fluid container-fluid-max-xl release-notes">
+			<div className="release-notes-header">
 				<h1>{i18n.translate('liferay-dxp-release-notes')}</h1>
 
 				<p className="text-secondary">
@@ -151,7 +151,7 @@ const DXPReleaseNotes = () => {
 							<Outlet context={{fromRelease, toRelease}} />
 						</>
 					) : (
-						<div className="dxp-release-notes-empty text-center text-secondary">
+						<div className="release-notes-empty text-center text-secondary">
 							{i18n.translate(
 								'content-collection-is-empty-select-your-settings-above-to-show-details'
 							)}

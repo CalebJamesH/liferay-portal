@@ -237,7 +237,7 @@ const Changelog = ({from, to}: ChangelogProps) => {
 	};
 
 	return (
-		<div className="changelog dxp-release-notes-tab row">
+		<div className="changelog release-notes-tab row">
 			<div className="changelog-sidebar col-md-3">
 				<div className="align-items-center d-flex justify-content-between">
 					<h3 className="m-0">{i18n.translate('refine-by')}</h3>

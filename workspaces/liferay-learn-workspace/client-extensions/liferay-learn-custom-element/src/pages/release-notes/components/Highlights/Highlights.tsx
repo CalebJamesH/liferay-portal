@@ -224,7 +224,7 @@ const Highlights = ({from, to}: HighlightsProps) => {
 	};
 
 	return (
-		<div className="dxp-release-notes-tab highlights row">
+		<div className="highlights release-notes-tab row">
 			<div className="col-md-3 highlights-sidebar">
 				<div className="align-items-center d-flex justify-content-between">
 					<h3 className="m-0">{i18n.translate('refine-by')}</h3>

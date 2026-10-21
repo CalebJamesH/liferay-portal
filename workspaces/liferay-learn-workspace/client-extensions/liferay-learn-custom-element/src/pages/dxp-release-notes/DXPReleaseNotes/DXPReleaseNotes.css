@@ -1,22 +1,22 @@
-.dxp-release-notes {
+.release-notes {
 	padding-bottom: 48px;
 	padding-top: 48px;
 }
 
-.dxp-release-notes-empty {
+.release-notes-empty {
 	border: 1px solid #e7e7ed;
 	border-radius: 4px;
 	padding: 48px 24px;
 }
 
-.dxp-release-notes-header {
+.release-notes-header {
 	margin-bottom: 32px;
 }
 
-.dxp-release-notes-tab {
+.release-notes-tab {
 	padding-top: 24px;
 }
 
-.dxp-release-notes-tabs {
+.release-notes-tabs {
 	margin-top: 8px;
 }
