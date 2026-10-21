@@ -9,6 +9,7 @@ import {IRelease, ReleaseNotesError} from '~/services/rest/releaseNotes';
 import i18n from '~/utils/I18n';
 
 import useReleases from '../../../hooks/useReleases';
+import ReleaseNotesLink from '../components/ReleaseNotesLink/ReleaseNotesLink';
 import ReleaseRangeFilters, {
 	ReleaseRange,
 	getToReleaseGroups,
@@ -23,6 +24,7 @@ export type ReleaseNotesOutletContext = {
 
 type ReleaseNotesProps = {
 	productLines?: string[];
+	relatedReleaseNotes: {title: string; url: string};
 	title: string;
 };
 
@@ -32,7 +34,11 @@ const TABS = [
 	{label: 'module-changes', path: '/module-changes'},
 ];
 
-const ReleaseNotes = ({productLines, title}: ReleaseNotesProps) => {
+const ReleaseNotes = ({
+	productLines,
+	relatedReleaseNotes,
+	title,
+}: ReleaseNotesProps) => {
 	const {
 		error,
 		loading,
@@ -130,6 +136,11 @@ const ReleaseNotes = ({productLines, title}: ReleaseNotesProps) => {
 						'display-the-fix-pack-information-relevant-to-your-liferay-build'
 					)}
 				</p>
+
+				<ReleaseNotesLink
+					title={relatedReleaseNotes.title}
+					url={relatedReleaseNotes.url}
+				/>
 			</div>
 
 			{loading && (

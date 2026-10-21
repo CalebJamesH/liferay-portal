@@ -28,6 +28,11 @@ const OWNER_OPTIONS = [
 	{label: 'third-party-libraries', value: 'third-party'},
 ];
 
+const RELATED_RELEASE_NOTES = {
+	title: 'liferay-commerce-release-notes',
+	url: '/commerce-release-notes',
+};
+
 const ChangelogRoute = () => {
 	const {fromRelease, toRelease} =
 		useOutletContext<ReleaseNotesOutletContext>();
@@ -72,7 +77,12 @@ const DXPReleaseNotesRoutes = () => {
 		<HashRouter>
 			<Routes>
 				<Route
-					element={<ReleaseNotes title="liferay-dxp-release-notes" />}
+					element={
+						<ReleaseNotes
+							relatedReleaseNotes={RELATED_RELEASE_NOTES}
+							title="liferay-dxp-release-notes"
+						/>
+					}
 					path="/"
 				>
 					<Route element={<HighlightsRoute />} index />
