@@ -29,6 +29,29 @@ export interface IHighlightsParams {
 	to: string;
 }
 
+export interface IModuleChange {
+	fromURL?: string;
+	fromVersion?: string;
+	group: string;
+	name: string;
+	owner: string;
+	toURL?: string;
+	toVersion?: string;
+}
+
+export interface IModuleChanges {
+	items: IModuleChange[];
+	total: number;
+}
+
+export interface IModuleChangesParams {
+	changesOnly: boolean;
+	from: string;
+	keywords: string;
+	owners: string[];
+	to: string;
+}
+
 export interface IRelease {
 	key: string;
 	name: string;
@@ -74,6 +97,25 @@ export async function getHighlights({
 	const searchParams = new URLSearchParams({from, to});
 
 	return releaseNotesFetchJSON(`/highlights?${searchParams.toString()}`);
+}
+
+export async function getModuleChanges({
+	changesOnly,
+	from,
+	keywords,
+	owners,
+	to,
+}: IModuleChangesParams): Promise<IModuleChanges> {
+	const searchParams = new URLSearchParams({
+		changesOnly: String(changesOnly),
+		from,
+		keywords,
+		to,
+	});
+
+	owners.forEach((owner) => searchParams.append('owners', owner));
+
+	return releaseNotesFetchJSON(`/module-changes?${searchParams.toString()}`);
 }
 
 export async function getReleases(): Promise<IProductVersion[]> {
