@@ -1,0 +1,10 @@
+.release-autocomplete-item {
+	display: flex;
+	gap: 16px;
+	justify-content: space-between;
+}
+
+.release-autocomplete-product {
+	font-size: 12px;
+	white-space: nowrap;
+}
