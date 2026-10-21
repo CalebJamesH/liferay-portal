@@ -16,11 +16,19 @@ import {
 import DXPReleaseNotes, {
 	ReleaseNotesOutletContext,
 } from './DXPReleaseNotes/DXPReleaseNotes';
+import Changelog from './components/Changelog/Changelog';
 import Highlights from './components/Highlights/Highlights';
 
 const ModuleChanges = lazy(
 	() => import('./components/ModuleChanges/ModuleChanges')
 );
+
+const ChangelogRoute = () => {
+	const {fromRelease, toRelease} =
+		useOutletContext<ReleaseNotesOutletContext>();
+
+	return <Changelog from={fromRelease} to={toRelease} />;
+};
 
 const HighlightsRoute = () => {
 	const {fromRelease, toRelease} =
@@ -56,6 +64,8 @@ const DXPReleaseNotesRoutes = () => {
 			<Routes>
 				<Route element={<DXPReleaseNotes />} path="/">
 					<Route element={<HighlightsRoute />} index />
+
+					<Route element={<ChangelogRoute />} path="changelog" />
 
 					<Route
 						element={<ModuleChangesRoute />}

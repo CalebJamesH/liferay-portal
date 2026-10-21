@@ -23,6 +23,7 @@ export type ReleaseNotesOutletContext = {
 
 const TABS = [
 	{label: 'highlights', path: '/'},
+	{label: 'changelog', path: '/changelog'},
 	{label: 'module-changes', path: '/module-changes'},
 ];
 
