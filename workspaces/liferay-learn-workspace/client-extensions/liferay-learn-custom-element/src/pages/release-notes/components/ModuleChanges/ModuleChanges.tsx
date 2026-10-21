@@ -23,13 +23,9 @@ import './ModuleChanges.css';
 
 type ModuleChangesProps = {
 	from: IRelease;
+	ownerOptions: {label: string; value: string}[];
 	to: IRelease;
 };
-
-const OWNER_OPTIONS = [
-	{label: 'liferay-artifacts', value: 'liferay'},
-	{label: 'third-party-libraries', value: 'third-party'},
-];
 
 const VersionLink = ({url, version}: {url?: string; version?: string}) => {
 	if (!version) {
@@ -47,7 +43,7 @@ const VersionLink = ({url, version}: {url?: string; version?: string}) => {
 	);
 };
 
-const ModuleChanges = ({from, to}: ModuleChangesProps) => {
+const ModuleChanges = ({from, ownerOptions, to}: ModuleChangesProps) => {
 	const [changesOnly, setChangesOnly] = useState(false);
 	const [keywords, setKeywords] = useState('');
 	const [keywordsInput, setKeywordsInput] = useState('');
@@ -59,7 +55,9 @@ const ModuleChanges = ({from, to}: ModuleChangesProps) => {
 		changesOnly,
 		from: from.key,
 		keywords,
-		owners,
+		owners: owners.length
+			? owners
+			: ownerOptions.map((ownerOption) => ownerOption.value),
 		to: to.key,
 	});
 
@@ -241,7 +239,7 @@ const ModuleChanges = ({from, to}: ModuleChangesProps) => {
 						{i18n.translate('group')}
 					</div>
 
-					{OWNER_OPTIONS.map((ownerOption) => (
+					{ownerOptions.map((ownerOption) => (
 						<div
 							className="custom-checkbox custom-control"
 							key={ownerOption.value}

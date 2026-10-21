@@ -23,6 +23,11 @@ const ModuleChanges = lazy(
 	() => import('../release-notes/components/ModuleChanges/ModuleChanges')
 );
 
+const OWNER_OPTIONS = [
+	{label: 'liferay-artifacts', value: 'liferay'},
+	{label: 'third-party-libraries', value: 'third-party'},
+];
+
 const ChangelogRoute = () => {
 	const {fromRelease, toRelease} =
 		useOutletContext<ReleaseNotesOutletContext>();
@@ -47,7 +52,11 @@ const ModuleChangesRoute = () => {
 				<span className="cp-spinner ml-2 spinner-border spinner-border-sm"></span>
 			}
 		>
-			<ModuleChanges from={fromRelease} to={toRelease} />
+			<ModuleChanges
+				from={fromRelease}
+				ownerOptions={OWNER_OPTIONS}
+				to={toRelease}
+			/>
 		</Suspense>
 	);
 };
