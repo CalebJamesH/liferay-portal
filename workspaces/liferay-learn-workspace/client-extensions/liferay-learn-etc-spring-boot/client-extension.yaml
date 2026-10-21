@@ -24,6 +24,7 @@ liferay-learn-etc-spring-boot-oahs:
         -   c_p2s3quizresult.everything
         -   c_p2s3userbadge.everything
         -   Liferay.Headless.Admin.User.everything
+        -   Liferay.Headless.Delivery.everything.read
         -   Liferay.Object.Admin.REST.everything.read
     type: oAuthApplicationHeadlessServer
     userAccountScreenName: default-service-account
