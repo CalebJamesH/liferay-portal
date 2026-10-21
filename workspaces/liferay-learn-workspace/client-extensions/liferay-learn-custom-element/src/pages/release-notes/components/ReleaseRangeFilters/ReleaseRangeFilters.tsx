@@ -13,6 +13,8 @@ import ReleaseAutocomplete, {
 
 import './ReleaseRangeFilters.css';
 
+const PRODUCT_VERSION_KEY_7_4 = '7.4';
+
 export type ReleaseRange = {
 	from: string;
 	productVersion: string;
@@ -85,19 +87,25 @@ export function getToReleaseGroups(
 		return [];
 	}
 
+	const laterReleaseGroups = productVersions
+		.slice(index + 1)
+		.filter(
+			(laterProductVersion) =>
+				laterProductVersion.line === productVersion.line
+		)
+		.map(({key, name, releases}) => ({key, name, releases}));
+
+	if (productVersion.key === PRODUCT_VERSION_KEY_7_4) {
+		return laterReleaseGroups;
+	}
+
 	return [
 		{
 			key: productVersion.key,
 			name: productVersion.name,
 			releases: productVersion.releases.slice(releaseIndex),
 		},
-		...productVersions
-			.slice(index + 1)
-			.filter(
-				(laterProductVersion) =>
-					laterProductVersion.line === productVersion.line
-			)
-			.map(({key, name, releases}) => ({key, name, releases})),
+		...laterReleaseGroups,
 	];
 }
 
