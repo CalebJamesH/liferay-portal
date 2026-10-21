@@ -8,6 +8,7 @@ package com.liferay.learn;
 import com.liferay.client.extension.util.spring.boot3.BaseRestController;
 import com.liferay.learn.constants.RoleConstants;
 import com.liferay.learn.service.ModuleChangesService;
+import com.liferay.learn.service.ReleaseHighlightsService;
 import com.liferay.learn.service.ReleaseNotesService;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
 
@@ -39,6 +40,40 @@ import org.springframework.web.util.UriComponentsBuilder;
 @RequestMapping("/release-notes")
 @RestController
 public class ReleaseNotesRestController extends BaseRestController {
+
+	@GetMapping("/highlights")
+	public ResponseEntity<String> getHighlights(
+		@AuthenticationPrincipal Jwt jwt, @RequestParam String from,
+		@RequestParam String to) {
+
+		try {
+			if (!_hasReleaseNotesPermission(jwt)) {
+				return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+			}
+
+			JSONObject highlightsJSONObject =
+				_releaseHighlightsService.getHighlightsJSONObject(from, to);
+
+			if (highlightsJSONObject == null) {
+				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+			}
+
+			return new ResponseEntity<>(
+				highlightsJSONObject.toString(), HttpStatus.OK);
+		}
+		catch (PrincipalException principalException) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(principalException);
+			}
+
+			return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+		}
+		catch (Exception exception) {
+			_log.error(exception);
+
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
 
 	@GetMapping("/module-changes")
 	public ResponseEntity<String> getModuleChanges(
@@ -189,6 +224,9 @@ public class ReleaseNotesRestController extends BaseRestController {
 
 	@Autowired
 	private ModuleChangesService _moduleChangesService;
+
+	@Autowired
+	private ReleaseHighlightsService _releaseHighlightsService;
 
 	@Autowired
 	private ReleaseNotesService _releaseNotesService;

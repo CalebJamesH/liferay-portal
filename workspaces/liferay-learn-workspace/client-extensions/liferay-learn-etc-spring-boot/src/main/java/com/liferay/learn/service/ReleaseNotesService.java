@@ -56,6 +56,53 @@ public class ReleaseNotesService extends BaseService {
 		return _productVersionsJSONArray;
 	}
 
+	public List<String> getReleaseKeys(
+			String fromReleaseKey, String toReleaseKey)
+		throws Exception {
+
+		JSONArray productVersionsJSONArray = getProductVersionsJSONArray();
+
+		String line = null;
+		List<String> releaseKeys = new ArrayList<>();
+
+		for (int i = 0; i < productVersionsJSONArray.length(); i++) {
+			JSONObject productVersionJSONObject =
+				productVersionsJSONArray.getJSONObject(i);
+
+			if ((line != null) &&
+				!line.equals(productVersionJSONObject.getString("line"))) {
+
+				continue;
+			}
+
+			JSONArray releasesJSONArray = productVersionJSONObject.getJSONArray(
+				"releases");
+
+			for (int j = 0; j < releasesJSONArray.length(); j++) {
+				JSONObject releaseJSONObject = releasesJSONArray.getJSONObject(
+					j);
+
+				String releaseKey = releaseJSONObject.getString("key");
+
+				if (line == null) {
+					if (!releaseKey.equals(fromReleaseKey)) {
+						continue;
+					}
+
+					line = productVersionJSONObject.getString("line");
+				}
+
+				releaseKeys.add(releaseKey);
+
+				if (releaseKey.equals(toReleaseKey)) {
+					return releaseKeys;
+				}
+			}
+		}
+
+		return null;
+	}
+
 	public String getTargetPlatformVersion(String releaseKey) {
 		if (!releaseKey.startsWith(_RELEASE_KEY_PREFIX_7_4)) {
 			return null;
@@ -76,6 +123,13 @@ public class ReleaseNotesService extends BaseService {
 		}
 
 		return null;
+	}
+
+	public boolean isQuarterlyRelease(String releaseKey) {
+		Matcher matcher = _quarterlyPattern.matcher(
+			GetterUtil.getString(getTargetPlatformVersion(releaseKey)));
+
+		return matcher.matches();
 	}
 
 	private Set<String> _getBOMVersions() throws Exception {
