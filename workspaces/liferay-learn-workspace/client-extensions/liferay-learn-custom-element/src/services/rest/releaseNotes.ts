@@ -8,6 +8,29 @@ import {Liferay} from '~/services/liferay';
 const OAUTH2_APP = 'liferay-learn-etc-spring-boot-oaua';
 const BASE_PATH = '/release-notes';
 
+export interface IChangelog {
+	items: IChangelogIssue[];
+	total: number;
+}
+
+export interface IChangelogIssue {
+	components: string[];
+	description: string;
+	key: string;
+	releases: string[];
+	summary: string;
+	url: string;
+}
+
+export interface IChangelogParams {
+	components: string[];
+	from: string;
+	keywords: string;
+	page: number;
+	pageSize: number;
+	to: string;
+}
+
 export interface IHighlight {
 	importantChanges?: string;
 	keyHighlights?: string;
@@ -88,6 +111,29 @@ async function releaseNotesFetchJSON<T = any>(path: string): Promise<T> {
 	}
 
 	return response.json();
+}
+
+export async function getChangelog({
+	components,
+	from,
+	keywords,
+	page,
+	pageSize,
+	to,
+}: IChangelogParams): Promise<IChangelog> {
+	const searchParams = new URLSearchParams({
+		from,
+		keywords,
+		page: String(page),
+		pageSize: String(pageSize),
+		to,
+	});
+
+	components.forEach((component) =>
+		searchParams.append('components', component)
+	);
+
+	return releaseNotesFetchJSON(`/changelog?${searchParams.toString()}`);
 }
 
 export async function getChangelogComponents(): Promise<string[]> {
