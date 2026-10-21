@@ -44,6 +44,7 @@
 	"reference-the-bundle-or-module-version-you-should-compile-against": "Indica el bundle o la versión del módulo que deberías usar para compilar.",
 	"refine-by": "Precisar por",
 	"release": "Actualización",
+	"search": "Buscar",
 	"search-for-security-vulnerability-by-keyword-or-cve-id": "Busca vulnerabilidades de seguridad por palabra clave o identificador CVE",
 	"security": "Seguridad",
 	"select-all": "Seleccionar todas",

@@ -44,6 +44,7 @@
 	"reference-the-bundle-or-module-version-you-should-compile-against": "コンパイルするべきバンドルまたはモジュールの一覧です。",
 	"refine-by": "絞り込む",
 	"release": "リリース",
+	"search": "検索",
 	"search-for-security-vulnerability-by-keyword-or-cve-id": "キーワードまたはCVE IDでセキュリティ脆弱性を検索する",
 	"security": "セキュリティ",
 	"select-all": "すべて選択",
