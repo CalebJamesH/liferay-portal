@@ -109,6 +109,21 @@ public class JiraService extends BaseService {
 		return null;
 	}
 
+	public JSONArray getComponentsJSONArray(String projectKey)
+		throws Exception {
+
+		return new JSONArray(
+			get(
+				_getCredentials(),
+				UriComponentsBuilder.fromUriString(
+					StringBundler.concat(
+						_jiraURL, _URL_REST_API_3,
+						"/project/{projectKey}/components")
+				).buildAndExpand(
+					projectKey
+				).toUri()));
+	}
+
 	@Cacheable("issue")
 	public JSONObject getIssueJSONObject(String issueKey) throws Exception {
 		try {
@@ -317,6 +332,38 @@ public class JiraService extends BaseService {
 		}
 
 		return jsonObjects;
+	}
+
+	public JSONObject searchIssuesJSONObject(
+			String jql, String expand, int maxResults, String nextPageToken,
+			String... fields)
+		throws Exception {
+
+		JSONObject jsonObject = new JSONObject(
+		).put(
+			"fields", new JSONArray(fields)
+		).put(
+			"jql", jql
+		).put(
+			"maxResults", maxResults
+		);
+
+		if (Validator.isNotNull(expand)) {
+			jsonObject.put("expand", expand);
+		}
+
+		if (Validator.isNotNull(nextPageToken)) {
+			jsonObject.put("nextPageToken", nextPageToken);
+		}
+
+		return new JSONObject(
+			post(
+				_getCredentials(), jsonObject.toString(),
+				UriComponentsBuilder.fromUriString(
+					StringBundler.concat(
+						_jiraURL, _URL_REST_API_3, "/search/jql")
+				).build(
+				).toUri()));
 	}
 
 	private JSONArray _flattenJSONArray(JSONArray jsonArray) {
