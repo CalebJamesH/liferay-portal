@@ -8,6 +8,27 @@ import {Liferay} from '~/services/liferay';
 const OAUTH2_APP = 'liferay-learn-etc-spring-boot-oaua';
 const BASE_PATH = '/release-notes';
 
+export interface IHighlight {
+	importantChanges?: string;
+	keyHighlights?: string;
+	knownIssues?: string;
+	releaseDate?: string;
+	releaseKey: string;
+	security?: string;
+	title: string;
+}
+
+export interface IHighlights {
+	hasQuarterlyReleases: boolean;
+	items: IHighlight[];
+	total: number;
+}
+
+export interface IHighlightsParams {
+	from: string;
+	to: string;
+}
+
 export interface IRelease {
 	key: string;
 	name: string;
@@ -44,6 +65,15 @@ async function releaseNotesFetchJSON<T = any>(path: string): Promise<T> {
 	}
 
 	return response.json();
+}
+
+export async function getHighlights({
+	from,
+	to,
+}: IHighlightsParams): Promise<IHighlights> {
+	const searchParams = new URLSearchParams({from, to});
+
+	return releaseNotesFetchJSON(`/highlights?${searchParams.toString()}`);
 }
 
 export async function getReleases(): Promise<IProductVersion[]> {
