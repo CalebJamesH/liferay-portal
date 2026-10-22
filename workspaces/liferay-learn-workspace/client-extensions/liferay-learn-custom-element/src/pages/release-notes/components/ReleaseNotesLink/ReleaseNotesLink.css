@@ -1,0 +1,6 @@
+.release-notes-link {
+	align-items: center;
+	display: inline-flex;
+	font-weight: 600;
+	gap: 8px;
+}

@@ -1,0 +1,22 @@
+.release-notes {
+	padding-bottom: 48px;
+	padding-top: 48px;
+}
+
+.release-notes-empty {
+	border: 1px solid #e7e7ed;
+	border-radius: 4px;
+	padding: 48px 24px;
+}
+
+.release-notes-header {
+	margin-bottom: 32px;
+}
+
+.release-notes-tab {
+	padding-top: 24px;
+}
+
+.release-notes-tabs {
+	margin-top: 8px;
+}

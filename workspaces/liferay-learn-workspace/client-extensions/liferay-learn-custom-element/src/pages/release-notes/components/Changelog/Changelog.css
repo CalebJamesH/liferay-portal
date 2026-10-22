@@ -1,0 +1,59 @@
+.changelog-components-selected {
+	margin-top: 12px;
+}
+
+.changelog-description {
+	overflow-wrap: anywhere;
+	overflow-x: auto;
+}
+
+.changelog-description img {
+	height: auto;
+	max-width: 100%;
+}
+
+.changelog-description pre {
+	white-space: pre-wrap;
+}
+
+.changelog-empty {
+	border: 1px solid #e7e7ed;
+	border-radius: 4px;
+	padding: 48px 24px;
+}
+
+.changelog-filter {
+	margin-top: 24px;
+}
+
+.changelog-keywords {
+	margin-top: 16px;
+}
+
+.changelog-sidebar {
+	margin-bottom: 24px;
+}
+
+.changelog-summary.btn {
+	font-weight: normal;
+	padding: 0;
+	text-align: left;
+	white-space: normal;
+}
+
+.changelog-table > tbody > tr > td {
+	vertical-align: top;
+}
+
+.changelog-table .changelog-components {
+	width: 20%;
+}
+
+.changelog-table .changelog-key {
+	white-space: nowrap;
+	width: 1%;
+}
+
+.changelog-table .changelog-releases {
+	width: 20%;
+}

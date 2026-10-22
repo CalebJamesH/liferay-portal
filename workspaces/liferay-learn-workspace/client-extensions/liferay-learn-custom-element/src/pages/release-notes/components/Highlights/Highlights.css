@@ -1,0 +1,53 @@
+.highlights-date {
+	white-space: nowrap;
+	width: 1%;
+}
+
+.highlights-empty {
+	border: 1px solid #e7e7ed;
+	border-radius: 4px;
+	padding: 48px 24px;
+}
+
+.highlights-filter {
+	margin-top: 16px;
+}
+
+.highlights-none {
+	font-style: italic;
+	margin: 8px 0 0;
+}
+
+.highlights-section {
+	margin-top: 16px;
+}
+
+.highlights-section h4 {
+	font-size: 1rem;
+}
+
+.highlights-section-body {
+	overflow-wrap: anywhere;
+	overflow-x: auto;
+}
+
+.highlights-section-body img {
+	height: auto;
+	max-width: 100%;
+}
+
+.highlights-section-body pre {
+	white-space: pre-wrap;
+}
+
+.highlights-sidebar {
+	margin-bottom: 24px;
+}
+
+.highlights-table.table td {
+	vertical-align: top;
+}
+
+.highlights-title {
+	margin-bottom: 0;
+}

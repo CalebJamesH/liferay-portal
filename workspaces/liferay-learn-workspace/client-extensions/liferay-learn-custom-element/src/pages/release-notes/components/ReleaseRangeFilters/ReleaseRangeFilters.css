@@ -1,0 +1,7 @@
+.release-range-filter {
+	flex: 1 1 240px;
+}
+
+.release-range-filters {
+	gap: 24px;
+}
