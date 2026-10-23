@@ -8,6 +8,7 @@ package com.liferay.learn;
 import com.liferay.client.extension.util.spring.boot3.BaseRestController;
 import com.liferay.learn.constants.RoleConstants;
 import com.liferay.learn.service.JiraService;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
 
 import java.time.LocalDateTime;
@@ -49,7 +50,9 @@ public class JiraRestController extends BaseRestController {
 			@PathVariable("issueKey") String issueKey) {
 
 		try {
-			if (!issueKey.startsWith(_jiraSecurityVulnerabilityProject)) {
+			if (!issueKey.startsWith(
+					_jiraSecurityVulnerabilityProject + StringPool.DASH)) {
+
 				throw new PrincipalException();
 			}
 
