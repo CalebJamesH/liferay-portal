@@ -42,13 +42,23 @@ public class JiraService extends BaseService {
 		return (page - 1) * pageSize;
 	}
 
+	@CacheEvict(allEntries = true, value = "affectedVersions")
+	@Scheduled(
+		cron = "${liferay.learn.jira.service.affected.versions.cache.eviction.cron}"
+	)
+	public void evictAffectedVersionsCache() throws Exception {
+	}
+
+	@CacheEvict(allEntries = true, value = {"issue", "issues"})
+	@Scheduled(
+		cron = "${liferay.learn.jira.service.issues.cache.eviction.cron}"
+	)
+	public void evictIssuesCache() throws Exception {
+	}
+
 	@Cacheable("affectedVersions")
 	public JSONArray getAffectedVersionsJSONArray() throws Exception {
 		try {
-			Set<String> affectedVersions = new TreeSet<>();
-
-			String[] issueFields = {_FIELD_VERSIONS};
-
 			StringBundler sb = new StringBundler(7);
 
 			sb.append("project = '");
@@ -64,10 +74,13 @@ public class JiraService extends BaseService {
 			sb.append(" <= now()");
 
 			String nextPageToken = StringPool.BLANK;
+			String[] returnFields = {_FIELD_VERSIONS};
+
+			Set<String> affectedVersions = new TreeSet<>();
 
 			while (true) {
 				JSONObject jsonObject = _searchJSONObject(
-					sb.toString(), 100, nextPageToken, issueFields);
+					sb.toString(), 100, nextPageToken, returnFields);
 
 				if (jsonObject == null) {
 					break;
@@ -136,31 +149,17 @@ public class JiraService extends BaseService {
 		return null;
 	}
 
-	@CacheEvict(allEntries = true, value = "affectedVersions")
-	@Scheduled(
-		cron = "${liferay.learn.jira.service.affected.versions.cache.eviction.cron}"
-	)
-	public void evictAffectedVersionsCache() throws Exception {
-	}
-
-	@CacheEvict(allEntries = true, value = {"issue", "issues"})
-	@Scheduled(
-		cron = "${liferay.learn.jira.service.issues.cache.eviction.cron}"
-	)
-	public void evictIssuesCache() throws Exception {
-	}
-
 	@Cacheable("issues")
 	public List<JSONObject> search(
-			String[] filterAffectedVersions, String[] filterCategories,
-			String[] filterClassifications, String[] filterFixVersions,
-			String[] filterSeverities, boolean hasEarlyPublishAccess,
+			boolean earlyPublishAccess, String[] filterAffectedVersions,
+			String[] filterCategories, String[] filterClassifications,
+			String[] filterFixVersions, String[] filterSeverities,
 			String keywords, String sortOrder)
 		throws Exception {
 
 		List<JSONObject> jsonObjects = new ArrayList<>();
 
-		StringBundler sb = new StringBundler(49);
+		StringBundler sb = new StringBundler(47);
 
 		sb.append("project = '");
 		sb.append(_jiraSecurityVulnerabilityProject);
@@ -169,7 +168,7 @@ public class JiraService extends BaseService {
 			_toJQLCustomField(_jiraSecurityVulnerabilityFieldPublishingStatus));
 		sb.append(" = 'Ready for Publishing'");
 
-		if (hasEarlyPublishAccess) {
+		if (earlyPublishAccess) {
 			sb.append(" AND ");
 			sb.append(
 				_toJQLCustomField(
@@ -185,9 +184,7 @@ public class JiraService extends BaseService {
 		}
 
 		if (ArrayUtil.isNotEmpty(filterAffectedVersions)) {
-			sb.append(" AND ");
-			sb.append("affectedVersion");
-			sb.append(" in ('");
+			sb.append(" AND affectedVersion in ('");
 			sb.append(StringUtil.merge(filterAffectedVersions, "','"));
 			sb.append("')");
 		}
@@ -245,7 +242,7 @@ public class JiraService extends BaseService {
 
 		sb.append(" ORDER BY ");
 
-		if (hasEarlyPublishAccess) {
+		if (earlyPublishAccess) {
 			sb.append(
 				_toJQLCustomField(
 					_jiraSecurityVulnerabilityFieldPartnerPublishingDate));
@@ -262,7 +259,8 @@ public class JiraService extends BaseService {
 		sb.append(_toJQLCustomField(_jiraSecurityVulnerabilityFieldSeverity));
 		sb.append(" ASC");
 
-		String[] securityVulnerabilitiesIssueFields = {
+		String nextPageToken = StringPool.BLANK;
+		String[] returnFields = {
 			_FIELD_COMPONENTS, _FIELD_ISSUE_KEY, _FIELD_VERSIONS,
 			_jiraSecurityVulnerabilityFieldAffectedVersionsDetails,
 			_jiraSecurityVulnerabilityFieldAffects,
@@ -281,12 +279,9 @@ public class JiraService extends BaseService {
 			_jiraSecurityVulnerabilityFieldSeverity
 		};
 
-		String nextPageToken = StringPool.BLANK;
-
 		while (true) {
 			JSONObject searchResponseJSONObject = _searchJSONObject(
-				sb.toString(), 100, nextPageToken,
-				securityVulnerabilitiesIssueFields);
+				sb.toString(), 100, nextPageToken, returnFields);
 
 			if (searchResponseJSONObject == null) {
 				break;
@@ -329,9 +324,11 @@ public class JiraService extends BaseService {
 
 			String value = itemJSONObject.optString("value");
 
-			if (Validator.isNotNull(value)) {
-				flattenedJSONArray.put(value);
+			if (Validator.isNull(value)) {
+				continue;
 			}
+
+			flattenedJSONArray.put(value);
 		}
 
 		return flattenedJSONArray;
@@ -348,10 +345,10 @@ public class JiraService extends BaseService {
 	}
 
 	private String _getCredentials() {
-		Base64.Encoder encoder = Base64.getEncoder();
-
 		String jiraUserNameAndJiraAPIToken =
 			_jiraAPIEmailAddress + StringPool.COLON + _jiraAPIToken;
+
+		Base64.Encoder encoder = Base64.getEncoder();
 
 		return "Basic " +
 			encoder.encodeToString(jiraUserNameAndJiraAPIToken.getBytes());
@@ -544,6 +541,20 @@ public class JiraService extends BaseService {
 	@Value("${liferay.learn.jira.security.vulnerability.field.affects}")
 	private String _jiraSecurityVulnerabilityFieldAffects;
 
+	@Value("${liferay.learn.jira.security.vulnerability.field.cve.ids}")
+	private String _jiraSecurityVulnerabilityFieldCVEIds;
+
+	@Value("${liferay.learn.jira.security.vulnerability.field.cvss.base.score}")
+	private String _jiraSecurityVulnerabilityFieldCVSSBaseScore;
+
+	@Value(
+		"${liferay.learn.jira.security.vulnerability.field.cvss.vector.string}"
+	)
+	private String _jiraSecurityVulnerabilityFieldCVSSVectorString;
+
+	@Value("${liferay.learn.jira.security.vulnerability.field.cwe.ids}")
+	private String _jiraSecurityVulnerabilityFieldCWEIds;
+
 	@Value("${liferay.learn.jira.security.vulnerability.field.categories}")
 	private String _jiraSecurityVulnerabilityFieldCategories;
 
@@ -564,20 +575,6 @@ public class JiraService extends BaseService {
 			"publishing.date}"
 	)
 	private String _jiraSecurityVulnerabilityFieldCustomerPublishingDate;
-
-	@Value("${liferay.learn.jira.security.vulnerability.field.cve.ids}")
-	private String _jiraSecurityVulnerabilityFieldCVEIds;
-
-	@Value("${liferay.learn.jira.security.vulnerability.field.cvss.base.score}")
-	private String _jiraSecurityVulnerabilityFieldCVSSBaseScore;
-
-	@Value(
-		"${liferay.learn.jira.security.vulnerability.field.cvss.vector.string}"
-	)
-	private String _jiraSecurityVulnerabilityFieldCVSSVectorString;
-
-	@Value("${liferay.learn.jira.security.vulnerability.field.cwe.ids}")
-	private String _jiraSecurityVulnerabilityFieldCWEIds;
 
 	@Value("${liferay.learn.jira.security.vulnerability.field.fix.versions}")
 	private String _jiraSecurityVulnerabilityFieldFixVersions;

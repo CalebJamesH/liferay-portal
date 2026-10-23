@@ -32,13 +32,13 @@ liferay-learn-etc-spring-boot-oaua:
     .serviceScheme: http
     name: Liferay Learn Etc Spring Boot OAuth Application User Agent
     scopes:
+        -   Liferay.Headless.Admin.User.everything.read
         -   c_p2s3course.everything
         -   c_p2s3lesson.everything
         -   c_p2s3module.everything
         -   c_p2s3examresult.everything
         -   c_p2s3examresultssynchronization.everything
         -   c_p2s3quiz.everything
-        -   Liferay.Headless.Admin.User.everything.read
     type: oAuthApplicationUserAgent
 liferay-learn-etc-spring-boot-object-action-course:
     name: Liferay Learn Etc Spring Boot Object Action Course
