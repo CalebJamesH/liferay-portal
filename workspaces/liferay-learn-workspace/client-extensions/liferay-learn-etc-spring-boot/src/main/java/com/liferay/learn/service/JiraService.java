@@ -32,6 +32,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
+ * @author Jenny Chen
  * @author Caleb Hall
  */
 @Component
@@ -139,7 +140,7 @@ public class JiraService extends BaseService {
 	@Scheduled(
 		cron = "${liferay.learn.jira.service.affected.versions.cache.eviction.cron}"
 	)
-	public void scheduledAffectedVersionsCacheEviction() throws Exception {
+	public void evictAffectedVersionsCache() throws Exception {
 	}
 
 	@CacheEvict(
@@ -148,14 +149,14 @@ public class JiraService extends BaseService {
 	@Scheduled(
 		cron = "${liferay.learn.jira.service.jsm.objects.cache.eviction.cron}"
 	)
-	public void scheduledAssetObjectsCacheEviction() throws Exception {
+	public void evictAssetObjectsCache() throws Exception {
 	}
 
 	@CacheEvict(allEntries = true, value = {"issue", "issues"})
 	@Scheduled(
 		cron = "${liferay.learn.jira.service.issues.cache.eviction.cron}"
 	)
-	public void scheduledIssuesCacheEviction() throws Exception {
+	public void evictIssuesCache() throws Exception {
 	}
 
 	@Cacheable("issues")
@@ -167,8 +168,6 @@ public class JiraService extends BaseService {
 		throws Exception {
 
 		List<JSONObject> jsonObjects = new ArrayList<>();
-
-		String nextPageToken = StringPool.BLANK;
 
 		StringBundler sb = new StringBundler(49);
 
@@ -196,7 +195,7 @@ public class JiraService extends BaseService {
 
 		if (ArrayUtil.isNotEmpty(filterAffectedVersions)) {
 			sb.append(" AND ");
-			sb.append(_FIELD_AFFECTED_VERSION);
+			sb.append("affectedVersion");
 			sb.append(" in ('");
 			sb.append(StringUtil.merge(filterAffectedVersions, "','"));
 			sb.append("')");
@@ -291,6 +290,8 @@ public class JiraService extends BaseService {
 			_jiraSecurityVulnerabilityFieldSeverity
 		};
 
+		String nextPageToken = StringPool.BLANK;
+
 		while (true) {
 			JSONObject searchResponseJSONObject = _searchJSONObject(
 				sb.toString(), 100, nextPageToken,
@@ -358,11 +359,11 @@ public class JiraService extends BaseService {
 	private String _getCredentials() {
 		Base64.Encoder encoder = Base64.getEncoder();
 
-		String jiraUserNameAndJiraApiToken =
+		String jiraUserNameAndJiraAPIToken =
 			_jiraAPIEmailAddress + StringPool.COLON + _jiraAPIToken;
 
 		return "Basic " +
-			encoder.encodeToString(jiraUserNameAndJiraApiToken.getBytes());
+			encoder.encodeToString(jiraUserNameAndJiraAPIToken.getBytes());
 	}
 
 	private String _getJSONObjectFieldValue(JSONObject jsonObject, String key) {
@@ -409,9 +410,9 @@ public class JiraService extends BaseService {
 	}
 
 	private String _toJQLCustomField(String customField) {
-		int pos = customField.indexOf(StringPool.UNDERLINE);
+		int index = customField.indexOf(StringPool.UNDERLINE);
 
-		return "cf[" + customField.substring(pos + 1) + "]";
+		return "cf[" + customField.substring(index + 1) + "]";
 	}
 
 	private JSONObject _transformIssueFieldsJSONObject(
@@ -501,7 +502,7 @@ public class JiraService extends BaseService {
 			).put(
 				"status",
 				_getJSONObjectFieldValue(
-					issueFieldsJSONObject.optJSONObject(_FIELD_STATUS), "name")
+					issueFieldsJSONObject.optJSONObject("status"), "name")
 			);
 		}
 
@@ -527,13 +528,9 @@ public class JiraService extends BaseService {
 		);
 	}
 
-	private static final String _FIELD_AFFECTED_VERSION = "affectedVersion";
-
 	private static final String _FIELD_COMPONENTS = "components";
 
 	private static final String _FIELD_ISSUE_KEY = "key";
-
-	private static final String _FIELD_STATUS = "status";
 
 	private static final String _FIELD_VERSIONS = "versions";
 
