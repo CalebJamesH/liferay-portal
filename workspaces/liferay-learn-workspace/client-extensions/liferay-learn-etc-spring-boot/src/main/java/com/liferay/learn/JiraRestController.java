@@ -36,6 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
+ * @author Jenny Chen
  * @author Caleb Hall
  */
 @RequestMapping("/jira")
@@ -45,23 +46,23 @@ public class JiraRestController extends BaseRestController {
 	@GetMapping("/issue/{issueKey}")
 	public ResponseEntity<String> getIssue(
 			@AuthenticationPrincipal Jwt jwt,
-			@PathVariable("issueKey") String issueKey)
-		throws Exception {
+			@PathVariable("issueKey") String issueKey) {
 
 		try {
 			if (!issueKey.startsWith(_jiraSecurityVulnerabilityProject)) {
 				throw new PrincipalException();
 			}
 
-			JSONObject jsonObject = _jiraService.getIssueJSONObject(issueKey);
+			JSONObject issueJSONObject = _jiraService.getIssueJSONObject(issueKey);
 
-			if (_hasIssuePermission(jwt, jsonObject)) {
+			if (_hasIssuePermission(jwt, issueJSONObject)) {
 				return new ResponseEntity<>(
-					jsonObject.toString(), HttpStatus.OK);
+						issueJSONObject.toString(), HttpStatus.OK);
 			}
 
 			return new ResponseEntity<>(
-				"No issue found with key " + issueKey, HttpStatus.NOT_FOUND);
+				"No issue was found with key " + issueKey,
+				HttpStatus.NOT_FOUND);
 		}
 		catch (Exception exception) {
 			_log.error(exception);
@@ -72,8 +73,7 @@ public class JiraRestController extends BaseRestController {
 	}
 
 	@GetMapping("/security-vulnerabilities/affected-versions")
-	public ResponseEntity<String> getSecurityVulnerabilitiesAffectedVersions()
-		throws Exception {
+	public ResponseEntity<String> getSecurityVulnerabilitiesAffectedVersions() {
 
 		try {
 			JSONArray affectedVersionsJSONArray =
@@ -107,8 +107,7 @@ public class JiraRestController extends BaseRestController {
 			@RequestParam(defaultValue = "1", required = false) int page,
 			@RequestParam(defaultValue = "15", required = false) int pageSize,
 			@RequestParam(defaultValue = "DESC", required = false) String
-				sortOrder)
-		throws Exception {
+				sortOrder) {
 
 		try {
 			List<JSONObject> jsonObjects = _jiraService.search(
@@ -150,9 +149,9 @@ public class JiraRestController extends BaseRestController {
 	private List<String> _getUserRoleNames(Jwt jwt) throws Exception {
 		List<String> roleNames = new ArrayList<>();
 
-		JSONObject userJSONObject = _getMyUserAccountJSONObject(jwt);
+		JSONObject myUserAccountJSONObject = _getMyUserAccountJSONObject(jwt);
 
-		JSONArray roleBriefsJSONArray = userJSONObject.getJSONArray(
+		JSONArray roleBriefsJSONArray = myUserAccountJSONObject.getJSONArray(
 			"roleBriefs");
 
 		for (int i = 0; i < roleBriefsJSONArray.length(); i++) {
@@ -188,7 +187,7 @@ public class JiraRestController extends BaseRestController {
 
 		if (publishingStatus.equals("Ready for Publishing")) {
 			LocalDateTime localDateTime = _parseLocalDateTime(
-				jwt, issueJSONObject);
+				jwt, fieldsJSONObject);
 
 			if (localDateTime.isBefore(LocalDateTime.now())) {
 				return true;
@@ -199,10 +198,8 @@ public class JiraRestController extends BaseRestController {
 	}
 
 	private LocalDateTime _parseLocalDateTime(
-			Jwt jwt, JSONObject issueJSONObject)
+			Jwt jwt, JSONObject fieldsJSONObject)
 		throws Exception {
-
-		JSONObject fieldsJSONObject = issueJSONObject.getJSONObject("fields");
 
 		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(
 			"yyyy-MM-dd'T'HH:mm:ss.SSSx");
