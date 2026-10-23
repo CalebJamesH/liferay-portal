@@ -149,6 +149,7 @@ public class JiraRestController extends BaseRestController {
 
 			throw new PrincipalException();
 		}
+
 		List<String> userRoleNames = new ArrayList<>();
 
 		JSONArray roleBriefsJSONArray = myUserAccountJSONObject.getJSONArray(
