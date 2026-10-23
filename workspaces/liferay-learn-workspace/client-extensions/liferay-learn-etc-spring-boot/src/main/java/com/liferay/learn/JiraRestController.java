@@ -46,8 +46,8 @@ public class JiraRestController extends BaseRestController {
 
 	@GetMapping("/issue/{issueKey}")
 	public ResponseEntity<String> getIssue(
-			@AuthenticationPrincipal Jwt jwt,
-			@PathVariable("issueKey") String issueKey) {
+		@AuthenticationPrincipal Jwt jwt,
+		@PathVariable("issueKey") String issueKey) {
 
 		try {
 			if (!issueKey.startsWith(
@@ -56,11 +56,12 @@ public class JiraRestController extends BaseRestController {
 				throw new PrincipalException();
 			}
 
-			JSONObject issueJSONObject = _jiraService.getIssueJSONObject(issueKey);
+			JSONObject issueJSONObject = _jiraService.getIssueJSONObject(
+				issueKey);
 
 			if (_hasIssuePermission(jwt, issueJSONObject)) {
 				return new ResponseEntity<>(
-						issueJSONObject.toString(), HttpStatus.OK);
+					issueJSONObject.toString(), HttpStatus.OK);
 			}
 
 			return new ResponseEntity<>(
@@ -77,7 +78,6 @@ public class JiraRestController extends BaseRestController {
 
 	@GetMapping("/security-vulnerabilities/affected-versions")
 	public ResponseEntity<String> getSecurityVulnerabilitiesAffectedVersions() {
-
 		try {
 			JSONArray affectedVersionsJSONArray =
 				_jiraService.getAffectedVersionsJSONArray();
@@ -95,28 +95,28 @@ public class JiraRestController extends BaseRestController {
 
 	@GetMapping("/security-vulnerabilities/search")
 	public ResponseEntity<String> getSecurityVulnerabilitiesSearch(
-			@AuthenticationPrincipal Jwt jwt,
-			@RequestParam(defaultValue = "", required = false) String[]
-				filterAffectedVersions,
-			@RequestParam(defaultValue = "", required = false) String[]
-				filterCategories,
-			@RequestParam(defaultValue = "", required = false) String[]
-				filterClassifications,
-			@RequestParam(defaultValue = "", required = false) String[]
-				filterFixVersions,
-			@RequestParam(defaultValue = "", required = false) String[]
-				filterSeverities,
-			@RequestParam(defaultValue = "", required = false) String keywords,
-			@RequestParam(defaultValue = "1", required = false) int page,
-			@RequestParam(defaultValue = "15", required = false) int pageSize,
-			@RequestParam(defaultValue = "DESC", required = false) String
-				sortOrder) {
+		@AuthenticationPrincipal Jwt jwt,
+		@RequestParam(defaultValue = "", required = false) String[]
+			filterAffectedVersions,
+		@RequestParam(defaultValue = "", required = false) String[]
+			filterCategories,
+		@RequestParam(defaultValue = "", required = false) String[]
+			filterClassifications,
+		@RequestParam(defaultValue = "", required = false) String[]
+			filterFixVersions,
+		@RequestParam(defaultValue = "", required = false) String[]
+			filterSeverities,
+		@RequestParam(defaultValue = "", required = false) String keywords,
+		@RequestParam(defaultValue = "1", required = false) int page,
+		@RequestParam(defaultValue = "15", required = false) int pageSize,
+		@RequestParam(defaultValue = "DESC", required = false) String
+			sortOrder) {
 
 		try {
 			List<JSONObject> jsonObjects = _jiraService.search(
-				filterAffectedVersions, filterCategories, filterClassifications,
-				filterFixVersions, filterSeverities,
-				_hasEarlyPublishAccess(jwt), keywords, sortOrder);
+				_hasEarlyPublishAccess(jwt), filterAffectedVersions,
+				filterCategories, filterClassifications, filterFixVersions,
+				filterSeverities, keywords, sortOrder);
 
 			JSONObject jsonObject = _toJSONObject(jsonObjects, page, pageSize);
 
@@ -130,9 +130,11 @@ public class JiraRestController extends BaseRestController {
 		}
 	}
 
-	private JSONObject _getMyUserAccountJSONObject(Jwt jwt) throws Exception {
+	private List<String> _getUserRoleNames(Jwt jwt) throws Exception {
+		JSONObject myUserAccountJSONObject = null;
+
 		try {
-			return new JSONObject(
+			myUserAccountJSONObject = new JSONObject(
 				get(
 					"Bearer " + jwt.getTokenValue(),
 					UriComponentsBuilder.fromPath(
@@ -147,12 +149,7 @@ public class JiraRestController extends BaseRestController {
 
 			throw new PrincipalException();
 		}
-	}
-
-	private List<String> _getUserRoleNames(Jwt jwt) throws Exception {
-		List<String> roleNames = new ArrayList<>();
-
-		JSONObject myUserAccountJSONObject = _getMyUserAccountJSONObject(jwt);
+		List<String> userRoleNames = new ArrayList<>();
 
 		JSONArray roleBriefsJSONArray = myUserAccountJSONObject.getJSONArray(
 			"roleBriefs");
@@ -161,10 +158,10 @@ public class JiraRestController extends BaseRestController {
 			JSONObject roleBriefJSONObject = roleBriefsJSONArray.getJSONObject(
 				i);
 
-			roleNames.add(roleBriefJSONObject.getString("name"));
+			userRoleNames.add(roleBriefJSONObject.getString("name"));
 		}
 
-		return roleNames;
+		return userRoleNames;
 	}
 
 	private boolean _hasEarlyPublishAccess(Jwt jwt) throws Exception {
