@@ -110,7 +110,12 @@ public class ObjectActionExamResultsSynchronizationRestController
 				while (offsetDateTime.isBefore(
 							OffsetDateTime.now(ZoneOffset.UTC))) {
 
-					examResultAmount += _importExamResults(offsetDateTime);
+					JSONArray jsonArray = _getWebassessorExamResultsJSONArray(
+						offsetDateTime);
+
+					_putExamResults(jsonArray);
+
+					examResultAmount += jsonArray.length();
 
 					offsetDateTime = offsetDateTime.plusDays(7);
 				}
@@ -306,64 +311,6 @@ public class ObjectActionExamResultsSynchronizationRestController
 			messageDigest.digest(keyString.getBytes(StandardCharsets.UTF_8)));
 	}
 
-	private String _getPayload(JSONObject jsonObject) {
-		return new JSONObject(
-		).put(
-			"date",
-			OffsetDateTime.parse(
-				jsonObject.getString("date")
-			).atZoneSameInstant(
-				ZoneOffset.UTC
-			).format(
-				DateTimeFormatter.ofPattern("uuuu-MM-dd'T'HH:mm:ssX")
-			)
-		).put(
-			"emailAddress",
-			jsonObject.getJSONObject(
-				"simpleRegistration"
-			).getJSONObject(
-				"candidate"
-			).getString(
-				"email"
-			)
-		).put(
-			"examName", jsonObject.getString("examName")
-		).put(
-			"externalReferenceCode", jsonObject.getLong("id")
-		).put(
-			"firstName",
-			jsonObject.getJSONObject(
-				"simpleRegistration"
-			).getJSONObject(
-				"candidate"
-			).getString(
-				"firstName"
-			)
-		).put(
-			"lastName",
-			jsonObject.getJSONObject(
-				"simpleRegistration"
-			).getJSONObject(
-				"candidate"
-			).getString(
-				"lastName"
-			)
-		).put(
-			"result", jsonObject.getString("passFail")
-		).put(
-			"score", jsonObject.getDouble("score")
-		).put(
-			"source", "webassessor"
-		).put(
-			"testName",
-			jsonObject.getJSONObject(
-				"simpleRegistration"
-			).getString(
-				"testName"
-			)
-		).toString();
-	}
-
 	private String _getSource(JSONObject jsonObject) {
 		JSONObject sourceJSONObject = jsonObject.optJSONObject("source");
 
@@ -414,7 +361,49 @@ public class ObjectActionExamResultsSynchronizationRestController
 			ZoneOffset.UTC);
 	}
 
-	private int _importExamResults(OffsetDateTime offsetDateTime) {
+	private JSONObject _getWebassessorExamResultJSONObject(
+		JSONObject jsonObject) {
+
+		JSONObject simpleRegistrationJSONObject = jsonObject.getJSONObject(
+			"simpleRegistration");
+
+		JSONObject candidateJSONObject =
+			simpleRegistrationJSONObject.getJSONObject("candidate");
+
+		return new JSONObject(
+		).put(
+			"date",
+			OffsetDateTime.parse(
+				jsonObject.getString("date")
+			).atZoneSameInstant(
+				ZoneOffset.UTC
+			).format(
+				DateTimeFormatter.ofPattern("uuuu-MM-dd'T'HH:mm:ssX")
+			)
+		).put(
+			"emailAddress", candidateJSONObject.getString("email")
+		).put(
+			"examName", jsonObject.getString("examName")
+		).put(
+			"externalReferenceCode", String.valueOf(jsonObject.getLong("id"))
+		).put(
+			"firstName", candidateJSONObject.getString("firstName")
+		).put(
+			"lastName", candidateJSONObject.getString("lastName")
+		).put(
+			"result", jsonObject.getString("passFail")
+		).put(
+			"score", jsonObject.getDouble("score")
+		).put(
+			"source", "webassessor"
+		).put(
+			"testName", simpleRegistrationJSONObject.getString("testName")
+		);
+	}
+
+	private JSONArray _getWebassessorExamResultsJSONArray(
+		OffsetDateTime offsetDateTime) {
+
 		JSONArray jsonArray = new JSONArray(
 			post(
 				null,
@@ -446,23 +435,27 @@ public class ObjectActionExamResultsSynchronizationRestController
 				).build(
 				).toUri()));
 
-		if (jsonArray.get(0) instanceof String) {
-			return 0;
+		if (jsonArray.isEmpty()) {
+			return new JSONArray();
 		}
+
+		if (jsonArray.get(0) instanceof String) {
+			if (_log.isWarnEnabled()) {
+				_log.warn("Webassessor returned " + jsonArray);
+			}
+
+			return new JSONArray();
+		}
+
+		JSONArray examResultsJSONArray = new JSONArray();
 
 		for (int i = 0; i < jsonArray.length(); i++) {
-			JSONObject jsonObject = jsonArray.getJSONObject(i);
-
-			put(
-				_getAuthorization(), _getPayload(jsonObject),
-				UriComponentsBuilder.fromPath(
-					"/o/c/p2s3examresults/by-external-reference-code/" +
-						jsonObject.getLong("id")
-				).build(
-				).toUri());
+			examResultsJSONArray.put(
+				_getWebassessorExamResultJSONObject(
+					jsonArray.getJSONObject(i)));
 		}
 
-		return jsonArray.length();
+		return examResultsJSONArray;
 	}
 
 	private void _putExamResults(JSONArray jsonArray) throws Exception {
