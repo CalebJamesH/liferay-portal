@@ -125,8 +125,9 @@ public class ObjectActionExamResultsSynchronizationRestController
 		}
 		catch (WebClientResponseException webClientResponseException) {
 			_log.error(
-				"Unable to synchronize exam results: " +
-					webClientResponseException.getResponseBodyAsString(),
+				StringBundler.concat(
+					"Unable to synchronize exam results: ",
+					webClientResponseException.getResponseBodyAsString()),
 				webClientResponseException);
 		}
 		catch (Exception exception) {
@@ -200,16 +201,14 @@ public class ObjectActionExamResultsSynchronizationRestController
 
 		String emailAddress = StringUtil.trim(
 			jsonObject.getString("emailAddress"));
-
 		String examName = StringUtil.trim(jsonObject.getString("examName"));
 
 		examName = _examNames.getOrDefault(examName, examName);
 
 		OffsetDateTime offsetDateTime = OffsetDateTime.parse(
-			jsonObject.getString("date")
-		).withOffsetSameInstant(
-			ZoneOffset.UTC
-		);
+			jsonObject.getString("date"));
+
+		offsetDateTime = offsetDateTime.withOffsetSameInstant(ZoneOffset.UTC);
 
 		return new JSONObject(
 		).put(
@@ -249,6 +248,8 @@ public class ObjectActionExamResultsSynchronizationRestController
 
 		int lastPage = 1;
 
+		OffsetDateTime endOffsetDateTime = offsetDateTime.plusDays(13);
+
 		for (int page = 1; page <= lastPage; page++) {
 			JSONObject jsonObject = new JSONObject(
 				get(
@@ -259,11 +260,8 @@ public class ObjectActionExamResultsSynchronizationRestController
 						"certmanager.liferay.com"
 					).queryParam(
 						"endDate",
-						offsetDateTime.plusDays(
-							13
-						).format(
-							DateTimeFormatter.ISO_LOCAL_DATE
-						)
+						endOffsetDateTime.format(
+							DateTimeFormatter.ISO_LOCAL_DATE)
 					).queryParam(
 						"examCode", "all"
 					).queryParam(
@@ -349,11 +347,10 @@ public class ObjectActionExamResultsSynchronizationRestController
 				continue;
 			}
 
-			return OffsetDateTime.parse(
-				itemJSONObject.getString("dateCreated")
-			).minusDays(
-				1
-			);
+			OffsetDateTime offsetDateTime = OffsetDateTime.parse(
+				itemJSONObject.getString("dateCreated"));
+
+			return offsetDateTime.minusDays(1);
 		}
 
 		return OffsetDateTime.of(
@@ -441,7 +438,8 @@ public class ObjectActionExamResultsSynchronizationRestController
 
 		if (jsonArray.get(0) instanceof String) {
 			if (_log.isWarnEnabled()) {
-				_log.warn("Webassessor returned " + jsonArray);
+				_log.warn(
+					StringBundler.concat("Webassessor returned ", jsonArray));
 			}
 
 			return new JSONArray();
@@ -487,8 +485,9 @@ public class ObjectActionExamResultsSynchronizationRestController
 				failedAmount++;
 
 				_log.error(
-					"Unable to synchronize exam result " +
-						jsonObject.getString("externalReferenceCode"),
+					StringBundler.concat(
+						"Unable to synchronize exam result ",
+						jsonObject.getString("externalReferenceCode")),
 					exception);
 			}
 		}
