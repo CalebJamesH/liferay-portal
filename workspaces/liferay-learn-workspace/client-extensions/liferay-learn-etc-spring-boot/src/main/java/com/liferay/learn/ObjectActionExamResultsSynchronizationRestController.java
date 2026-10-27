@@ -8,6 +8,7 @@ package com.liferay.learn;
 import com.liferay.client.extension.util.spring.boot3.BaseRestController;
 import com.liferay.client.extension.util.spring.boot3.client.LiferayOAuth2AccessTokenManager;
 import com.liferay.petra.string.StringBundler;
+import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.URLCodec;
 import com.liferay.portal.kernel.util.Validator;
@@ -203,7 +204,11 @@ public class ObjectActionExamResultsSynchronizationRestController
 
 		String examName = StringUtil.trim(jsonObject.getString("examName"));
 
-		examName = _examNames.getOrDefault(examName, examName);
+		Map<String, String> examNames = Map.of(
+			"Building Enterprise Websites with Liferay",
+			"Building Enterprise Websites with Liferay Certification Exam");
+
+		examName = examNames.getOrDefault(examName, examName);
 
 		OffsetDateTime offsetDateTime = OffsetDateTime.parse(
 			jsonObject.getString("date"));
@@ -245,9 +250,7 @@ public class ObjectActionExamResultsSynchronizationRestController
 		throws Exception {
 
 		JSONArray jsonArray = new JSONArray();
-
 		int lastPage = 1;
-
 		OffsetDateTime endOffsetDateTime = offsetDateTime.plusDays(13);
 
 		for (int page = 1; page <= lastPage; page++) {
@@ -301,9 +304,9 @@ public class ObjectActionExamResultsSynchronizationRestController
 			StringUtil.toLowerCase(emailAddress), "|", examName, "|",
 			localDate);
 
-		MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
-
 		HexFormat hexFormat = HexFormat.of();
+
+		MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
 
 		return hexFormat.formatHex(
 			messageDigest.digest(keyString.getBytes(StandardCharsets.UTF_8)));
@@ -382,7 +385,7 @@ public class ObjectActionExamResultsSynchronizationRestController
 		).put(
 			"examName", jsonObject.getString("examName")
 		).put(
-			"externalReferenceCode", String.valueOf(jsonObject.getLong("id"))
+			"externalReferenceCode", GetterUtil.getString(jsonObject.getLong("id"))
 		).put(
 			"firstName", candidateJSONObject.getString("firstName")
 		).put(
@@ -601,10 +604,6 @@ public class ObjectActionExamResultsSynchronizationRestController
 
 	private static final Log _log = LogFactory.getLog(
 		ObjectActionExamResultsSynchronizationRestController.class);
-
-	private static final Map<String, String> _examNames = Map.of(
-		"Building Enterprise Websites with Liferay",
-		"Building Enterprise Websites with Liferay Certification Exam");
 
 	private String _certmanagerAuthorization;
 	private long _certmanagerAuthorizationExpirationTime;
