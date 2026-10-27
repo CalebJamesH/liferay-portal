@@ -249,9 +249,9 @@ public class ObjectActionExamResultsSynchronizationRestController
 			OffsetDateTime offsetDateTime)
 		throws Exception {
 
+		OffsetDateTime endOffsetDateTime = offsetDateTime.plusDays(13);
 		JSONArray jsonArray = new JSONArray();
 		int lastPage = 1;
-		OffsetDateTime endOffsetDateTime = offsetDateTime.plusDays(13);
 
 		for (int page = 1; page <= lastPage; page++) {
 			JSONObject jsonObject = new JSONObject(
@@ -305,7 +305,6 @@ public class ObjectActionExamResultsSynchronizationRestController
 			localDate);
 
 		HexFormat hexFormat = HexFormat.of();
-
 		MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
 
 		return hexFormat.formatHex(
