@@ -126,8 +126,9 @@ public class ObjectActionExamResultsSynchronizationRestController
 		}
 		catch (WebClientResponseException webClientResponseException) {
 			_log.error(
-				"Unable to synchronize exam results: " +
-					webClientResponseException.getResponseBodyAsString(),
+				StringBundler.concat(
+					"Unable to synchronize exam results: ",
+					webClientResponseException.getResponseBodyAsString()),
 				webClientResponseException);
 		}
 		catch (Exception exception) {
@@ -487,8 +488,9 @@ public class ObjectActionExamResultsSynchronizationRestController
 				failedAmount++;
 
 				_log.error(
-					"Unable to synchronize exam result " +
-						jsonObject.getString("externalReferenceCode"),
+					StringBundler.concat(
+						"Unable to synchronize exam result ",
+						jsonObject.getString("externalReferenceCode")),
 					exception);
 			}
 		}
@@ -545,7 +547,6 @@ public class ObjectActionExamResultsSynchronizationRestController
 		}
 
 		JSONArray jsonArray = new JSONArray();
-
 		LocalDate endLocalDate = LocalDate.MIN;
 
 		for (LocalDate localDate : localDates) {
