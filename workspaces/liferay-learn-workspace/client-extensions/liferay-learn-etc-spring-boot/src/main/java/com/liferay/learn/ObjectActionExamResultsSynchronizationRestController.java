@@ -385,7 +385,8 @@ public class ObjectActionExamResultsSynchronizationRestController
 		).put(
 			"examName", jsonObject.getString("examName")
 		).put(
-			"externalReferenceCode", GetterUtil.getString(jsonObject.getLong("id"))
+			"externalReferenceCode",
+			GetterUtil.getString(jsonObject.getLong("id"))
 		).put(
 			"firstName", candidateJSONObject.getString("firstName")
 		).put(
