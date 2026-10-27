@@ -125,9 +125,8 @@ public class ObjectActionExamResultsSynchronizationRestController
 		}
 		catch (WebClientResponseException webClientResponseException) {
 			_log.error(
-				StringBundler.concat(
-					"Unable to synchronize exam results: ",
-					webClientResponseException.getResponseBodyAsString()),
+				"Unable to synchronize exam results: " +
+					webClientResponseException.getResponseBodyAsString(),
 				webClientResponseException);
 		}
 		catch (Exception exception) {
@@ -201,6 +200,7 @@ public class ObjectActionExamResultsSynchronizationRestController
 
 		String emailAddress = StringUtil.trim(
 			jsonObject.getString("emailAddress"));
+
 		String examName = StringUtil.trim(jsonObject.getString("examName"));
 
 		examName = _examNames.getOrDefault(examName, examName);
@@ -438,8 +438,7 @@ public class ObjectActionExamResultsSynchronizationRestController
 
 		if (jsonArray.get(0) instanceof String) {
 			if (_log.isWarnEnabled()) {
-				_log.warn(
-					StringBundler.concat("Webassessor returned ", jsonArray));
+				_log.warn("Webassessor returned " + jsonArray);
 			}
 
 			return new JSONArray();
@@ -485,9 +484,8 @@ public class ObjectActionExamResultsSynchronizationRestController
 				failedAmount++;
 
 				_log.error(
-					StringBundler.concat(
-						"Unable to synchronize exam result ",
-						jsonObject.getString("externalReferenceCode")),
+					"Unable to synchronize exam result " +
+						jsonObject.getString("externalReferenceCode"),
 					exception);
 			}
 		}
