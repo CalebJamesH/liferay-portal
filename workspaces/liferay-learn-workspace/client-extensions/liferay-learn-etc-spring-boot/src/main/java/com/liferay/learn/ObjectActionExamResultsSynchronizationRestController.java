@@ -23,7 +23,6 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.HexFormat;
 import java.util.Map;
@@ -97,12 +96,12 @@ public class ObjectActionExamResultsSynchronizationRestController
 				while (offsetDateTime.isBefore(
 							OffsetDateTime.now(ZoneOffset.UTC))) {
 
-					JSONArray jsonArray = _getCertmanagerExamResultsJSONArray(
-						offsetDateTime);
+					JSONArray examResultsJSONArray =
+						_getCertmanagerExamResultsJSONArray(offsetDateTime);
 
-					_putExamResults(jsonArray);
+					_putExamResults(examResultsJSONArray);
 
-					examResultAmount += jsonArray.length();
+					examResultAmount += examResultsJSONArray.length();
 
 					offsetDateTime = offsetDateTime.plusDays(14);
 				}
@@ -111,12 +110,12 @@ public class ObjectActionExamResultsSynchronizationRestController
 				while (offsetDateTime.isBefore(
 							OffsetDateTime.now(ZoneOffset.UTC))) {
 
-					JSONArray jsonArray = _getWebassessorExamResultsJSONArray(
-						offsetDateTime);
+					JSONArray examResultsJSONArray =
+						_getWebassessorExamResultsJSONArray(offsetDateTime);
 
-					_putExamResults(jsonArray);
+					_putExamResults(examResultsJSONArray);
 
-					examResultAmount += jsonArray.length();
+					examResultAmount += examResultsJSONArray.length();
 
 					offsetDateTime = offsetDateTime.plusDays(7);
 				}
@@ -126,9 +125,8 @@ public class ObjectActionExamResultsSynchronizationRestController
 		}
 		catch (WebClientResponseException webClientResponseException) {
 			_log.error(
-				StringBundler.concat(
-					"Unable to synchronize exam results: ",
-					webClientResponseException.getResponseBodyAsString()),
+				"Unable to synchronize exam results: " +
+					webClientResponseException.getResponseBodyAsString(),
 				webClientResponseException);
 		}
 		catch (Exception exception) {
@@ -169,7 +167,7 @@ public class ObjectActionExamResultsSynchronizationRestController
 					"&client_secret=",
 					URLCodec.encodeURL(_certmanagerClientSecret),
 					"&grant_type=client_credentials"),
-				Collections.singletonMap(
+				Map.of(
 					HttpHeaders.CONTENT_TYPE,
 					MediaType.APPLICATION_FORM_URLENCODED_VALUE),
 				UriComponentsBuilder.fromPath(
@@ -205,11 +203,12 @@ public class ObjectActionExamResultsSynchronizationRestController
 
 		String examName = StringUtil.trim(jsonObject.getString("examName"));
 
-		Map<String, String> examNames = Map.of(
+		examName = Map.of(
 			"Building Enterprise Websites with Liferay",
-			"Building Enterprise Websites with Liferay Certification Exam");
-
-		examName = examNames.getOrDefault(examName, examName);
+			"Building Enterprise Websites with Liferay Certification Exam"
+		).getOrDefault(
+			examName, examName
+		);
 
 		OffsetDateTime offsetDateTime = OffsetDateTime.parse(
 			jsonObject.getString("date"));
@@ -250,8 +249,9 @@ public class ObjectActionExamResultsSynchronizationRestController
 			OffsetDateTime offsetDateTime)
 		throws Exception {
 
-		OffsetDateTime endOffsetDateTime = offsetDateTime.plusDays(13);
 		JSONArray jsonArray = new JSONArray();
+
+		OffsetDateTime endOffsetDateTime = offsetDateTime.plusDays(13);
 		int lastPage = 1;
 
 		for (int page = 1; page <= lastPage; page++) {
@@ -488,9 +488,8 @@ public class ObjectActionExamResultsSynchronizationRestController
 				failedAmount++;
 
 				_log.error(
-					StringBundler.concat(
-						"Unable to synchronize exam result ",
-						jsonObject.getString("externalReferenceCode")),
+					"Unable to synchronize exam result " +
+						jsonObject.getString("externalReferenceCode"),
 					exception);
 			}
 		}
@@ -546,8 +545,8 @@ public class ObjectActionExamResultsSynchronizationRestController
 			lastPage = jsonObject.getInt("lastPage");
 		}
 
-		JSONArray jsonArray = new JSONArray();
 		LocalDate endLocalDate = LocalDate.MIN;
+		JSONArray jsonArray = new JSONArray();
 
 		for (LocalDate localDate : localDates) {
 			if (localDate.isBefore(endLocalDate)) {
