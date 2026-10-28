@@ -126,9 +126,8 @@ public class ObjectActionExamResultsSynchronizationRestController
 		}
 		catch (WebClientResponseException webClientResponseException) {
 			_log.error(
-				StringBundler.concat(
-					"Unable to synchronize exam results: ",
-					webClientResponseException.getResponseBodyAsString()),
+				"Unable to synchronize exam results: " +
+					webClientResponseException.getResponseBodyAsString(),
 				webClientResponseException);
 		}
 		catch (Exception exception) {
@@ -250,8 +249,9 @@ public class ObjectActionExamResultsSynchronizationRestController
 			OffsetDateTime offsetDateTime)
 		throws Exception {
 
-		OffsetDateTime endOffsetDateTime = offsetDateTime.plusDays(13);
 		JSONArray jsonArray = new JSONArray();
+
+		OffsetDateTime endOffsetDateTime = offsetDateTime.plusDays(13);
 		int lastPage = 1;
 
 		for (int page = 1; page <= lastPage; page++) {
@@ -488,9 +488,8 @@ public class ObjectActionExamResultsSynchronizationRestController
 				failedAmount++;
 
 				_log.error(
-					StringBundler.concat(
-						"Unable to synchronize exam result ",
-						jsonObject.getString("externalReferenceCode")),
+					"Unable to synchronize exam result " +
+						jsonObject.getString("externalReferenceCode"),
 					exception);
 			}
 		}
