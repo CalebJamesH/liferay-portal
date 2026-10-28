@@ -546,8 +546,8 @@ public class ObjectActionExamResultsSynchronizationRestController
 			lastPage = jsonObject.getInt("lastPage");
 		}
 
-		JSONArray jsonArray = new JSONArray();
 		LocalDate endLocalDate = LocalDate.MIN;
+		JSONArray jsonArray = new JSONArray();
 
 		for (LocalDate localDate : localDates) {
 			if (localDate.isBefore(endLocalDate)) {
