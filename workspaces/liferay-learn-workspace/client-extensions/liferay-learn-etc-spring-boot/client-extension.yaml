@@ -55,6 +55,7 @@ liferay-learn-etc-spring-boot-object-action-friendly-url:
     name: Liferay Learn Etc Spring Boot Object Action Friendly URL
     oAuth2ApplicationExternalReferenceCode: liferay-learn-etc-spring-boot-oaua
     resourcePath: /object/action/friendly-url
+    type: objectAction
 liferay-learn-etc-spring-boot-object-action-knowledge-article-guest-view:
     name: Liferay Learn Etc Spring Boot Object Action Knowledge Article Guest View
     oAuth2ApplicationExternalReferenceCode: liferay-learn-etc-spring-boot-oaua

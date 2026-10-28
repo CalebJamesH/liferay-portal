@@ -8,10 +8,11 @@ package com.liferay.learn;
 import com.liferay.client.extension.util.spring.boot3.BaseRestController;
 import com.liferay.client.extension.util.spring.boot3.client.LiferayOAuth2AccessTokenManager;
 import com.liferay.petra.string.StringBundler;
-import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
-import com.liferay.portal.kernel.util.URLCodec;
 import com.liferay.portal.kernel.util.Validator;
+
+import java.net.URLEncoder;
 
 import java.nio.charset.StandardCharsets;
 
@@ -165,9 +166,12 @@ public class ObjectActionExamResultsSynchronizationRestController
 		JSONObject jsonObject = new JSONObject(
 			post(
 				StringBundler.concat(
-					"client_id=", URLCodec.encodeURL(_certmanagerClientId),
+					"client_id=",
+					URLEncoder.encode(
+						_certmanagerClientId, StandardCharsets.UTF_8),
 					"&client_secret=",
-					URLCodec.encodeURL(_certmanagerClientSecret),
+					URLEncoder.encode(
+						_certmanagerClientSecret, StandardCharsets.UTF_8),
 					"&grant_type=client_credentials"),
 				Collections.singletonMap(
 					HttpHeaders.CONTENT_TYPE,
@@ -385,8 +389,7 @@ public class ObjectActionExamResultsSynchronizationRestController
 		).put(
 			"examName", jsonObject.getString("examName")
 		).put(
-			"externalReferenceCode",
-			GetterUtil.getString(jsonObject.getLong("id"))
+			"externalReferenceCode", String.valueOf(jsonObject.getLong("id"))
 		).put(
 			"firstName", candidateJSONObject.getString("firstName")
 		).put(
@@ -403,38 +406,44 @@ public class ObjectActionExamResultsSynchronizationRestController
 	}
 
 	private JSONArray _getWebassessorExamResultsJSONArray(
-		OffsetDateTime offsetDateTime) {
+			OffsetDateTime offsetDateTime)
+		throws Exception {
 
-		JSONArray jsonArray = new JSONArray(
-			post(
-				null,
-				new JSONObject(
-				).put(
-					"endDate",
-					offsetDateTime.plusDays(
-						7
-					).format(
-						DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss")
-					)
-				).put(
-					"requestType", "GET TRANSCRIPTS BY DATE RANGE"
-				).put(
-					"returnFormat", "JSON"
-				).put(
-					"securityToken", _webassessorSecurityToken
-				).put(
-					"startDate",
-					offsetDateTime.format(
-						DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss"))
-				).toString(),
-				UriComponentsBuilder.fromPath(
-					"/WebAssessorWebServices/jaxrs/wawebservices/processRequest"
-				).host(
-					"webassessor.com"
-				).scheme(
-					"https"
-				).build(
-				).toUri()));
+		String response = post(
+			null,
+			new JSONObject(
+			).put(
+				"endDate",
+				offsetDateTime.plusDays(
+					7
+				).format(
+					DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss")
+				)
+			).put(
+				"requestType", "GET TRANSCRIPTS BY DATE RANGE"
+			).put(
+				"returnFormat", "JSON"
+			).put(
+				"securityToken", _webassessorSecurityToken
+			).put(
+				"startDate",
+				offsetDateTime.format(
+					DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss"))
+			).toString(),
+			UriComponentsBuilder.fromPath(
+				"/WebAssessorWebServices/jaxrs/wawebservices/processRequest"
+			).host(
+				"webassessor.com"
+			).scheme(
+				"https"
+			).build(
+			).toUri());
+
+		if (!response.startsWith(StringPool.OPEN_BRACKET)) {
+			throw new Exception("Webassessor returned " + response);
+		}
+
+		JSONArray jsonArray = new JSONArray(response);
 
 		if (jsonArray.isEmpty()) {
 			return new JSONArray();
