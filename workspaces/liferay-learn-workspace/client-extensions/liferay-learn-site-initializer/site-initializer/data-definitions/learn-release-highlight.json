@@ -257,7 +257,7 @@
 		"dataRules": [
 		],
 		"description": {
-			"en_US": "The highlights of one Liferay DXP release: key highlights, important changes, known issues and security."
+			"en_US": "This structure holds the highlights of one Liferay DXP release: key highlights, important changes, known issues, and security."
 		},
 		"name": {
 			"en_US": "LEARN-RELEASE-HIGHLIGHT"
@@ -266,7 +266,7 @@
 	},
 	"defaultLanguageId": "en_US",
 	"description": {
-		"en_US": "The highlights of one Liferay DXP release: key highlights, important changes, known issues and security."
+		"en_US": "This structure holds the highlights of one Liferay DXP release: key highlights, important changes, known issues, and security."
 	},
 	"name": {
 		"en_US": "Release Highlight"
