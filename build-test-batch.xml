@@ -10551,20 +10551,58 @@ ${output.content}</echo>
 				</beanshell>
 			</try>
 			<catch>
-				<echo>Unable to find cached source-formatter. Building from source.</echo>
+				<local name="source.formatter.released.source.match" />
+				<local name="source.formatter.released.source.match.failure" />
 
-				<antcall target="compile" />
+				<trycatch property="source.formatter.released.source.match.failure">
+					<try>
+						<beanshell>
+							<![CDATA[
+								import com.liferay.jenkins.results.parser.GitWorkingDirectory;
+								import com.liferay.jenkins.results.parser.GitWorkingDirectoryFactory;
+								import com.liferay.jenkins.results.parser.SourceFormatterReleaseUtil;
 
-				<antcall target="install-portal-snapshots" />
+								import java.io.File;
+
+								File baseDir = project.getBaseDir();
+
+								GitWorkingDirectory gitWorkingDirectory = GitWorkingDirectoryFactory.newGitWorkingDirectory(project.getProperty("liferay.portal.branch"), baseDir.getCanonicalPath(), "liferay-portal");
+
+								if (SourceFormatterReleaseUtil.isReleasedSourceMatch(gitWorkingDirectory, "HEAD")) {
+									project.setProperty("source.formatter.released.source.match", "true");
+								}
+							]]>
+						</beanshell>
+					</try>
+					<catch>
+						<echo>Unable to compare source-formatter with the released version: ${source.formatter.released.source.match.failure}</echo>
+					</catch>
+				</trycatch>
 
 				<if>
-					<available file="modules/util/source-formatter" />
+					<equals arg1="${source.formatter.released.source.match}" arg2="true" />
 					<then>
-						<gradle-execute dir="modules/util/source-formatter" task="deploy" />
-					</then>
-				</if>
+						<echo>Unable to find cached source-formatter. Using the released source-formatter.</echo>
 
-				<antcall target="publish-source-formatter" />
+						<antcall inheritAll="false" target="setup-sdk" />
+					</then>
+					<else>
+						<echo>Unable to find cached source-formatter. Building from source.</echo>
+
+						<antcall target="compile" />
+
+						<antcall target="install-portal-snapshots" />
+
+						<if>
+							<available file="modules/util/source-formatter" />
+							<then>
+								<gradle-execute dir="modules/util/source-formatter" task="deploy" />
+							</then>
+						</if>
+
+						<antcall target="publish-source-formatter" />
+					</else>
+				</if>
 			</catch>
 		</trycatch>
 	</target>

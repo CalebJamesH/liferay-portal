@@ -960,9 +960,18 @@ public class LiferayOAuthDataProvider
 	protected JwtClaims createJwtAccessToken(
 		ServerAccessToken serverAccessToken) {
 
-		// Fix a bug in CXF. Scopes in JWT claim should be a string.
-
 		JwtClaims jwtClaims = super.createJwtAccessToken(serverAccessToken);
+
+		OAuth2Application oAuth2Application = resolveOAuth2Application(
+			serverAccessToken.getClient());
+
+		if (oAuth2Application != null) {
+			jwtClaims.setClaim(
+				"external_reference_code",
+				oAuth2Application.getExternalReferenceCode());
+		}
+
+		// Fix a bug in CXF. Scopes in JWT claim should be a string.
 
 		List<OAuthPermission> oAuthPermissions = serverAccessToken.getScopes();
 

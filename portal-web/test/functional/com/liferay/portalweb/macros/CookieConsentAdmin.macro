@@ -13,6 +13,8 @@ definition {
 			locator1 = "Button#SAVE",
 			value1 = "Save");
 
+		CookiePreferenceHandlingAdmin.confirmConfiguration();
+
 		AssertTextEquals.assertPartialText(
 			locator1 = "Message#SUCCESS",
 			value1 = "Your request completed successfully.");
@@ -55,6 +57,8 @@ definition {
 			locator1 = "Button#SAVE",
 			value1 = "Save");
 
+		CookiePreferenceHandlingAdmin.confirmConfiguration();
+
 		AssertTextEquals.assertPartialText(
 			locator1 = "Message#SUCCESS",
 			value1 = "Your request completed successfully.");
@@ -77,7 +81,7 @@ definition {
 
 		Type(
 			locator1 = "CookieConsentAdmin#COOKIE_POLICY_LINK",
-			value1 = "${text}_3");
+			value1 = "/web/guest/${text}_3");
 
 		Type(
 			locator1 = "CookieConsentAdmin#LINK_DISPLAY_TEXT",
@@ -184,7 +188,7 @@ definition {
 
 		AssertTextEquals(
 			locator1 = "CookieConsentAdmin#COOKIE_POLICY_LINK",
-			value1 = ${text});
+			value1 = "/${text}");
 
 		AssertTextEquals(
 			locator1 = "CookieConsentAdmin#LINK_DISPLAY_TEXT",

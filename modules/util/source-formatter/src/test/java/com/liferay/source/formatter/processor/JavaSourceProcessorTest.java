@@ -1494,6 +1494,42 @@ public class JavaSourceProcessorTest extends BaseSourceProcessorTestCase {
 	}
 
 	@Test
+	public void testUnresolvedCredentialReads() throws Exception {
+		test(
+			SourceProcessorTestParameters.create(
+				"unresolvedcredentialreads/UnresolvedCredentialReads.testjava"
+			).addDependentFileName(
+				"unresolvedcredentialreads/portal-impl/src/com/liferay/portal" +
+					"/configuration/SecretResolverConfiguration.testjava"
+			).addExpectedMessage(
+				"Resolve \"password()\" through \"SecretResolver\" or " +
+					"\"SecretResolverUtil\" before using the value, see " +
+						"LPD-107260",
+				27
+			).addExpectedMessage(
+				"Resolve \"password()\" through \"SecretResolver\" or " +
+					"\"SecretResolverUtil\" before using the value, see " +
+						"LPD-107260",
+				49
+			).addExpectedMessage(
+				"Resolve \"password()\" through \"SecretResolver\" or " +
+					"\"SecretResolverUtil\" before using the value, see " +
+						"LPD-107260",
+				65
+			).addExpectedMessage(
+				"Resolve \"password()\" through \"SecretResolver\" or " +
+					"\"SecretResolverUtil\" before using the value, see " +
+						"LPD-107260",
+				69
+			).addExpectedMessage(
+				"Resolve \"password()\" through \"SecretResolver\" or " +
+					"\"SecretResolverUtil\" before using the value, see " +
+						"LPD-107260",
+				90
+			));
+	}
+
+	@Test
 	public void testUnusedImport() throws Exception {
 		test("UnusedImport.testjava");
 	}

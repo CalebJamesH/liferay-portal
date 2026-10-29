@@ -16,6 +16,8 @@ definition {
 			value1 = "Include \\"Decline All\\" Button");
 
 		Button.clickSave();
+
+		CookiePreferenceHandlingAdmin.confirmConfiguration();
 	}
 
 	@summary = "Default summary"
@@ -30,6 +32,8 @@ definition {
 				locator1 = "Button#SAVE",
 				value1 = "Save");
 		}
+
+		CookiePreferenceHandlingAdmin.confirmConfiguration();
 	}
 
 	@description = "Save Cookie Banner settings"
@@ -81,7 +85,7 @@ definition {
 
 		Type(
 			locator1 = "CookieBannerAdmin#PRIVACY_POLICY_LINK",
-			value1 = "${text}_2");
+			value1 = "/web/guest/${text}_2");
 
 		Type(
 			locator1 = "CookieBannerAdmin#LINK_DISPLAY_TEXT",
@@ -117,7 +121,7 @@ definition {
 
 		Type(
 			locator1 = "CookieBannerAdmin#PRIVACY_POLICY_LINK",
-			value1 = "${text}_2");
+			value1 = "/web/guest/${text}_2");
 
 		Type(
 			locator1 = "CookieBannerAdmin#LINK_DISPLAY_TEXT",
@@ -148,7 +152,7 @@ definition {
 
 		AssertTextEquals(
 			locator1 = "CookieBannerAdmin#PRIVACY_POLICY_LINK",
-			value1 = ${text});
+			value1 = "/${text}");
 
 		AssertTextEquals(
 			locator1 = "CookieBannerAdmin#LINK_DISPLAY_TEXT",
