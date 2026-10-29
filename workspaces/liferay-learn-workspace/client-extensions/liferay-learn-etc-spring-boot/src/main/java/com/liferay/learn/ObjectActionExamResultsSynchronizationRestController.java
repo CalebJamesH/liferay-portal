@@ -201,14 +201,13 @@ public class ObjectActionExamResultsSynchronizationRestController
 		String emailAddress = StringUtil.trim(
 			jsonObject.getString("emailAddress"));
 
+		Map<String, String> examNames = Map.of(
+			"Building Enterprise Websites with Liferay",
+			"Building Enterprise Websites with Liferay Certification Exam");
+
 		String examName = StringUtil.trim(jsonObject.getString("examName"));
 
-		examName = Map.of(
-			"Building Enterprise Websites with Liferay",
-			"Building Enterprise Websites with Liferay Certification Exam"
-		).getOrDefault(
-			examName, examName
-		);
+		examName = examNames.getOrDefault(examName, examName);
 
 		OffsetDateTime offsetDateTime = OffsetDateTime.parse(
 			jsonObject.getString("date"));
