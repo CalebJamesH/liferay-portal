@@ -6,13 +6,13 @@
 package com.liferay.learn;
 
 import com.liferay.client.extension.util.spring.boot3.BaseRestController;
+import com.liferay.petra.function.transform.TransformUtil;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.TreeMapBuilder;
 
 import java.text.Normalizer;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -82,17 +82,17 @@ public class ObjectActionFriendlyURLRestController extends BaseRestController {
 	}
 
 	private List<String> _getChildDTOKeys(String dtoKey) {
-		List<String> childDTOKeys = new ArrayList<>();
+		return TransformUtil.transform(
+			_entryTypes.entrySet(),
+			entry -> {
+				EntryType entryType = entry.getValue();
 
-		for (Map.Entry<String, EntryType> entry : _entryTypes.entrySet()) {
-			EntryType entryType = entry.getValue();
+				if (dtoKey.equals(entryType.getParentDTOKey())) {
+					return entry.getKey();
+				}
 
-			if (dtoKey.equals(entryType.getParentDTOKey())) {
-				childDTOKeys.add(entry.getKey());
-			}
-		}
-
-		return childDTOKeys;
+				return null;
+			});
 	}
 
 	private String _getCurrentFriendlyURLPath(

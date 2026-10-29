@@ -150,11 +150,9 @@ public class ExamResultsRestController extends BaseRestController {
 	}
 
 	private double _getScore(CSVRecord csvRecord) {
-		String scoreString = StringUtil.removeChar(
-			csvRecord.get(
-				7
-			).trim(),
-			'%');
+		String scoreValue = csvRecord.get(7);
+
+		String scoreString = StringUtil.removeChar(scoreValue.trim(), '%');
 
 		if (!Validator.isNumber(scoreString)) {
 			throw new IllegalArgumentException(
@@ -194,20 +192,18 @@ public class ExamResultsRestController extends BaseRestController {
 			JSONArray jsonArray = new JSONArray();
 
 			for (CSVRecord csvRecord : csvParser) {
+				String dateString = csvRecord.get(10);
+
 				OffsetDateTime offsetDateTime = OffsetDateTime.of(
-					_parseLocalDateTime(
-						csvRecord.get(
-							10
-						).trim()),
-					ZoneOffset.UTC);
+					_parseLocalDateTime(dateString.trim()), ZoneOffset.UTC);
 
-				String emailAddress = csvRecord.get(
-					2
-				).trim();
+				String emailAddressValue = csvRecord.get(2);
 
-				String examName = csvRecord.get(
-					6
-				).trim();
+				String emailAddress = emailAddressValue.trim();
+
+				String examNameValue = csvRecord.get(6);
+
+				String examName = examNameValue.trim();
 
 				examName = _examNames.getOrDefault(examName, examName);
 
