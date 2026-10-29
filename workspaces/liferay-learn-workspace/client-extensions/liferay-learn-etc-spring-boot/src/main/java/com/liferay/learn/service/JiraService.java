@@ -541,6 +541,9 @@ public class JiraService extends BaseService {
 	@Value("${liferay.learn.jira.security.vulnerability.field.affects}")
 	private String _jiraSecurityVulnerabilityFieldAffects;
 
+	@Value("${liferay.learn.jira.security.vulnerability.field.categories}")
+	private String _jiraSecurityVulnerabilityFieldCategories;
+
 	@Value("${liferay.learn.jira.security.vulnerability.field.cve.ids}")
 	private String _jiraSecurityVulnerabilityFieldCVEIds;
 
@@ -554,9 +557,6 @@ public class JiraService extends BaseService {
 
 	@Value("${liferay.learn.jira.security.vulnerability.field.cwe.ids}")
 	private String _jiraSecurityVulnerabilityFieldCWEIds;
-
-	@Value("${liferay.learn.jira.security.vulnerability.field.categories}")
-	private String _jiraSecurityVulnerabilityFieldCategories;
 
 	@Value(
 		"${liferay.learn.jira.security.vulnerability.field.customer.portal." +

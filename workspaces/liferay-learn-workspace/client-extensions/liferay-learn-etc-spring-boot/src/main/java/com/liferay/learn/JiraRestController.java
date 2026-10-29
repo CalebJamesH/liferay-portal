@@ -95,7 +95,6 @@ public class JiraRestController extends BaseRestController {
 
 	@GetMapping("/security-vulnerabilities/search")
 	public ResponseEntity<String> getSecurityVulnerabilitiesSearch(
-		@AuthenticationPrincipal Jwt jwt,
 		@RequestParam(defaultValue = "", required = false) String[]
 			filterAffectedVersions,
 		@RequestParam(defaultValue = "", required = false) String[]
@@ -106,6 +105,7 @@ public class JiraRestController extends BaseRestController {
 			filterFixVersions,
 		@RequestParam(defaultValue = "", required = false) String[]
 			filterSeverities,
+		@AuthenticationPrincipal Jwt jwt,
 		@RequestParam(defaultValue = "", required = false) String keywords,
 		@RequestParam(defaultValue = "1", required = false) int page,
 		@RequestParam(defaultValue = "15", required = false) int pageSize,
