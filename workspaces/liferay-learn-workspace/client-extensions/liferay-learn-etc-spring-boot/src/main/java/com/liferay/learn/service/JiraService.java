@@ -184,18 +184,18 @@ public class JiraService extends BaseService {
 		}
 
 		if (ArrayUtil.isNotEmpty(filterAffectedVersions)) {
-			sb.append(" AND affectedVersion in ('");
-			sb.append(StringUtil.merge(filterAffectedVersions, "','"));
-			sb.append("')");
+			sb.append(" AND affectedVersion in (");
+			sb.append(_toJQLValues(filterAffectedVersions));
+			sb.append(")");
 		}
 
 		if (ArrayUtil.isNotEmpty(filterCategories)) {
 			sb.append(" AND ");
 			sb.append(
 				_toJQLCustomField(_jiraSecurityVulnerabilityFieldCategories));
-			sb.append(" in ('");
-			sb.append(StringUtil.merge(filterCategories, "','"));
-			sb.append("')");
+			sb.append(" in (");
+			sb.append(_toJQLValues(filterCategories));
+			sb.append(")");
 		}
 
 		if (ArrayUtil.isNotEmpty(filterClassifications)) {
@@ -203,27 +203,27 @@ public class JiraService extends BaseService {
 			sb.append(
 				_toJQLCustomField(
 					_jiraSecurityVulnerabilityFieldIssueClassification));
-			sb.append(" in ('");
-			sb.append(StringUtil.merge(filterClassifications, "','"));
-			sb.append("')");
+			sb.append(" in (");
+			sb.append(_toJQLValues(filterClassifications));
+			sb.append(")");
 		}
 
 		if (ArrayUtil.isNotEmpty(filterFixVersions)) {
 			sb.append(" AND ");
 			sb.append(
 				_toJQLCustomField(_jiraSecurityVulnerabilityFieldFixVersions));
-			sb.append(" in ('");
-			sb.append(StringUtil.merge(filterFixVersions, "','"));
-			sb.append("')");
+			sb.append(" in (");
+			sb.append(_toJQLValues(filterFixVersions));
+			sb.append(")");
 		}
 
 		if (ArrayUtil.isNotEmpty(filterSeverities)) {
 			sb.append(" AND ");
 			sb.append(
 				_toJQLCustomField(_jiraSecurityVulnerabilityFieldSeverity));
-			sb.append(" in ('");
-			sb.append(StringUtil.merge(filterSeverities, "','"));
-			sb.append("')");
+			sb.append(" in (");
+			sb.append(_toJQLValues(filterSeverities));
+			sb.append(")");
 		}
 
 		if (Validator.isNotNull(keywords)) {
@@ -232,11 +232,11 @@ public class JiraService extends BaseService {
 				_toJQLCustomField(
 					_jiraSecurityVulnerabilityFieldCustomerPortalSummary));
 			sb.append(" ~ ");
-			sb.append(StringUtil.quote(keywords));
+			sb.append(_toJQLValue(keywords));
 			sb.append(" OR ");
 			sb.append(_toJQLCustomField(_jiraSecurityVulnerabilityFieldCVEIds));
 			sb.append(" ~ ");
-			sb.append(StringUtil.quote(keywords));
+			sb.append(_toJQLValue(keywords));
 			sb.append(")");
 		}
 
@@ -401,6 +401,23 @@ public class JiraService extends BaseService {
 		int index = customField.indexOf(StringPool.UNDERLINE);
 
 		return "cf[" + customField.substring(index + 1) + "]";
+	}
+
+	private String _toJQLValue(String value) {
+		value = value.replace("\\", "\\\\");
+
+		return StringPool.QUOTE + value.replace("\"", "\\\"") +
+			StringPool.QUOTE;
+	}
+
+	private String _toJQLValues(String[] values) {
+		List<String> jqlValues = new ArrayList<>();
+
+		for (String value : values) {
+			jqlValues.add(_toJQLValue(value));
+		}
+
+		return String.join(", ", jqlValues);
 	}
 
 	private JSONObject _transformIssueFieldsJSONObject(
