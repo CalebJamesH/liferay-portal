@@ -6,12 +6,15 @@ liferay-learn-etc-spring-boot-oahs:
     .serviceScheme: http
     name: Liferay Learn Etc Spring Boot OAuth Application Headless Server
     scopes:
+        -   Liferay.Headless.Admin.User.everything
+        -   Liferay.Object.Admin.REST.everything.read
         -   c_article.everything
         -   c_attachment.everything
         -   c_p2s3badge.everything.read
         -   c_p2s3course.everything
         -   c_p2s3enrollment.everything
         -   c_p2s3externalmedia.everything
+        -   c_p2s3knowledgearticle.everything
         -   c_p2s3learningpath.everything
         -   c_p2s3learningpathstep.everything
         -   c_p2s3lesson.everything
@@ -23,8 +26,6 @@ liferay-learn-etc-spring-boot-oahs:
         -   c_p2s3quizquestion.everything.read
         -   c_p2s3quizresult.everything
         -   c_p2s3userbadge.everything
-        -   Liferay.Headless.Admin.User.everything
-        -   Liferay.Object.Admin.REST.everything.read
     type: oAuthApplicationHeadlessServer
     userAccountScreenName: default-service-account
 liferay-learn-etc-spring-boot-oaua:
@@ -32,6 +33,7 @@ liferay-learn-etc-spring-boot-oaua:
     .serviceScheme: http
     name: Liferay Learn Etc Spring Boot OAuth Application User Agent
     scopes:
+        -   Liferay.Headless.Admin.User.everything.read
         -   c_p2s3course.everything
         -   c_p2s3lesson.everything
         -   c_p2s3module.everything
@@ -48,6 +50,16 @@ liferay-learn-etc-spring-boot-object-action-exam-results-synchronization:
     name: Liferay Learn Etc Spring Boot Object Action Exam Result Synchronization
     oAuth2ApplicationExternalReferenceCode: liferay-learn-etc-spring-boot-oaua
     resourcePath: /object/action/exam/results/synchronization
+    type: objectAction
+liferay-learn-etc-spring-boot-object-action-friendly-url:
+    name: Liferay Learn Etc Spring Boot Object Action Friendly URL
+    oAuth2ApplicationExternalReferenceCode: liferay-learn-etc-spring-boot-oaua
+    resourcePath: /object/action/friendly-url
+    type: objectAction
+liferay-learn-etc-spring-boot-object-action-knowledge-article-guest-view:
+    name: Liferay Learn Etc Spring Boot Object Action Knowledge Article Guest View
+    oAuth2ApplicationExternalReferenceCode: liferay-learn-etc-spring-boot-oaua
+    resourcePath: /object/action/knowledge/article/guest/view
     type: objectAction
 liferay-learn-etc-spring-boot-object-action-permission:
     name: Liferay Learn Etc Spring Boot Object Action Permission
