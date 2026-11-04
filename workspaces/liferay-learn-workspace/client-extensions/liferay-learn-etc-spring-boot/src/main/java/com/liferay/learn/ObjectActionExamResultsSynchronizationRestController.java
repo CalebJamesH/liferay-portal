@@ -198,9 +198,6 @@ public class ObjectActionExamResultsSynchronizationRestController
 			JSONObject jsonObject)
 		throws Exception {
 
-		String emailAddress = StringUtil.trim(
-			jsonObject.getString("emailAddress"));
-
 		Map<String, String> examNames = Map.of(
 			"Building Enterprise Websites with Liferay",
 			"Building Enterprise Websites with Liferay Certification Exam");
@@ -213,6 +210,9 @@ public class ObjectActionExamResultsSynchronizationRestController
 			jsonObject.getString("date"));
 
 		offsetDateTime = offsetDateTime.withOffsetSameInstant(ZoneOffset.UTC);
+
+		String emailAddress = StringUtil.trim(
+			jsonObject.getString("emailAddress"));
 
 		return new JSONObject(
 		).put(
