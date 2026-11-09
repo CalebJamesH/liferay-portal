@@ -7,6 +7,7 @@ import {ClayPaginationBarWithBasicItems} from '@clayui/pagination-bar';
 import {useMemo} from 'react';
 import CloudLockIcon from '~/assets/CloudLock';
 import {SVWaves} from '~/assets/SVWaves';
+import Loading from '~/components/Loading/Loading';
 import useJiraSearch, {IJiraSearchParams} from '~/hooks/useJiraSearch';
 import useJiraVersions from '~/hooks/useJiraVersions';
 import i18n from '~/utils/I18n';
@@ -121,10 +122,7 @@ const SecurityVulnerabilitiesList = () => {
 
 					<div className="col-12 col-lg-9 sv-results-column">
 						{loading ? (
-							<span
-								className="cp-spinner ml-2 spinner-border spinner-border-sm"
-								role="status"
-							/>
+							<Loading />
 						) : error ? (
 							<div className="py-2">
 								{i18n.translate('an-unexpected-error-occurred')}

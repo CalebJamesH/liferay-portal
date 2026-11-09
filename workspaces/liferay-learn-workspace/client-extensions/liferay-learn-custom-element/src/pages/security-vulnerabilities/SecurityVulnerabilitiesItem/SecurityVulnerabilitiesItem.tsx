@@ -7,6 +7,7 @@ import DOMPurify from 'dompurify';
 import {ReactNode} from 'react';
 import {Link, useParams} from 'react-router-dom';
 import {SVWaves} from '~/assets/SVWaves';
+import Loading from '~/components/Loading/Loading';
 import useJiraIssue from '~/hooks/useJiraIssue';
 import i18n from '~/utils/I18n';
 import {JiraEnum} from '~/utils/constants/JiraEnum';
@@ -56,10 +57,7 @@ const SecurityVulnerabilitiesItem = () => {
 	if (loading) {
 		return (
 			<SVItemMessage>
-				<span
-					className="cp-spinner spinner-border spinner-border-sm"
-					role="status"
-				></span>
+				<Loading />
 			</SVItemMessage>
 		);
 	}
