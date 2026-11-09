@@ -892,6 +892,20 @@
   resolved "https://registry.yarnpkg.com/@bufbuild/protobuf/-/protobuf-2.12.0.tgz#53225636a8fcebb2bd94998ad9d42f99f96add4d"
   integrity sha512-B/XlCaFIP8LOwzo+bz5uFzATYokcwCKQcghqnlfwSmM5eX/qTkvDBnDPs+gXtX/RyjxJ4DRikECcPJbyALA8FA==
 
+"@clayui/autocomplete@^3.166.0":
+  version "3.167.0"
+  resolved "https://registry.yarnpkg.com/@clayui/autocomplete/-/autocomplete-3.167.0.tgz#ef41f598bfce8abacb6f7897917674a2f951af35"
+  integrity sha512-5MAcIWWiTv12hM7IhbustwHY4QBz16QDflcRcdOAMkBAhExIU1ITgoXQ+9XBkkHIn2hh7uW6t+a0j4lR2qREaA==
+  dependencies:
+    "@clayui/core" "^3.167.0"
+    "@clayui/data-provider" "^3.167.0"
+    "@clayui/drop-down" "^3.167.0"
+    "@clayui/form" "^3.167.0"
+    "@clayui/loading-indicator" "^3.167.0"
+    "@clayui/shared" "^3.167.0"
+    classnames "2.3.1"
+    fuzzy "0.1.3"
+
 "@clayui/button@^3.161.0":
   version "3.161.0"
   resolved "https://registry.yarnpkg.com/@clayui/button/-/button-3.161.0.tgz#864ac7aee2b4a3b938b7a15dc1781dc9e3bf9b20"
@@ -902,7 +916,7 @@
     classnames "2.3.1"
     warning "^4.0.3"
 
-"@clayui/button@^3.167.0":
+"@clayui/button@^3.166.0", "@clayui/button@^3.167.0":
   version "3.167.0"
   resolved "https://registry.yarnpkg.com/@clayui/button/-/button-3.167.0.tgz#4994d4be87c38ca87fd34a5765e25a610b3a0b4b"
   integrity sha512-oxL5qmd2S1LhJ/ZejKZfJ0ici53CFIoNcXXS0cwdCtG4FmM6XwioCCrQucFmYHq7V/+T1LUkeF2IbkR6yhZ5Og==
@@ -969,7 +983,7 @@
     react-transition-group "4.4.5"
     warning "4.0.3"
 
-"@clayui/form@^3.167.0":
+"@clayui/form@^3.166.0", "@clayui/form@^3.167.0":
   version "3.167.0"
   resolved "https://registry.yarnpkg.com/@clayui/form/-/form-3.167.0.tgz#563ae883a0792c0389b72d30f7106cefb27978b2"
   integrity sha512-IVYWGxMVl8Bt+BKv+VX6XTtfuSpUP61Z9+NWhUWM/TdM4nwjDwi0w3KZjzYOqg3BKY5Yx2n9hDa3WK/YME0XXQ==
@@ -1041,7 +1055,7 @@
   dependencies:
     classnames "2.3.1"
 
-"@clayui/loading-indicator@^3.167.0":
+"@clayui/loading-indicator@^3.166.0", "@clayui/loading-indicator@^3.167.0":
   version "3.167.0"
   resolved "https://registry.yarnpkg.com/@clayui/loading-indicator/-/loading-indicator-3.167.0.tgz#ef5cfa8ad48d0474fa1d1ee0fbb843ac97860046"
   integrity sha512-HhCp3MkE77BpyeBHIuumdFaaeUEtV5D4ZHQDrYztOtxeP6Ai1H/SGcyB+eDF9gZgU0WSvmBSSwXTJUm9x2zpOg==
@@ -1126,7 +1140,7 @@
     dom-align "1.12.2"
     warning "4.0.3"
 
-"@clayui/table@^3.167.0":
+"@clayui/table@^3.166.0", "@clayui/table@^3.167.0":
   version "3.167.0"
   resolved "https://registry.yarnpkg.com/@clayui/table/-/table-3.167.0.tgz#1205dc8135ce1f165ffd035792726deaa6736ba3"
   integrity sha512-MypPJwqwSklE6CNXoL+0+KtxKHRpmD56bvT9B0qJ1BBitaDXdB5o/hvLaWMV3nnlH8a9oMK3tNWeZqjx9Daevg==
@@ -3128,7 +3142,7 @@ eslint-plugin-react@7.23.1:
     resolve "^2.0.0-next.3"
     string.prototype.matchall "^4.0.4"
 
-eslint-plugin-sort-destructure-keys@^1.3.5:
+eslint-plugin-sort-destructure-keys@1.5.0, eslint-plugin-sort-destructure-keys@^1.3.5:
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/eslint-plugin-sort-destructure-keys/-/eslint-plugin-sort-destructure-keys-1.5.0.tgz#dc45ff119b6886d4e72d3e0ff8a528af83b89388"
   integrity sha512-xGLyqHtbFXZNXQSvAiQ4ISBYokrbUywEhmaA50fKtSKgceCv5y3zjoNuZwcnajdM6q29Nxj+oXC9KcqfMsAPrg==
