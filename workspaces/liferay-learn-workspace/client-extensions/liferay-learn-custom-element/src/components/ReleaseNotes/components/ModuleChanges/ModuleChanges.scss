@@ -1,0 +1,31 @@
+.module-changes-changed > td {
+	background-color: #edf3fe;
+}
+
+.module-changes-table {
+	th.module-changes-version {
+		min-width: 180px;
+		white-space: normal;
+	}
+
+	tbody tr.module-changes-changed:hover > td {
+		background-color: #e7efff;
+	}
+
+	.module-changes-version {
+		white-space: nowrap;
+		width: 1%;
+	}
+
+	&.release-notes-table td:first-child,
+	&.release-notes-table th:first-child {
+		padding-left: 12px;
+	}
+}
+
+.module-changes-toggle {
+	.toggle-switch-label {
+		color: #282934;
+		font-size: 13px;
+	}
+}
