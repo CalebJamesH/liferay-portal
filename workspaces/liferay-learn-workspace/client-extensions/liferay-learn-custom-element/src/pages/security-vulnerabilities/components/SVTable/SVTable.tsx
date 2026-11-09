@@ -70,6 +70,7 @@ const SVTable = ({rows}: IProps) => {
 					/>
 				),
 				category: row.category,
+				className: 'sv-row',
 				issueClassification: row.issueClassification,
 				link: row.link,
 				prioritySummary: (
@@ -106,8 +107,9 @@ const SVTable = ({rows}: IProps) => {
 
 	return (
 		<Table
-			className="sv"
+			className="sv-structured-data sv-table"
 			columns={columns}
+			noWrap
 			onRowClick={handleRowClick}
 			rows={tableRows}
 		/>

@@ -4,56 +4,46 @@
  */
 
 import ClayTable from '@clayui/table';
-import classNames from 'classnames';
+import {ReactNode} from 'react';
 
 export interface IColumn {
 	className?: string;
 	columnKey: string;
 	label: string;
-	subLabel?: string;
 }
 
 export interface IRow {
+	className?: string;
+	id?: string;
 	link?: string;
-	[key: string]: string | number | JSX.Element | undefined;
+	[key: string]: ReactNode;
 }
 
 interface IProps {
 	className?: string;
 	columns: IColumn[];
+	noWrap?: boolean;
 	onRowClick?: (row: IRow) => void;
 	rows: IRow[];
 }
 
-const Table = ({className, columns, onRowClick, rows}: IProps) => {
+const Table = ({className, columns, noWrap, onRowClick, rows}: IProps) => {
 	return (
 		<ClayTable
 			borderless
-			className={`${className}-table ${className}-structured-data table`}
-			noWrap
+			className={className}
+			noWrap={noWrap}
 			striped={false}
 		>
 			<ClayTable.Head align="left">
 				<ClayTable.Row>
 					{columns.map((column) => (
 						<ClayTable.Cell
-							className={classNames(
-								'text-neutral-10 font-weight-semi-bold',
-								column.className
-							)}
+							className={column.className}
+							headingCell
 							key={column.columnKey}
 						>
-							<div>
-								<div className="be-header-label">
-									{column.label}
-								</div>
-
-								{column.subLabel && (
-									<div className="be-header-sub-label color-neutral-7">
-										{column.subLabel}
-									</div>
-								)}
-							</div>
+							{column.label}
 						</ClayTable.Cell>
 					))}
 				</ClayTable.Row>
@@ -62,8 +52,8 @@ const Table = ({className, columns, onRowClick, rows}: IProps) => {
 			<ClayTable.Body align="left">
 				{rows.map((row, index) => (
 					<ClayTable.Row
-						className={`${className}-row`}
-						key={index}
+						className={row.className}
+						key={row.id ?? index}
 						onClick={() => onRowClick && onRowClick(row)}
 					>
 						{columns.map((column) => (
