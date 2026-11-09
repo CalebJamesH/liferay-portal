@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
-import {Button as ClayButton} from '@clayui/core';
 import {ClayCheckbox, ClayRadio} from '@clayui/form';
 import ClayIcon from '@clayui/icon';
 import classNames from 'classnames';
@@ -13,6 +12,7 @@ import i18n from '~/utils/I18n';
 import {JiraEnum} from '~/utils/constants/JiraEnum';
 import {IFilterOptions} from '~/utils/constants/filterOptions';
 import {IProps as ISortOptions} from '~/utils/constants/sortOptions';
+import Button from '~/components/Button/Button';
 
 import './SVFilter.scss';
 
@@ -119,7 +119,7 @@ const SVFilter = ({
 					'sv-filter-box-closed': !isExpanded,
 				})}
 			>
-				<button
+				<Button
 					aria-controls={`${filterKey}-options`}
 					aria-expanded={isExpanded}
 					className="align-items-center bg-transparent border-0 d-flex justify-content-between p-0 sv-filter-section-header w-100"
@@ -128,27 +128,27 @@ const SVFilter = ({
 					<h5 className="m-0">{i18n.translate(languageKey)}</h5>
 
 					<ClayIcon symbol="angle-down" />
-				</button>
+				</Button>
 
 				<div className="sv-filter-box-body" id={`${filterKey}-options`}>
 					<div className="d-flex my-2">
-						<ClayButton
+						<Button
 							aria-label={i18n.translate('select-all')}
 							className="font-weight-semi-bold mr-3 p-0 sv-link sv-select-all-button"
 							displayType="link"
 							onClick={() => setFilterValues(filterKey, options)}
 						>
 							{i18n.translate('select-all')}
-						</ClayButton>
+						</Button>
 
-						<ClayButton
+						<Button
 							aria-label={i18n.translate('clear')}
 							className="font-weight-semi-bold p-0 sv-clear-button sv-link"
 							displayType="link"
 							onClick={() => setFilterValues(filterKey, [])}
 						>
 							{i18n.translate('clear')}
-						</ClayButton>
+						</Button>
 					</div>
 
 					{displayedOptions.map((value) => (
@@ -163,7 +163,7 @@ const SVFilter = ({
 					))}
 
 					{options.length > 8 && (
-						<ClayButton
+						<Button
 							aria-label={
 								isViewAll
 									? i18n.translate('view-less')
@@ -176,7 +176,7 @@ const SVFilter = ({
 							{isViewAll
 								? i18n.translate('view-less')
 								: i18n.translate('view-all')}
-						</ClayButton>
+						</Button>
 					)}
 				</div>
 			</div>
