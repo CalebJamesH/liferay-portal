@@ -6,7 +6,9 @@ liferay-learn-etc-spring-boot-oahs:
     .serviceScheme: http
     name: Liferay Learn Etc Spring Boot OAuth Application Headless Server
     scopes:
+        -   Liferay.Headless.Admin.Site.everything.read
         -   Liferay.Headless.Admin.User.everything
+        -   Liferay.Headless.Delivery.everything.read
         -   Liferay.Object.Admin.REST.everything.read
         -   c_article.everything
         -   c_attachment.everything
