@@ -9,7 +9,6 @@ import com.liferay.client.extension.util.spring.boot3.service.BaseService;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.util.ArrayUtil;
-import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 
 import java.util.ArrayList;
@@ -49,7 +48,7 @@ public class JiraService extends BaseService {
 	public void evictAffectedVersionsCache() throws Exception {
 	}
 
-	@CacheEvict(allEntries = true, value = {"issue", "issues"})
+	@CacheEvict(allEntries = true, value = {"issue", "issueIds", "issues"})
 	@Scheduled(
 		cron = "${liferay.learn.jira.service.issues.cache.eviction.cron}"
 	)
@@ -79,14 +78,11 @@ public class JiraService extends BaseService {
 			Set<String> affectedVersions = new TreeSet<>();
 
 			while (true) {
-				JSONObject jsonObject = _searchJSONObject(
-					sb.toString(), 100, nextPageToken, returnFields);
+				JSONObject searchJSONObject = searchJSONObject(
+					null, sb.toString(), 100, nextPageToken, returnFields);
 
-				if (jsonObject == null) {
-					break;
-				}
-
-				JSONArray issuesJSONArray = jsonObject.getJSONArray("issues");
+				JSONArray issuesJSONArray = searchJSONObject.getJSONArray(
+					"issues");
 
 				for (int i = 0; i < issuesJSONArray.length(); i++) {
 					JSONObject issueJSONObject = issuesJSONArray.getJSONObject(
@@ -107,7 +103,7 @@ public class JiraService extends BaseService {
 					}
 				}
 
-				nextPageToken = jsonObject.optString("nextPageToken");
+				nextPageToken = searchJSONObject.optString("nextPageToken");
 
 				if (Validator.isNull(nextPageToken)) {
 					break;
@@ -121,6 +117,46 @@ public class JiraService extends BaseService {
 		}
 
 		return null;
+	}
+
+	public JSONArray getComponentsJSONArray(String projectKey)
+		throws Exception {
+
+		return new JSONArray(
+			get(
+				_getCredentials(),
+				UriComponentsBuilder.fromUriString(
+					StringBundler.concat(
+						_jiraURL, _URL_REST_API_3,
+						"/project/{projectKey}/components")
+				).buildAndExpand(
+					projectKey
+				).toUri()));
+	}
+
+	@Cacheable("issueIds")
+	public long[] getIssueIds(String jql) throws Exception {
+		List<Long> issueIds = new ArrayList<>();
+
+		String nextPageToken = null;
+
+		do {
+			JSONObject searchJSONObject = searchJSONObject(
+				null, jql, _ISSUE_IDS_PAGE_SIZE, nextPageToken, "id");
+
+			JSONArray issuesJSONArray = searchJSONObject.getJSONArray("issues");
+
+			for (int i = 0; i < issuesJSONArray.length(); i++) {
+				JSONObject issueJSONObject = issuesJSONArray.getJSONObject(i);
+
+				issueIds.add(issueJSONObject.getLong("id"));
+			}
+
+			nextPageToken = searchJSONObject.optString("nextPageToken");
+		}
+		while (Validator.isNotNull(nextPageToken));
+
+		return ArrayUtil.toLongArray(issueIds);
 	}
 
 	@Cacheable("issue")
@@ -280,15 +316,11 @@ public class JiraService extends BaseService {
 		};
 
 		while (true) {
-			JSONObject searchResponseJSONObject = _searchJSONObject(
-				sb.toString(), 100, nextPageToken, returnFields);
+			JSONObject searchJSONObject = searchJSONObject(
+				"renderedFields", sb.toString(), 100, nextPageToken,
+				returnFields);
 
-			if (searchResponseJSONObject == null) {
-				break;
-			}
-
-			JSONArray issuesJSONArray = searchResponseJSONObject.getJSONArray(
-				"issues");
+			JSONArray issuesJSONArray = searchJSONObject.getJSONArray("issues");
 
 			for (int i = 0; i < issuesJSONArray.length(); i++) {
 				jsonObjects.add(
@@ -296,7 +328,7 @@ public class JiraService extends BaseService {
 						issuesJSONArray.getJSONObject(i)));
 			}
 
-			nextPageToken = searchResponseJSONObject.optString("nextPageToken");
+			nextPageToken = searchJSONObject.optString("nextPageToken");
 
 			if (Validator.isNull(nextPageToken)) {
 				break;
@@ -304,6 +336,38 @@ public class JiraService extends BaseService {
 		}
 
 		return jsonObjects;
+	}
+
+	public JSONObject searchJSONObject(
+			String expand, String jql, int maxResults, String nextPageToken,
+			String... fields)
+		throws Exception {
+
+		JSONObject jsonObject = new JSONObject(
+		).put(
+			"fields", new JSONArray(fields)
+		).put(
+			"jql", jql
+		).put(
+			"maxResults", maxResults
+		);
+
+		if (Validator.isNotNull(expand)) {
+			jsonObject.put("expand", expand);
+		}
+
+		if (Validator.isNotNull(nextPageToken)) {
+			jsonObject.put("nextPageToken", nextPageToken);
+		}
+
+		return new JSONObject(
+			post(
+				_getCredentials(), jsonObject.toString(),
+				UriComponentsBuilder.fromUriString(
+					StringBundler.concat(
+						_jiraURL, _URL_REST_API_3, "/search/jql")
+				).build(
+				).toUri()));
 	}
 
 	private JSONArray _flattenJSONArray(JSONArray jsonArray) {
@@ -357,41 +421,6 @@ public class JiraService extends BaseService {
 	private String _getJSONObjectFieldValue(JSONObject jsonObject, String key) {
 		if (jsonObject != null) {
 			return jsonObject.optString(key);
-		}
-
-		return null;
-	}
-
-	private JSONObject _searchJSONObject(
-			String jql, int maxResults, String nextPageToken,
-			String[] returnFields)
-		throws Exception {
-
-		try {
-			return new JSONObject(
-				get(
-					_getCredentials(),
-					UriComponentsBuilder.fromUriString(
-						StringBundler.concat(
-							_jiraURL, _URL_REST_API_3, "/search/jql")
-					).queryParam(
-						"expand", "renderedFields"
-					).queryParam(
-						"fields", StringUtil.merge(returnFields)
-					).queryParam(
-						"jql", jql
-					).queryParam(
-						"maxResults", maxResults
-					).queryParam(
-						"nextPageToken", nextPageToken
-					).build(
-					).toUri()));
-		}
-		catch (Exception exception) {
-			if (_log.isWarnEnabled()) {
-				_log.warn(
-					"Unable to get Jira issues with JQL " + jql, exception);
-			}
 		}
 
 		return null;
@@ -538,6 +567,8 @@ public class JiraService extends BaseService {
 	private static final String _FIELD_ISSUE_KEY = "key";
 
 	private static final String _FIELD_VERSIONS = "versions";
+
+	private static final int _ISSUE_IDS_PAGE_SIZE = 5000;
 
 	private static final String _URL_REST_API_3 = "/rest/api/3";
 
