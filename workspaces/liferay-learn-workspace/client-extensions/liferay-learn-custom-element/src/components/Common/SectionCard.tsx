@@ -5,11 +5,19 @@
 
 import ClayLayout from '@clayui/layout';
 import {ClayTooltipProvider} from '@clayui/tooltip';
-import React from 'react';
 
 import {getPersonasLabel, getPersonasTooltip, truncateText} from '../../utils/util';
 
 import './SectionCard.scss';
+
+type SectionCardProps = {
+	description: string;
+	expertise: string;
+	index: string;
+	link: string;
+	personas: string;
+	title: string;
+};
 
 const SectionCard = ({
 	description,
@@ -18,7 +26,7 @@ const SectionCard = ({
 	link,
 	personas,
 	title,
-}) => {
+}: SectionCardProps) => {
 	return (
 		<ClayLayout.Col className="course-layout-col d-flex" key={index} lg={4} md={6} sm={12} xl={4} xs={12}>
 			<a className="section-card-link" href={link} >
