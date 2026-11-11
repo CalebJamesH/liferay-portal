@@ -1,7 +1,7 @@
 .sv-item {
 	.sv-badge {
-		background-color: #e6ebf5;
-		color: #1c3667;
+		background-color: var(--color-state-info-lighten-2, #e6ebf5);
+		color: var(--color-state-info-darken-2, #1c3667);
 		font-size: 11px;
 		line-height: 1.4;
 	}
@@ -22,8 +22,8 @@
 	.sv-item-header {
 		background: linear-gradient(
 			90deg,
-			#00256c 20%,
-			#0038a3 40%,
+			var(--color-brand-primary-darken-5, #00256c) 20%,
+			var(--color-brand-primary-darken-3, #003eb3) 40%,
 			#0b5fff 60%,
 			#00a4fa 80%
 		);

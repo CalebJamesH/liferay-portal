@@ -1,7 +1,7 @@
 .sv-list-items {
 	.sv-list-item {
 		border-radius: 4px;
-		color: #3f404b;
+		color: var(--color-neutral-9, #3f404b);
 		cursor: pointer;
 		display: flex;
 		flex-direction: column;
@@ -11,7 +11,7 @@
 		padding: 12px;
 
 		&:hover {
-			background-color: #edf3fe;
+			background-color: var(--color-action-primary-hover-10, #edf3fe);
 		}
 
 		+ .sv-list-item {
@@ -26,12 +26,12 @@
 	}
 
 	.sv-list-item-label {
-		color: #6b6c7e;
+		color: var(--color-neutral-7, #6b6c7e);
 		font-weight: 600;
 	}
 
 	.sv-name {
-		color: #0b5fff;
+		color: var(--color-action-primary-default, #0b5fff);
 	}
 
 	.sv-severity {

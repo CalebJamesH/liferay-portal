@@ -1,6 +1,6 @@
 .sv-filter-content {
 	.sv-filter-box {
-		background-color: #f7f7f8;
+		background-color: var(--color-neutral-1, #f7f7f8);
 		border-radius: var(--border-radius-lg);
 
 		.custom-control-input {
@@ -9,7 +9,7 @@
 		}
 
 		.custom-control-label {
-			color: #282934;
+			color: var(--color-neutral-10, #282934);
 			font-size: 18px;
 			font-weight: 600;
 			height: 1.5rem;
@@ -46,7 +46,7 @@
 	}
 
 	.sv-filter-section-header {
-		color: #332b4a;
+		color: var(--color-neutral-10, #332b4a);
 		cursor: pointer;
 
 		.lexicon-icon {
@@ -55,7 +55,7 @@
 	}
 
 	.sv-link {
-		color: #282934;
+		color: var(--color-neutral-10, #282934);
 		font-size: var(--font-size-sm);
 
 		&.disabled {

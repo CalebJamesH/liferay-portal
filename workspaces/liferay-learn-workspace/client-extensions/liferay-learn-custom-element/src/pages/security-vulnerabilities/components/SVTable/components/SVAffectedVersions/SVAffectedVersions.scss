@@ -1,6 +1,6 @@
 .sv-affected-version {
-	background-color: #e2e2e4;
-	color: #54555f;
+	background-color: var(--color-neutral-2, #e2e2e4);
+	color: var(--color-neutral-8, #54555f);
 	font-size: var(--font-size-sm);
 	min-width: var(--spacer-6);
 }

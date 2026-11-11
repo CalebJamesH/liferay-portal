@@ -5,11 +5,11 @@
 	}
 
 	.be-header-label {
-		color: #54555f;
+		color: var(--color-neutral-8, #54555f);
 	}
 
 	.sv-name {
-		color: #0b5fff;
+		color: var(--color-action-primary-default, #0b5fff);
 	}
 
 	.sv-priority-summary-column {

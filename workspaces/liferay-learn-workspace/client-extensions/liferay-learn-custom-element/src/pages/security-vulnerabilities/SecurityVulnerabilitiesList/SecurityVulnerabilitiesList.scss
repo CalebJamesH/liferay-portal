@@ -1,6 +1,6 @@
 .sv-list {
 	.cloud-lock-icon {
-		background-color: #e7efff;
+		background-color: var(--color-brand-primary-lighten-5, #e7efff);
 		border-radius: 10px;
 		height: 48px;
 		width: 48px;
@@ -13,8 +13,8 @@
 	.sv-list-header {
 		background: linear-gradient(
 			180deg,
-			#00256c 5.72%,
-			#0038a3 26.08%,
+			var(--color-brand-primary-darken-5, #00256c) 5.72%,
+			var(--color-brand-primary-darken-3, #003eb3) 26.08%,
 			#0b5fff 44.48%,
 			#00a4fa 64.33%,
 			rgba(46, 183, 255, 0.8) 77.33%,
