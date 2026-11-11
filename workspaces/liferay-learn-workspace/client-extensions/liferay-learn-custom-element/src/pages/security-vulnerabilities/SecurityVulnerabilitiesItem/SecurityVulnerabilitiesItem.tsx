@@ -132,6 +132,9 @@ const SecurityVulnerabilitiesItem = () => {
 
 					<div
 						className="sv-structured-data"
+
+						// XSS: the description is sanitized by DOMPurify.sanitize
+
 						dangerouslySetInnerHTML={{
 							__html: DOMPurify.sanitize(
 								fields[JiraEnum.DESCRIPTION] ?? ''

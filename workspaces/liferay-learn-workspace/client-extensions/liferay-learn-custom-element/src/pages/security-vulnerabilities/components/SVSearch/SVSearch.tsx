@@ -44,12 +44,12 @@ const SVSearch = ({keywords = '', onChange}: SVSearchProps) => {
 		<div className="flex-grow-1 position-relative sv-search">
 			<ClayInput
 				aria-label={i18n.translate(
-					'search-for-security-vulnerability-by-keyword-or-cve-id'
+					'search-for-a-security-vulnerability-by-keyword-or-cve-id'
 				)}
 				className="border border-brand-primary-lighten-4 font-weight-semi-bold px-5 py-3 rounded-pill shadow-lg sv-search-input w-100"
 				onChange={(event) => handleChange(event.target.value)}
 				placeholder={i18n.translate(
-					'search-for-security-vulnerability-by-keyword-or-cve-id'
+					'search-for-a-security-vulnerability-by-keyword-or-cve-id'
 				)}
 				type="text"
 				value={value}

@@ -17,12 +17,12 @@
 	"published": "Published",
 	"search": "Search",
 	"search-event-name": "Search Event Name",
-	"search-for-security-vulnerability-by-keyword-or-cve-id": "Search for security vulnerability by keyword or CVE ID.",
+	"search-for-a-security-vulnerability-by-keyword-or-cve-id": "Search for a security vulnerability by keyword or CVE ID.",
 	"security-advisories": "Security Advisories",
 	"select-all": "Select All",
 	"severity": "Severity",
-	"showing-x-to-x-of-x-entries": "Showing {0} to {1} of {2} entries",
-	"sorry-there-are-no-results-found": "Sorry, there are no results found",
+	"showing-x-to-x-of-x-entries": "Showing {0} to {1} of {2} Entries",
+	"sorry-there-are-no-results-found": "Sorry, there are no results found.",
 	"sort-by": "Sort By",
 	"summary": "Summary",
 	"the-requested-search-does-not-exist-in-our-database-please-try-again-with-different-criteria": "The requested search does not exist in our database. Please try again with different criteria.",
@@ -30,8 +30,8 @@
 	"view-all": "View All",
 	"view-less": "View Less",
 	"welcome-to-the-liferay-security-advisories-dashboard-use-this-tool-to-search-and-monitor-documented-security-vulnerabilities-cve-identifiers-and-classification-statuses-across-liferay-products-including-dxp-paas-and-saas-for-detailed-information-regarding-our-triage-protocols-patching-timelines-or-to-responsibly-report-a-security-issue-please-visit-the-official-liferay-security-statement": "Welcome to the Liferay Security Advisories dashboard. Use this tool to search and monitor documented security vulnerabilities, CVE identifiers, and classification statuses across Liferay products, including DXP, PaaS, and SaaS. For detailed information regarding our triage protocols, patching timelines, or to responsibly report a security issue, please visit the official Liferay Security Statement.",
-	"x-entries": "{0} entries",
-	"x-others": "+{0} others",
-	"x-result-for-x": "{0} result for {1}",
-	"x-results-for-x": "{0} results for {1}"
+	"x-entries": "{0} Entries",
+	"x-others": "+{0} Others",
+	"x-result-for-x": "{0} Result for {1}",
+	"x-results-for-x": "{0} Results for {1}"
 }
