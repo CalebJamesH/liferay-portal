@@ -24,8 +24,8 @@
 			90deg,
 			var(--color-brand-primary-darken-5, #00256c) 20%,
 			var(--color-brand-primary-darken-3, #003eb3) 40%,
-			#0b5fff 60%,
-			#00a4fa 80%
+			var(--color-brand-primary, #0b5fff) 60%,
+			var(--color-brand-primary-lighten-2, #00a4fa) 80%
 		);
 		border-radius: var(--border-radius-lg);
 		color: var(--color-neutral-0);
