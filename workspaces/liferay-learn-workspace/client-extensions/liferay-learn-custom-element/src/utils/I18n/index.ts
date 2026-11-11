@@ -19,6 +19,14 @@ export const languages: Languages = {
 	pt_BR,
 };
 
+const translate = (key: string) => {
+	const languageId = Liferay.ThemeDisplay.getLanguageId().toString();
+
+	const languageEntry = languages[languageId] || languages.en_US;
+
+	return languageEntry[key] || languages.en_US[key] || key;
+};
+
 const sub = (key: string, subValues: string[]) => {
 	let value = translate(key);
 
@@ -27,14 +35,6 @@ const sub = (key: string, subValues: string[]) => {
 	});
 
 	return value;
-};
-
-const translate = (key: string) => {
-	const languageId = Liferay.ThemeDisplay.getLanguageId().toString();
-
-	const languageEntry = languages[languageId] || languages.en_US;
-
-	return languageEntry[key] || languages.en_US[key] || key;
 };
 
 const i18n = {

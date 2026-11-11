@@ -6,7 +6,11 @@
 import ClayLayout from '@clayui/layout';
 import {ClayTooltipProvider} from '@clayui/tooltip';
 
-import {getPersonasLabel, getPersonasTooltip, truncateText} from '../../utils/util';
+import {
+	getPersonasLabel,
+	getPersonasTooltip,
+	truncateText,
+} from '../../utils/util';
 
 import './SectionCard.scss';
 
@@ -28,8 +32,16 @@ const SectionCard = ({
 	title,
 }: SectionCardProps) => {
 	return (
-		<ClayLayout.Col className="course-layout-col d-flex" key={index} lg={4} md={6} sm={12} xl={4} xs={12}>
-			<a className="section-card-link" href={link} >
+		<ClayLayout.Col
+			className="course-layout-col d-flex"
+			key={index}
+			lg={4}
+			md={6}
+			sm={12}
+			xl={4}
+			xs={12}
+		>
+			<a className="section-card-link" href={link}>
 				<div className="d-flex section-card-container">
 					<div className="card-content d-flex flex-column justify-content-between">
 						<h4 className="title">{title}</h4>

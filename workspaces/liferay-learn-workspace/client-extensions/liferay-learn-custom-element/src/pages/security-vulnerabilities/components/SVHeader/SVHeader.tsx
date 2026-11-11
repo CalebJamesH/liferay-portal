@@ -15,12 +15,7 @@ type SVHeaderProps = {
 	title: string;
 };
 
-const SVHeader = ({
-	children,
-	icon,
-	label,
-	title,
-}: SVHeaderProps) => {
+const SVHeader = ({children, icon, label, title}: SVHeaderProps) => {
 	return (
 		<div className="d-flex flex-column sv-header">
 			<span className="font-weight-semi-bold text-white">{label}</span>

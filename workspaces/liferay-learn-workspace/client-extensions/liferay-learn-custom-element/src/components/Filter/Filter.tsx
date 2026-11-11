@@ -6,9 +6,9 @@
 import Button from '~/components/Button/Button';
 import i18n from '~/utils/I18n';
 
+import FilterDropdown from './components/FilterDropdown/FilterDropdown';
 import FilterContent from './components/FilterDropdown/components/FilterContent/FilterContent';
 import {IFilterNavigationItem} from './components/FilterDropdown/components/FilterNavigation/FilterNavigation';
-import FilterDropdown from './components/FilterDropdown/FilterDropdown';
 
 export interface IFilterValue {
 	key: string;

@@ -52,9 +52,7 @@ const SVListItemContent = ({row}: {row: ISVRow}) => {
 				<div className="ml-2 text-nowrap">{row.published}</div>
 			</div>
 
-			<div className="sv-summary text-break text-wrap">
-				{row.summary}
-			</div>
+			<div className="sv-summary text-break text-wrap">{row.summary}</div>
 
 			<div className="sv-list-item-details">
 				<div>

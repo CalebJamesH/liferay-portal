@@ -12,7 +12,7 @@ import i18n from '~/utils/I18n';
 type SearchBarProps = {
 	isBusinessEvent: boolean;
 	onSearchSubmit: (searchTerm: string) => void;
-}
+};
 
 const SearchBar = ({isBusinessEvent, onSearchSubmit}: SearchBarProps) => {
 	const [term, setTerm] = useState('');
