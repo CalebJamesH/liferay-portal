@@ -1,0 +1,45 @@
+.sv-list {
+	.cloud-lock-icon {
+		background-color: #e7efff;
+		border-radius: 10px;
+		height: 48px;
+		width: 48px;
+	}
+
+	.sv-body-container {
+		max-width: 1600px;
+	}
+
+	.sv-list-header {
+		background: linear-gradient(
+			180deg,
+			#00256c 5.72%,
+			#0038a3 26.08%,
+			#0b5fff 44.48%,
+			#00a4fa 64.33%,
+			rgba(46, 183, 255, 0.8) 77.33%,
+			rgba(255, 255, 255, 0.5) 96.94%
+		);
+		min-height: 440px;
+
+		.sv-gradient {
+			right: 0;
+		}
+
+		.sv-search-container {
+			max-width: 1600px;
+		}
+	}
+}
+
+@media (max-width: 991.98px) {
+	.sv-table-content {
+		> .sv-filter-column {
+			padding: 24px 28px;
+		}
+
+		> .sv-results-column {
+			padding: 24px 12px;
+		}
+	}
+}
