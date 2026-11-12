@@ -1,0 +1,53 @@
+.release-notes-facet {
+	border-radius: 10px;
+}
+
+.release-notes-facet-body {
+	gap: 12px;
+}
+
+.release-notes-facet-link.btn {
+	color: #2b3a4b;
+	font-size: 13px;
+	line-height: 16px;
+
+	&:disabled {
+		color: #959da5;
+		opacity: 1;
+	}
+}
+
+.release-notes-facet-section-title {
+	color: #282934;
+	font-size: 13px;
+	line-height: 16px;
+}
+
+.release-notes-facet-title {
+	line-height: 20px;
+}
+
+.release-notes-facet-toggle.btn {
+	color: #2b3a4b;
+	height: 32px;
+	width: 32px;
+
+	&:hover {
+		background-color: #e2e2e4;
+	}
+
+	.lexicon-icon {
+		height: 16px;
+		width: 16px;
+	}
+}
+
+.release-notes-facet-view-all.btn {
+	color: #2b3a4b;
+	font-size: 14px;
+	line-height: 16px;
+
+	&:hover {
+		text-decoration: underline;
+	}
+}

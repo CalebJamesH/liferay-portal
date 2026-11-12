@@ -1,0 +1,15 @@
+.input-with-icon {
+	.form-control {
+		padding-right: 2.5rem;
+	}
+
+	.lexicon-icon {
+		height: 1rem;
+		pointer-events: none;
+		position: absolute;
+		right: 1rem;
+		top: 50%;
+		transform: translateY(-50%);
+		width: 1rem;
+	}
+}

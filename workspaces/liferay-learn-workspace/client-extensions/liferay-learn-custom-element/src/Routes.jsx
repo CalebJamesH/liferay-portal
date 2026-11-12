@@ -7,10 +7,12 @@ import React, {Suspense} from 'react';
 
 const lazyRoutes = {
 	'certification-list': React.lazy(() => import('./components/Certification/CertificationList')),
+	'commerce-release-notes': React.lazy(() => import('./pages/CommerceReleaseNotes/CommerceReleaseNotesRouter')),
 	'course-list': React.lazy(() => import('./components/Course/CoursesList')),
+	'dxp-release-notes': React.lazy(() => import('./pages/DXPReleaseNotes/DXPReleaseNotesRouter')),
 	'landing-page-view': React.lazy(() => import('./components/LandingPageView')),
-	'learning-path-list': React.lazy(() => import('./components/LearningPath/LearningPathList')
-	),
+	'learning-path-list': React.lazy(() => import('./components/LearningPath/LearningPathList')),
+	'security-vulnerabilities': React.lazy(() => import('./pages/security-vulnerabilities/SecurityVulnerabilitiesRouter')),
 };
 
 export default function Routes({path, properties}) {
