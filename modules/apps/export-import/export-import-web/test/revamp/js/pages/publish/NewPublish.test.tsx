@@ -112,6 +112,7 @@ const getFilteredPreviewCall = () =>
 
 const mockAPIRoutes = ({
 	deleteStatus = 204,
+	postError = false,
 	scheduledPublishProcess = SCHEDULED_PUBLISH_PROCESS,
 } = {}) => {
 	fetch.mockResponse(async (request) => {
@@ -119,6 +120,20 @@ const mockAPIRoutes = ({
 			return {
 				body: '',
 				status: deleteStatus,
+			};
+		}
+
+		if (
+			postError &&
+			request.method === 'POST' &&
+			request.url.endsWith('publish-processes')
+		) {
+			return {
+				body: JSON.stringify({
+					status: 'BAD_REQUEST',
+					title: 'Server error title',
+				}),
+				status: 400,
 			};
 		}
 
@@ -205,6 +220,14 @@ describe('NewPublish', () => {
 		expect(Liferay.Util.navigate).toHaveBeenCalledWith(
 			DEFAULT_PROPS.processesBackURL
 		);
+
+		expect(Liferay.Util.openToast).toHaveBeenCalledWith({
+			message: 'the-process-has-started',
+			type: 'success',
+		});
+		expect(
+			screen.getByRole('button', {name: /publish-to-live/i})
+		).toBeDisabled();
 	});
 
 	it('selects the schedule option when it is the default', async () => {
@@ -536,6 +559,11 @@ describe('NewPublish', () => {
 		expect(Liferay.Util.navigate).toHaveBeenCalledWith(
 			DEFAULT_PROPS.scheduledBackURL
 		);
+
+		expect(Liferay.Util.openToast).toHaveBeenCalledWith({
+			message: 'the-publication-has-been-scheduled',
+			type: 'success',
+		});
 	});
 
 	it('drops the end date once the repetition goes back to never', async () => {
@@ -1091,6 +1119,27 @@ describe('NewPublish', () => {
 		expect(Liferay.Util.openToast).toHaveBeenCalledWith(
 			expect.objectContaining({type: 'danger'})
 		);
+	});
+
+	it('shows the server error title when the publication fails', async () => {
+		mockAPIRoutes({postError: true});
+
+		renderComponent();
+
+		await fillRequiredFields();
+
+		await user.click(
+			screen.getByRole('button', {name: /publish-to-live/i})
+		);
+
+		await waitFor(() => {
+			expect(Liferay.Util.openToast).toHaveBeenCalledWith({
+				message: 'Server error title',
+				type: 'danger',
+			});
+		});
+
+		expect(Liferay.Util.navigate).not.toHaveBeenCalled();
 	});
 
 	it('requires a cron expression for a custom recurrence', async () => {

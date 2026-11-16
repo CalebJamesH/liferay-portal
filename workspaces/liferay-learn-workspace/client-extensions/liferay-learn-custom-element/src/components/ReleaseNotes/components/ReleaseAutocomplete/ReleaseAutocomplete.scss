@@ -1,0 +1,115 @@
+.release-autocomplete {
+	border-radius: 0;
+	flex: 4 1 0;
+	gap: 2px;
+	min-width: 0;
+
+	& + &::before {
+		background-color: #e2e2e4;
+		content: '';
+		height: 64px;
+		left: 0;
+		position: absolute;
+		top: 50%;
+		transform: translateY(-50%);
+		width: 1px;
+	}
+
+	&:first-child {
+		border-radius: 15px 0 0 15px;
+		flex-grow: 3;
+	}
+
+	&:focus-within {
+		box-shadow: inset 0 0 0 2px #80acff;
+	}
+
+	&:last-child {
+		border-radius: 0 15px 15px 0;
+	}
+
+	.form-control {
+		background-color: transparent;
+		background-image: none;
+		border: 0;
+		border-radius: 0;
+		box-shadow: none;
+		color: #282934;
+		font-family: var(--font-family-sans-serif, 'Source Sans 3');
+		font-size: 24px;
+		font-weight: 600;
+		height: 28px;
+		line-height: 28px;
+		min-width: 0;
+		padding: 0 32px 0 0;
+		text-overflow: ellipsis;
+
+		&:disabled {
+			background-color: transparent;
+			cursor: not-allowed;
+			opacity: 1;
+		}
+
+		&::placeholder {
+			color: #6c6c75;
+			opacity: 1;
+		}
+	}
+
+	.input-group,
+	.input-group-item {
+		flex: 1 1 0;
+		min-width: 0;
+	}
+
+	label {
+		color: #6c6c75;
+		letter-spacing: 0.7px;
+		line-height: 20px;
+	}
+
+	@media (max-width: 767.98px) {
+		flex: none;
+		width: 100%;
+
+		& + &::before {
+			height: 1px;
+			left: 16px;
+			right: 16px;
+			top: 0;
+			transform: none;
+			width: auto;
+		}
+
+		&:first-child {
+			border-radius: 15px 15px 0 0;
+		}
+
+		&:last-child {
+			border-radius: 0 0 15px 15px;
+		}
+
+		.form-control {
+			font-size: 20px;
+		}
+	}
+}
+
+.release-autocomplete-caret {
+	&.lexicon-icon {
+		color: #999aa3;
+		height: 24px;
+		pointer-events: none;
+		position: absolute;
+		right: 0;
+		top: 50%;
+		transform: translateY(-50%);
+		width: 24px;
+	}
+}
+
+.release-autocomplete-control {
+	> svg:first-child:not(.lexicon-icon) {
+		flex-shrink: 0;
+	}
+}

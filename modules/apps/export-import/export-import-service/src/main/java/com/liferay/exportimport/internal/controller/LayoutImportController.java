@@ -10,6 +10,7 @@ import com.liferay.exportimport.configuration.ExportImportServiceConfiguration;
 import com.liferay.exportimport.constants.ExportImportConstants;
 import com.liferay.exportimport.controller.PortletImportController;
 import com.liferay.exportimport.internal.lar.GroupImporter;
+import com.liferay.exportimport.internal.lar.PortletLayoutListenerHelper;
 import com.liferay.exportimport.internal.util.ManifestXMLFilePathUtil;
 import com.liferay.exportimport.kernel.controller.ExportImportController;
 import com.liferay.exportimport.kernel.controller.ImportController;
@@ -62,10 +63,12 @@ import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
 import com.liferay.portal.kernel.service.ClassNameLocalService;
 import com.liferay.portal.kernel.service.GroupLocalService;
 import com.liferay.portal.kernel.service.GroupService;
+import com.liferay.portal.kernel.service.LayoutLocalService;
 import com.liferay.portal.kernel.service.LayoutPrototypeLocalService;
 import com.liferay.portal.kernel.service.LayoutSetLocalService;
 import com.liferay.portal.kernel.service.LayoutSetPrototypeLocalService;
 import com.liferay.portal.kernel.service.PortletLocalService;
+import com.liferay.portal.kernel.service.PortletPreferencesLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
 import com.liferay.portal.kernel.util.ArrayUtil;
@@ -881,56 +884,21 @@ public class LayoutImportController implements ImportController {
 			layoutSetPrototypeUuid = GetterUtil.getString(
 				headerElement.attributeValue("type-uuid"));
 
-			if (!_layoutVisibilityManager.isPrivateLayoutsEnabled(
-					group.getCompanyId())) {
+			if (headerElement.attribute("theme-id") != null) {
+				if (!_layoutVisibilityManager.isPrivateLayoutsEnabled(
+						group.getCompanyId())) {
 
-				LayoutSet publicLayoutSet =
-					_layoutSetLocalService.fetchLayoutSet(
-						group.getGroupId(), false);
-
-				if (publicLayoutSet != null) {
-					publicLayoutSet.setThemeId(
-						GetterUtil.getString(
-							headerElement.attributeValue("theme-id")));
-					publicLayoutSet.setColorSchemeId(
-						GetterUtil.getString(
-							headerElement.attributeValue("color-scheme-id")));
-
-					_layoutSetLocalService.updateLayoutSet(publicLayoutSet);
+					_updateLayoutSetTheme(
+						group.getGroupId(), headerElement, false);
+					_updateLayoutSetTheme(
+						group.getGroupId(), headerElement, true);
 				}
-
-				LayoutSet privateLayoutSet =
-					_layoutSetLocalService.fetchLayoutSet(
-						group.getGroupId(), true);
-
-				if (privateLayoutSet != null) {
-					privateLayoutSet.setThemeId(
-						GetterUtil.getString(
-							headerElement.attributeValue("theme-id")));
-					privateLayoutSet.setColorSchemeId(
-						GetterUtil.getString(
-							headerElement.attributeValue("color-scheme-id")));
-
-					_layoutSetLocalService.updateLayoutSet(privateLayoutSet);
-				}
-			}
-			else {
-				boolean privateLayout = MapUtil.getBoolean(
-					portletDataContext.getParameterMap(),
-					PortletDataHandlerKeys.LAYOUT_SET_PRIVATE_LAYOUT);
-
-				LayoutSet layoutSet = _layoutSetLocalService.fetchLayoutSet(
-					group.getGroupId(), privateLayout);
-
-				if (layoutSet != null) {
-					layoutSet.setThemeId(
-						GetterUtil.getString(
-							headerElement.attributeValue("theme-id")));
-					layoutSet.setColorSchemeId(
-						GetterUtil.getString(
-							headerElement.attributeValue("color-scheme-id")));
-
-					_layoutSetLocalService.updateLayoutSet(layoutSet);
+				else {
+					_updateLayoutSetTheme(
+						group.getGroupId(), headerElement,
+						MapUtil.getBoolean(
+							portletDataContext.getParameterMap(),
+							PortletDataHandlerKeys.LAYOUT_SET_PRIVATE_LAYOUT));
 				}
 			}
 		}
@@ -976,6 +944,17 @@ public class LayoutImportController implements ImportController {
 				portletDataContext, groupElement);
 		}
 
+		// Portlet layout listeners
+
+		PortletLayoutListenerHelper portletLayoutListenerHelper =
+			new PortletLayoutListenerHelper(
+				_layoutLocalService, _portletLocalService,
+				_portletPreferencesLocalService);
+
+		portletLayoutListenerHelper.setUpPortlets(
+			companyId, portletDataContext.getGroupId(),
+			portletDataContext.isPrivateLayout(), userId);
+
 		// Asset links
 
 		_portletImportController.importAssetLinks(portletDataContext);
@@ -995,6 +974,25 @@ public class LayoutImportController implements ImportController {
 
 		groupImporter.importGroups(
 			portletDataContext, this::_importFile, userId);
+	}
+
+	private void _updateLayoutSetTheme(
+		long groupId, Element headerElement, boolean privateLayout) {
+
+		LayoutSet layoutSet = _layoutSetLocalService.fetchLayoutSet(
+			groupId, privateLayout);
+
+		if (layoutSet == null) {
+			return;
+		}
+
+		layoutSet.setThemeId(
+			GetterUtil.getString(headerElement.attributeValue("theme-id")));
+		layoutSet.setColorSchemeId(
+			GetterUtil.getString(
+				headerElement.attributeValue("color-scheme-id")));
+
+		_layoutSetLocalService.updateLayoutSet(layoutSet);
 	}
 
 	private void _validateLayoutPrototypes(
@@ -1125,6 +1123,9 @@ public class LayoutImportController implements ImportController {
 	private Language _language;
 
 	@Reference
+	private LayoutLocalService _layoutLocalService;
+
+	@Reference
 	private LayoutPrototypeLocalService _layoutPrototypeLocalService;
 
 	@Reference
@@ -1153,6 +1154,9 @@ public class LayoutImportController implements ImportController {
 
 	@Reference
 	private PortletLocalService _portletLocalService;
+
+	@Reference
+	private PortletPreferencesLocalService _portletPreferencesLocalService;
 
 	@Reference
 	private Staging _staging;

@@ -125,6 +125,20 @@ public class StyleBookSerDes {
 			sb.append("\"");
 		}
 
+		if (styleBook.getFrontendTokenDefinition() != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"frontendTokenDefinition\": ");
+
+			sb.append("\"");
+
+			sb.append(_escape(styleBook.getFrontendTokenDefinition()));
+
+			sb.append("\"");
+		}
+
 		if (styleBook.getFrontendTokensValues() != null) {
 			if (sb.length() > 1) {
 				sb.append(", ");
@@ -177,21 +191,6 @@ public class StyleBookSerDes {
 			sb.append("\"");
 		}
 
-		if (styleBook.getPreviewFileEntryExternalReferenceCode() != null) {
-			if (sb.length() > 1) {
-				sb.append(", ");
-			}
-
-			sb.append("\"previewFileEntryExternalReferenceCode\": ");
-
-			sb.append("\"");
-
-			sb.append(
-				_escape(styleBook.getPreviewFileEntryExternalReferenceCode()));
-
-			sb.append("\"");
-		}
-
 		if (styleBook.getScope() != null) {
 			if (sb.length() > 1) {
 				sb.append(", ");
@@ -214,6 +213,16 @@ public class StyleBookSerDes {
 			sb.append(_escape(styleBook.getThemeId()));
 
 			sb.append("\"");
+		}
+
+		if (styleBook.getThumbnailURLReference() != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"thumbnailURLReference\": ");
+
+			sb.append(String.valueOf(styleBook.getThumbnailURLReference()));
 		}
 
 		sb.append("}");
@@ -287,6 +296,15 @@ public class StyleBookSerDes {
 				String.valueOf(styleBook.getExternalReferenceCode()));
 		}
 
+		if (styleBook.getFrontendTokenDefinition() == null) {
+			map.put("frontendTokenDefinition", null);
+		}
+		else {
+			map.put(
+				"frontendTokenDefinition",
+				String.valueOf(styleBook.getFrontendTokenDefinition()));
+		}
+
 		if (styleBook.getFrontendTokensValues() == null) {
 			map.put("frontendTokensValues", null);
 		}
@@ -317,16 +335,6 @@ public class StyleBookSerDes {
 			map.put("name", String.valueOf(styleBook.getName()));
 		}
 
-		if (styleBook.getPreviewFileEntryExternalReferenceCode() == null) {
-			map.put("previewFileEntryExternalReferenceCode", null);
-		}
-		else {
-			map.put(
-				"previewFileEntryExternalReferenceCode",
-				String.valueOf(
-					styleBook.getPreviewFileEntryExternalReferenceCode()));
-		}
-
 		if (styleBook.getScope() == null) {
 			map.put("scope", null);
 		}
@@ -339,6 +347,15 @@ public class StyleBookSerDes {
 		}
 		else {
 			map.put("themeId", String.valueOf(styleBook.getThemeId()));
+		}
+
+		if (styleBook.getThumbnailURLReference() == null) {
+			map.put("thumbnailURLReference", null);
+		}
+		else {
+			map.put(
+				"thumbnailURLReference",
+				String.valueOf(styleBook.getThumbnailURLReference()));
 		}
 
 		return map;
@@ -379,6 +396,11 @@ public class StyleBookSerDes {
 				return false;
 			}
 			else if (Objects.equals(
+						jsonParserFieldName, "frontendTokenDefinition")) {
+
+				return false;
+			}
+			else if (Objects.equals(
 						jsonParserFieldName, "frontendTokensValues")) {
 
 				return false;
@@ -392,16 +414,15 @@ public class StyleBookSerDes {
 			else if (Objects.equals(jsonParserFieldName, "name")) {
 				return false;
 			}
-			else if (Objects.equals(
-						jsonParserFieldName,
-						"previewFileEntryExternalReferenceCode")) {
-
-				return false;
-			}
 			else if (Objects.equals(jsonParserFieldName, "scope")) {
 				return false;
 			}
 			else if (Objects.equals(jsonParserFieldName, "themeId")) {
+				return false;
+			}
+			else if (Objects.equals(
+						jsonParserFieldName, "thumbnailURLReference")) {
+
 				return false;
 			}
 
@@ -452,6 +473,14 @@ public class StyleBookSerDes {
 				}
 			}
 			else if (Objects.equals(
+						jsonParserFieldName, "frontendTokenDefinition")) {
+
+				if (jsonParserFieldValue != null) {
+					styleBook.setFrontendTokenDefinition(
+						(String)jsonParserFieldValue);
+				}
+			}
+			else if (Objects.equals(
 						jsonParserFieldName, "frontendTokensValues")) {
 
 				if (jsonParserFieldValue != null) {
@@ -474,15 +503,6 @@ public class StyleBookSerDes {
 					styleBook.setName((String)jsonParserFieldValue);
 				}
 			}
-			else if (Objects.equals(
-						jsonParserFieldName,
-						"previewFileEntryExternalReferenceCode")) {
-
-				if (jsonParserFieldValue != null) {
-					styleBook.setPreviewFileEntryExternalReferenceCode(
-						(String)jsonParserFieldValue);
-				}
-			}
 			else if (Objects.equals(jsonParserFieldName, "scope")) {
 				if (jsonParserFieldValue != null) {
 					styleBook.setScope(
@@ -493,6 +513,15 @@ public class StyleBookSerDes {
 			else if (Objects.equals(jsonParserFieldName, "themeId")) {
 				if (jsonParserFieldValue != null) {
 					styleBook.setThemeId((String)jsonParserFieldValue);
+				}
+			}
+			else if (Objects.equals(
+						jsonParserFieldName, "thumbnailURLReference")) {
+
+				if (jsonParserFieldValue != null) {
+					styleBook.setThumbnailURLReference(
+						ThumbnailURLReferenceSerDes.toDTO(
+							(String)jsonParserFieldValue));
 				}
 			}
 		}
@@ -582,4 +611,4 @@ public class StyleBookSerDes {
 	}
 
 }
-// LIFERAY-REST-BUILDER-HASH:174516762
+// LIFERAY-REST-BUILDER-HASH:-1650094063

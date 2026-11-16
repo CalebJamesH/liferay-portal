@@ -1,5 +1,6 @@
 import * as API from 'shared/api';
 import Card from 'shared/components/Card';
+import DataValue from 'shared/components/DataValue';
 import Loading from 'shared/components/Loading';
 import React from 'react';
 import {
@@ -11,6 +12,7 @@ import {
 	rangeSelectors,
 } from 'shared/components/FrontendDataSet';
 import {
+	isLifecycleStage,
 	LifecycleStages,
 	lifecycleStagesLabelMap,
 } from 'contacts/pages/account/utils/constants';
@@ -18,7 +20,6 @@ import {buildViews} from './utils';
 import {ICatalogField} from 'shared/api/catalog';
 import {RangeKeyTimeRanges} from 'shared/util/constants';
 import {Routes} from 'shared/util/router';
-import {toThousands} from 'shared/util/numbers';
 import {useRequest} from 'shared/hooks/useRequest';
 
 interface IAccountsDataSetProps {
@@ -30,7 +31,7 @@ interface IAccountsDataSetProps {
 	fieldCatalog?: ICatalogField[];
 	groupId: string;
 	industryFilter?: string;
-	lifecycleStageFilter?: LifecycleStages;
+	lifecycleStageFilter?: string;
 	rangeKeyFilter?: RangeKeyTimeRanges;
 	segmentFilter?: string;
 	segmentName?: string;
@@ -40,10 +41,11 @@ interface IAccountsDataSetProps {
 interface ILifecycleStageFieldValue {
 	externalReferenceCode: string;
 	id: string;
-	stageType: LifecycleStages;
+	stageName?: string;
+	stageType?: LifecycleStages;
 }
 
-const buildSelectionPreloadedData = (value?: string, label?: string) =>
+export const buildSelectionPreloadedData = (value?: string, label?: string) =>
 	value
 		? {
 				exclude: false,
@@ -81,8 +83,11 @@ const AccountsDataSet: React.FC<IAccountsDataSetProps> = ({
 		lifecycleStageFieldValues?.items ?? [];
 
 	const lifecycleStageItems = lifecycleStages.map(
-		({externalReferenceCode, stageType}) => ({
-			label: lifecycleStagesLabelMap[stageType].label,
+		({externalReferenceCode, stageName, stageType}) => ({
+			label:
+				stageName ??
+				(stageType && lifecycleStagesLabelMap[stageType]?.label) ??
+				externalReferenceCode,
 			value: externalReferenceCode,
 		})
 	);
@@ -92,9 +97,7 @@ const AccountsDataSet: React.FC<IAccountsDataSetProps> = ({
 	);
 
 	const preloadedLifecycleStage = lifecycleStageFilter
-		? lifecycleStages.find(
-				({stageType}) => stageType === lifecycleStageFilter
-			)
+		? lifecycleStages.find(({id}) => id === lifecycleStageFilter)
 		: undefined;
 
 	// The data set reads `filters` only when its reducer is initialized on
@@ -117,14 +120,22 @@ const AccountsDataSet: React.FC<IAccountsDataSetProps> = ({
 					accountLifecycleStageRenderer: ({
 						value,
 					}: {
-						value: LifecycleStages;
-					}) =>
-						value &&
-						columns.cmsLabelRenderer({
-							displayType:
-								lifecycleStagesLabelMap[value].displayType,
-							label: lifecycleStagesLabelMap[value].label,
-						}),
+						value: string;
+					}) => (
+						<DataValue
+							format={(stage: string) =>
+								columns.cmsLabelRenderer(
+									isLifecycleStage(stage)
+										? lifecycleStagesLabelMap[stage]
+										: {
+												displayType: 'secondary',
+												label: stage,
+											}
+								)
+							}
+							value={value}
+						/>
+					),
 					accountNameRenderer: ({
 						itemData,
 						value,
@@ -141,10 +152,13 @@ const AccountsDataSet: React.FC<IAccountsDataSetProps> = ({
 						}),
 					activitiesCountRenderer: columns.countRenderer,
 					annualRevenueRenderer: ({value}: {value?: number}) => (
-						<div>{value ? toThousands(value) : ''}</div>
+						<div>
+							<DataValue type="count" value={value} />
+						</div>
 					),
 					dateRenderer: ({value}: {value: string}) =>
 						columns.dateRenderer({itemData: {}, value}),
+					textRenderer: columns.textRenderer,
 				}}
 				emptyState={{
 					description: Liferay.Language.get(
@@ -177,11 +191,11 @@ const AccountsDataSet: React.FC<IAccountsDataSetProps> = ({
 									name: 'status',
 									preloadedData: buildSelectionPreloadedData(
 										preloadedLifecycleStage?.externalReferenceCode,
-										lifecycleStageFilter
-											? lifecycleStagesLabelMap[
-													lifecycleStageFilter
-												].label
-											: undefined
+										lifecycleStageItems.find(
+											({value}) =>
+												value ===
+												preloadedLifecycleStage?.externalReferenceCode
+										)?.label
 									),
 									type: 'selection' as const,
 								},

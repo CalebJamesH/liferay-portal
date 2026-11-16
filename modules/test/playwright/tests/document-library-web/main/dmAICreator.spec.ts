@@ -6,17 +6,27 @@
 import {expect, mergeTests} from '@playwright/test';
 
 import {documentLibraryPagesTest} from '../../../fixtures/documentLibraryPages.fixtures';
+import {featureFlagsTest} from '../../../fixtures/featureFlagsTest';
 import {isolatedSiteTest} from '../../../fixtures/isolatedSiteTest';
 import {loginTest} from '../../../fixtures/loginTest';
+import {siteSettingsPagesTest} from '../../../fixtures/siteSettingsPagesTest';
 import {waitForAlert} from '../../../utils/waitForAlert';
 
-const MOCKED_IMAGE_PATH =
-	'USER_IMAGES_URL_http://localhost:8080/o/classic-theme/images/favicon.ico';
-
-const test = mergeTests(
+const baseTest = mergeTests(
 	documentLibraryPagesTest,
 	isolatedSiteTest,
-	loginTest()
+	loginTest(),
+	siteSettingsPagesTest
+);
+
+const aiCreatorDisabledTest = mergeTests(
+	baseTest,
+	featureFlagsTest({'LPD-93786': {enabled: false}})
+);
+
+const test = mergeTests(
+	baseTest,
+	featureFlagsTest({'LPD-93786': {enabled: true}})
 );
 
 test(
@@ -28,7 +38,7 @@ test(
 		page,
 		site,
 	}) => {
-		await aiCreatorInstanceSettingsPage.enableDalleCreateImages();
+		await aiCreatorInstanceSettingsPage.enableOpenAIImageGeneration();
 		await aiCreatorInstanceSettingsPage.removeApiKey();
 
 		await documentLibraryPage.goto(site.friendlyUrlPath);
@@ -46,7 +56,7 @@ test(
 		page,
 		site,
 	}) => {
-		await aiCreatorInstanceSettingsPage.disableDalleCreateImages();
+		await aiCreatorInstanceSettingsPage.disableOpenAIImageGeneration();
 
 		await expect(async () => {
 			await documentLibraryPage.goto(site.friendlyUrlPath);
@@ -60,7 +70,47 @@ test(
 			).toBeHidden({timeout: 3000});
 		}).toPass({timeout: 30000});
 
-		await aiCreatorInstanceSettingsPage.enableDalleCreateImages();
+		await aiCreatorInstanceSettingsPage.enableOpenAIImageGeneration();
+	}
+);
+
+test(
+	'Create AI Image option is hidden when disabled from Site Settings',
+	{tag: '@LPD-109984'},
+	async ({
+		aiCreatorInstanceSettingsPage,
+		documentLibraryPage,
+		page,
+		site,
+		siteSettingsPage,
+	}) => {
+
+		// Disable OpenAI image generation for the site
+
+		await siteSettingsPage.goToSiteSetting(
+			'AI Creator',
+			'OpenAI',
+			site.friendlyUrlPath
+		);
+
+		await aiCreatorInstanceSettingsPage.openAIImageGenerationCheckbox.uncheck();
+		await aiCreatorInstanceSettingsPage.saveButton.click();
+
+		await waitForAlert(page);
+
+		// The Create AI Image option is hidden in the site
+
+		await expect(async () => {
+			await documentLibraryPage.goto(site.friendlyUrlPath);
+			await documentLibraryPage.openNewButton();
+
+			await expect(
+				page.getByRole('menuitem', {exact: true, name: 'Folder'})
+			).toBeVisible({timeout: 3000});
+			await expect(
+				page.getByRole('menuitem', {name: 'Create AI Image'})
+			).toBeHidden({timeout: 3000});
+		}).toPass({timeout: 30000});
 	}
 );
 
@@ -90,7 +140,7 @@ test(
 			);
 			await createAIImageModalPage
 				.getByPlaceholder('Write something...')
-				.fill(MOCKED_IMAGE_PATH);
+				.fill('USER_IMAGES');
 			await createAIImageModalPage
 				.getByRole('button', {name: 'Create'})
 				.click();
@@ -112,5 +162,84 @@ test(
 				'scr:disable com.liferay.ai.creator.openai.web.internal.client.MockAICreatorOpenAIClient'
 			);
 		}
+	}
+);
+
+test(
+	'Create AI Image lists the image sizes configured for the site',
+	{tag: '@LPD-109984'},
+	async ({
+		aiCreatorInstanceSettingsPage,
+		documentLibraryPage,
+		gogoShellPage,
+		page,
+		site,
+		siteSettingsPage,
+	}) => {
+		await gogoShellPage.addCommand(
+			'scr:enable com.liferay.ai.creator.openai.web.internal.client.MockAICreatorOpenAIClient'
+		);
+
+		try {
+			await aiCreatorInstanceSettingsPage.addApiKey();
+
+			// Set the image sizes for the site
+
+			await siteSettingsPage.goToSiteSetting(
+				'AI Creator',
+				'OpenAI',
+				site.friendlyUrlPath
+			);
+
+			await aiCreatorInstanceSettingsPage.imageSizesInput.fill(
+				'1024x1536,1536x1024'
+			);
+			await aiCreatorInstanceSettingsPage.saveButton.click();
+
+			await waitForAlert(page);
+
+			// The Create AI Image modal lists the site image sizes
+
+			await documentLibraryPage.goto(site.friendlyUrlPath);
+			await documentLibraryPage.openCreateAIImage();
+
+			const createAIImageModalPage = page.frameLocator(
+				'iframe[title="Create AI Image"]'
+			);
+
+			await expect(
+				createAIImageModalPage
+					.getByLabel('Image Size', {exact: true})
+					.locator('option')
+			).toHaveText(['1024x1536', '1536x1024']);
+
+			await createAIImageModalPage
+				.getByRole('button', {name: 'Cancel'})
+				.click();
+		}
+		finally {
+			await aiCreatorInstanceSettingsPage.removeApiKey();
+			await gogoShellPage.addCommand(
+				'scr:disable com.liferay.ai.creator.openai.web.internal.client.MockAICreatorOpenAIClient'
+			);
+		}
+	}
+);
+
+aiCreatorDisabledTest(
+	'Create AI Image option is hidden while the feature flag is disabled',
+	{tag: '@LPD-114710'},
+	async ({documentLibraryPage, page, site}) => {
+		await expect(async () => {
+			await documentLibraryPage.goto(site.friendlyUrlPath);
+			await documentLibraryPage.openNewButton();
+
+			await expect(
+				page.getByRole('menuitem', {exact: true, name: 'Folder'})
+			).toBeVisible({timeout: 3000});
+			await expect(
+				page.getByRole('menuitem', {name: 'Create AI Image'})
+			).toBeHidden({timeout: 3000});
+		}).toPass({timeout: 30000});
 	}
 );

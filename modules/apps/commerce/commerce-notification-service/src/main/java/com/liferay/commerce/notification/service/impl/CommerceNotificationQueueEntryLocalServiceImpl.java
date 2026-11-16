@@ -9,6 +9,7 @@ import com.liferay.commerce.notification.model.CommerceNotificationAttachment;
 import com.liferay.commerce.notification.model.CommerceNotificationQueueEntry;
 import com.liferay.commerce.notification.service.CommerceNotificationAttachmentLocalService;
 import com.liferay.commerce.notification.service.base.CommerceNotificationQueueEntryLocalServiceBaseImpl;
+import com.liferay.commerce.notification.service.persistence.CommerceNotificationAttachmentPersistence;
 import com.liferay.commerce.notification.util.comparator.CommerceNotificationAttachmentCreateDateComparator;
 import com.liferay.mail.kernel.model.MailMessage;
 import com.liferay.mail.kernel.service.MailService;
@@ -130,8 +131,16 @@ public class CommerceNotificationQueueEntryLocalServiceImpl
 	}
 
 	@Override
-	public void deleteCommerceNotificationQueueEntries(Date sentDate) {
-		commerceNotificationQueueEntryPersistence.removeByLtSentDate(sentDate);
+	public void deleteCommerceNotificationQueueEntries(Date sentDate)
+		throws PortalException {
+
+		for (CommerceNotificationQueueEntry commerceNotificationQueueEntry :
+				commerceNotificationQueueEntryPersistence.findByLtSentDate(
+					sentDate)) {
+
+			commerceNotificationQueueEntryLocalService.
+				deleteCommerceNotificationQueue(commerceNotificationQueueEntry);
+		}
 	}
 
 	@Override
@@ -172,17 +181,6 @@ public class CommerceNotificationQueueEntryLocalServiceImpl
 	@Override
 	public List<CommerceNotificationQueueEntry>
 		getCommerceNotificationQueueEntries(
-			long groupId, int start, int end,
-			OrderByComparator<CommerceNotificationQueueEntry>
-				orderByComparator) {
-
-		return commerceNotificationQueueEntryPersistence.findByGroupId(
-			groupId, start, end, orderByComparator);
-	}
-
-	@Override
-	public List<CommerceNotificationQueueEntry>
-		getCommerceNotificationQueueEntries(
 			long groupId, String className, long classPK, boolean sent,
 			int start, int end,
 			OrderByComparator<CommerceNotificationQueueEntry>
@@ -191,12 +189,6 @@ public class CommerceNotificationQueueEntryLocalServiceImpl
 		return commerceNotificationQueueEntryPersistence.findByG_C_C_S(
 			groupId, _classNameLocalService.getClassNameId(className), classPK,
 			sent, start, end, orderByComparator);
-	}
-
-	@Override
-	public int getCommerceNotificationQueueEntriesCount(long groupId) {
-		return commerceNotificationQueueEntryPersistence.countByGroupId(
-			groupId);
 	}
 
 	@Override
@@ -238,8 +230,8 @@ public class CommerceNotificationQueueEntryLocalServiceImpl
 
 			List<CommerceNotificationAttachment>
 				commerceNotificationAttachments =
-					_commerceNotificationAttachmentLocalService.
-						getCommerceNotificationAttachments(
+					_commerceNotificationAttachmentPersistence.
+						findByCommerceNotificationQueueEntryId(
 							commerceNotificationQueueEntry.
 								getCommerceNotificationQueueEntryId(),
 							QueryUtil.ALL_POS, QueryUtil.ALL_POS,
@@ -345,6 +337,10 @@ public class CommerceNotificationQueueEntryLocalServiceImpl
 	@Reference
 	private CommerceNotificationAttachmentLocalService
 		_commerceNotificationAttachmentLocalService;
+
+	@Reference
+	private CommerceNotificationAttachmentPersistence
+		_commerceNotificationAttachmentPersistence;
 
 	@Reference
 	private MailService _mailService;

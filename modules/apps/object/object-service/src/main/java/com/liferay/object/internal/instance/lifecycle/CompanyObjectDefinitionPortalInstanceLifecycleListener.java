@@ -20,6 +20,7 @@ import com.liferay.petra.string.StringPool;
 import com.liferay.portal.dao.orm.common.SQLTransformer;
 import com.liferay.portal.instance.lifecycle.BasePortalInstanceLifecycleListener;
 import com.liferay.portal.instance.lifecycle.PortalInstanceLifecycleListener;
+import com.liferay.portal.kernel.dao.db.DBInspector;
 import com.liferay.portal.kernel.dao.jdbc.CurrentConnection;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -91,10 +92,10 @@ public class CompanyObjectDefinitionPortalInstanceLifecycleListener
 			}
 
 			_executeUpdates(
-				_classNameColumnNamesMap, company.getCompanyId(), connection,
+				_classNameColumnNamesMap, connection,
 				objectDefinition.getClassName(), className);
 			_executeUpdates(
-				_portletIdColumnNamesMap, company.getCompanyId(), connection,
+				_portletIdColumnNamesMap, connection,
 				ObjectDefinitionUtil.getPortletId(
 					objectDefinition.getClassName()),
 				ObjectDefinitionUtil.getPortletId(className));
@@ -171,18 +172,23 @@ public class CompanyObjectDefinitionPortalInstanceLifecycleListener
 	}
 
 	private void _executeUpdates(
-			Map<String, String> columnNamesMap, long companyId,
-			Connection connection, String newData, String oldData)
+			Map<String, String> columnNamesMap, Connection connection,
+			String newData, String oldData)
 		throws Exception {
 
+		DBInspector dbInspector = new DBInspector(connection);
+
 		for (Map.Entry<String, String> entry : columnNamesMap.entrySet()) {
+			if (!dbInspector.hasTable(entry.getKey())) {
+				continue;
+			}
+
 			String[] columnNames = StringUtil.split(entry.getValue());
 
 			try (PreparedStatement preparedStatement =
 					connection.prepareStatement(
 						SQLTransformer.transform(
-							_getUpdateSQL(
-								columnNames, companyId, entry.getKey())))) {
+							_getUpdateSQL(columnNames, entry.getKey())))) {
 
 				int parameterIndex = 1;
 
@@ -201,15 +207,10 @@ public class CompanyObjectDefinitionPortalInstanceLifecycleListener
 		}
 	}
 
-	private String _getUpdateSQL(
-		String[] columnNames, long companyId, String tableName) {
-
+	private String _getUpdateSQL(String[] columnNames, String tableName) {
 		StringBundler sb = new StringBundler();
 
 		sb.append("update ");
-		sb.append(PropsValues.DATABASE_PARTITION_SCHEMA_NAME_PREFIX);
-		sb.append(companyId);
-		sb.append(StringPool.PERIOD);
 		sb.append(tableName);
 		sb.append(" set ");
 

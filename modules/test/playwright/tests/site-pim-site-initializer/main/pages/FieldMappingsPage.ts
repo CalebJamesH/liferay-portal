@@ -3,11 +3,13 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
-import {Locator, Page} from '@playwright/test';
+import {Locator, Page, expect} from '@playwright/test';
 
 import {clickAndExpectToBeVisible} from '../../../../utils/clickAndExpectToBeVisible';
+import getRandomString from '../../../../utils/getRandomString';
 import {waitForAlert} from '../../../../utils/waitForAlert';
 import {DataSetPage} from '../../../site-cms-site-initializer/main/pages/DataSetPage';
+import {EditFieldMappingsPage} from './EditFieldMappingsPage';
 
 export class FieldMappingsPage {
 	readonly channelField: (channelField: string) => Locator;
@@ -18,6 +20,7 @@ export class FieldMappingsPage {
 	readonly row: (channelField: string) => Locator;
 	readonly sourceAttributes: (channelField: string) => Locator;
 	readonly status: (channelField: string) => Locator;
+	readonly transformationRules: (channelField: string) => Locator;
 
 	constructor(page: Page) {
 		this.channelField = (channelField) =>
@@ -43,6 +46,8 @@ export class FieldMappingsPage {
 			this.row(channelField).locator('.cell-sourceAttributes');
 		this.status = (channelField) =>
 			this.row(channelField).locator('.cell-status .label');
+		this.transformationRules = (channelField) =>
+			this.row(channelField).locator('.cell-transformationRules');
 	}
 
 	async clearMapping(channelField: string) {
@@ -86,6 +91,55 @@ export class FieldMappingsPage {
 		});
 
 		await this.page.keyboard.press('Escape');
+	}
+
+	async expectMoreActionsMenuItems({
+		hidden = [],
+		visible = [],
+	}: {
+		hidden?: string[];
+		visible?: string[];
+	}) {
+		await this.moreActionsButton.click();
+
+		for (const name of visible) {
+			await expect(this.moreActionsMenuItem(name)).toBeVisible();
+		}
+
+		for (const name of hidden) {
+			await expect(this.moreActionsMenuItem(name)).toBeHidden();
+		}
+
+		await this.page.keyboard.press('Escape');
+	}
+
+	async mapRequiredChannelFields() {
+		const editFieldMappingsPage = new EditFieldMappingsPage(this.page);
+
+		for (const {channelField, sourceAttribute, value} of [
+			{
+				channelField: 'Catalog External Reference Code',
+				value: getRandomString(),
+			},
+			{channelField: 'Name', sourceAttribute: 'Title (title)'},
+			{channelField: 'Product Type', value: 'simple'},
+			{channelField: 'SKU', sourceAttribute: 'SKU (sku)'},
+		]) {
+			await this.channelField(channelField).click();
+
+			if (sourceAttribute) {
+				await editFieldMappingsPage.mapToSourceAttribute(
+					sourceAttribute
+				);
+			}
+			else {
+				await editFieldMappingsPage.mapToValue(value!);
+			}
+
+			await editFieldMappingsPage.saveButton.click();
+
+			await expect(this.status(channelField)).toHaveText('Mapped');
+		}
 	}
 
 	async openConnectorSchedule() {

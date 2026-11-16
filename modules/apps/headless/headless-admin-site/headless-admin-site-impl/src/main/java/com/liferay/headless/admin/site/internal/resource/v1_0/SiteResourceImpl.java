@@ -13,6 +13,7 @@ import com.liferay.headless.admin.site.dto.v1_0.AnalyticsConfiguration;
 import com.liferay.headless.admin.site.dto.v1_0.GoogleAnalyticsConfiguration;
 import com.liferay.headless.admin.site.dto.v1_0.RatingsTypes;
 import com.liferay.headless.admin.site.dto.v1_0.Site;
+import com.liferay.headless.admin.site.internal.dto.v1_0.util.CreatorUtil;
 import com.liferay.headless.admin.site.resource.v1_0.SiteResource;
 import com.liferay.layout.util.LayoutServiceContextHelper;
 import com.liferay.petra.function.UnsafeFunction;
@@ -31,6 +32,8 @@ import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.GroupConstants;
 import com.liferay.portal.kernel.model.LayoutSetPrototype;
+import com.liferay.portal.kernel.search.Sort;
+import com.liferay.portal.kernel.search.filter.Filter;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.security.auth.PrincipalThreadLocal;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
@@ -81,6 +84,8 @@ import java.io.Serializable;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -160,19 +165,24 @@ public class SiteResourceImpl
 
 				// The sites admin API does not support OData filtering, so the
 				// selection is narrowed with the query parameter the batch
-				// engine forwards to the resource instead of with a filter. An
-				// import reads a key of its own, because a batch import outside
-				// an export import is not narrowed by a query parameter its
-				// caller happened to pass.
+				// engine forwards to the resource instead of with a filter. The
+				// date range is passed as parameters of its own and applied by
+				// the read method. An import reads a key of its own, because a
+				// batch import outside an export import is not narrowed by a
+				// query parameter its caller happened to pass.
 
 				String[] groupExternalReferenceCodes =
 					_getGroupExternalReferenceCodes(portletDataContext);
 
 				return HashMapBuilder.<String, Serializable>put(
-					_SELECTED_EXTERNAL_REFERENCE_CODES,
-					groupExternalReferenceCodes
+					"endDate", portletDataContext.getEndDate()
 				).put(
 					"externalReferenceCodes", groupExternalReferenceCodes
+				).put(
+					"selectedExternalReferenceCodes",
+					groupExternalReferenceCodes
+				).put(
+					"startDate", portletDataContext.getStartDate()
 				).build();
 			}
 
@@ -361,6 +371,55 @@ public class SiteResourceImpl
 		Group finalGroup = group;
 
 		return _toSite(finalGroup);
+	}
+
+	@Override
+	public Page<Site> read(
+			Filter filter, Pagination pagination, Sort[] sorts,
+			Map<String, Serializable> parameters, String search)
+		throws Exception {
+
+		Date endDate = (Date)parameters.get("endDate");
+		Date startDate = (Date)parameters.get("startDate");
+
+		if ((endDate == null) && (startDate == null)) {
+			return super.read(filter, pagination, sorts, parameters, search);
+		}
+
+		String[] externalReferenceCodes = ArrayUtil.filter(
+			(String[])parameters.get("externalReferenceCodes"),
+			externalReferenceCode -> {
+				Group group =
+					_groupLocalService.fetchGroupByExternalReferenceCode(
+						externalReferenceCode, contextCompany.getCompanyId());
+
+				if (group == null) {
+					return false;
+				}
+
+				Date modifiedDate = group.getModifiedDate();
+
+				if (((endDate != null) && modifiedDate.after(endDate)) ||
+					((startDate != null) && modifiedDate.before(startDate))) {
+
+					return false;
+				}
+
+				return true;
+			});
+
+		if (ArrayUtil.isEmpty(externalReferenceCodes)) {
+			return Page.of(Collections.emptyList());
+		}
+
+		return super.read(
+			filter, pagination, sorts,
+			HashMapBuilder.<String, Serializable>putAll(
+				parameters
+			).put(
+				"externalReferenceCodes", externalReferenceCodes
+			).build(),
+			search);
 	}
 
 	@Override
@@ -581,9 +640,12 @@ public class SiteResourceImpl
 
 		_initThemeDisplay();
 
+		PermissionChecker permissionChecker =
+			PermissionThreadLocal.getPermissionChecker();
+
 		try (AutoCloseable autoCloseable =
 				_layoutServiceContextHelper.getServiceContextAutoCloseable(
-					contextCompany, contextUser)) {
+					contextCompany, permissionChecker.getUser())) {
 
 			return _addGroup(externalReferenceCode, site, _getServiceContext());
 		}
@@ -591,7 +653,8 @@ public class SiteResourceImpl
 
 			// LPS-169057
 
-			PermissionCacheUtil.clearCache(contextUser.getUserId());
+			PermissionCacheUtil.clearCache(
+				contextUser.getUserId(), permissionChecker.getUserId());
 
 			throw exception;
 		}
@@ -605,16 +668,28 @@ public class SiteResourceImpl
 			ServiceContext serviceContext)
 		throws Exception {
 
-		Group group = _groupService.addGroup(
-			externalReferenceCode,
-			_getParentGroupId(null, site.getParentSiteExternalReferenceCode()),
-			GroupConstants.DEFAULT_LIVE_GROUP_ID, _getNameMap(site),
-			_getDescriptionMap(site), _getType(site.getMembershipType()),
-			_getTypeSettings(site, null),
-			_isManualMembership(site.getManualMembership()),
-			_getMembershipRestriction(site.getMembershipRestriction()),
-			_getFriendlyUrlPath(null, site), true, false,
-			_isActive(site.getActive()), serviceContext);
+		Group group = null;
+
+		String name = PrincipalThreadLocal.getName();
+
+		try {
+			PrincipalThreadLocal.setName(contextUser.getUserId(), false);
+
+			group = _groupService.addGroup(
+				externalReferenceCode,
+				_getParentGroupId(
+					null, site.getParentSiteExternalReferenceCode()),
+				GroupConstants.DEFAULT_LIVE_GROUP_ID, _getNameMap(site),
+				_getDescriptionMap(site), _getType(site.getMembershipType()),
+				_getTypeSettings(site, null),
+				_isManualMembership(site.getManualMembership()),
+				_getMembershipRestriction(site.getMembershipRestriction()),
+				_getFriendlyUrlPath(null, site), true, false,
+				_isActive(site.getActive()), serviceContext);
+		}
+		finally {
+			PrincipalThreadLocal.setName(name, false);
+		}
 
 		LiveUsers.joinGroup(
 			contextCompany.getCompanyId(), group.getGroupId(),
@@ -821,7 +896,7 @@ public class SiteResourceImpl
 		}
 
 		String[] selectedExternalReferenceCodes = (String[])parameters.get(
-			_SELECTED_EXTERNAL_REFERENCE_CODES);
+			"selectedExternalReferenceCodes");
 
 		if (selectedExternalReferenceCodes == null) {
 			return sites;
@@ -1138,6 +1213,9 @@ public class SiteResourceImpl
 							"assetAutoTaggingEnabled")));
 				setContentSharingWithChildrenEnabled(
 					group::isContentSharingWithChildrenEnabled);
+				setCreator(
+					() -> CreatorUtil.toCreator(
+						group.getCreatorUserId(), null));
 				setDefaultLanguageId(group::getDefaultLanguageId);
 				setDescription(
 					() -> group.getDescription(LocaleUtil.getDefault()));
@@ -1224,9 +1302,12 @@ public class SiteResourceImpl
 	}
 
 	private Group _updateGroup(Group group, Site site) throws Exception {
+		PermissionChecker permissionChecker =
+			PermissionThreadLocal.getPermissionChecker();
+
 		try (AutoCloseable autoCloseable =
 				_layoutServiceContextHelper.getServiceContextAutoCloseable(
-					contextCompany, contextUser)) {
+					contextCompany, permissionChecker.getUser())) {
 
 			if ((group.isCompany() || group.isControlPanel() ||
 				 group.isGuest()) &&
@@ -1255,7 +1336,7 @@ public class SiteResourceImpl
 			return updatedGroup;
 		}
 		catch (Exception exception) {
-			PermissionCacheUtil.clearCache(contextUser.getUserId());
+			PermissionCacheUtil.clearCache(permissionChecker.getUserId());
 
 			throw exception;
 		}
@@ -1268,9 +1349,6 @@ public class SiteResourceImpl
 		GooglePlacesWebKeys.GOOGLE_PLACES_API_KEY, "defaultSiteRoleIds",
 		"defaultTeamIds", "googleMapsAPIKey"
 	};
-
-	private static final String _SELECTED_EXTERNAL_REFERENCE_CODES =
-		"selectedExternalReferenceCodes";
 
 	@Reference
 	private GroupLocalService _groupLocalService;

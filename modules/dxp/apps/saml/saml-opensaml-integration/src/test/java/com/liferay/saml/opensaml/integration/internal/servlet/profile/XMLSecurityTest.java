@@ -106,11 +106,11 @@ public class XMLSecurityTest extends BaseSamlTestCase {
 		ReflectionTestUtil.setFieldValue(
 			_webSsoProfileImpl, "credentialResolver", credentialResolver);
 		ReflectionTestUtil.setFieldValue(
+			_webSsoProfileImpl, "httpClientFactory", httpClientFactory);
+		ReflectionTestUtil.setFieldValue(
 			_webSsoProfileImpl, "localEntityManager",
 			keyStoreLocalEntityManager);
 		ReflectionTestUtil.setFieldValue(_webSsoProfileImpl, "portal", portal);
-		ReflectionTestUtil.setFieldValue(
-			_webSsoProfileImpl, "samlBindingProvider", samlBindingProvider);
 		ReflectionTestUtil.setFieldValue(
 			_webSsoProfileImpl, "samlProviderConfigurationHelper",
 			samlProviderConfigurationHelper);
@@ -139,6 +139,22 @@ public class XMLSecurityTest extends BaseSamlTestCase {
 			new MockMetadataResolver());
 
 		prepareServiceProvider(SP_ENTITY_ID);
+	}
+
+	@Test(expected = MessageDecodingException.class)
+	public void testMaximumMessageSizeExceeded() throws Exception {
+		String redirectURL = _getAuthnRequestRedirectURL();
+
+		String authnRequestXML = OpenSamlUtil.marshall(
+			getAuthnRequest(redirectURL));
+
+		Mockito.when(
+			samlProviderConfiguration.maximumMessageSize()
+		).thenReturn(
+			100
+		);
+
+		decodeAuthnRequest(authnRequestXML, redirectURL);
 	}
 
 	@Test(expected = MessageDecodingException.class)

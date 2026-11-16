@@ -17,6 +17,7 @@ import com.liferay.portal.kernel.dao.orm.Projection;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.model.PersistedModel;
+import com.liferay.portal.kernel.model.SystemEventConstants;
 import com.liferay.portal.kernel.search.Indexable;
 import com.liferay.portal.kernel.search.IndexableType;
 import com.liferay.portal.kernel.service.BaseLocalService;
@@ -26,6 +27,7 @@ import com.liferay.portal.kernel.service.change.tracking.CTService;
 import com.liferay.portal.kernel.service.persistence.change.tracking.CTPersistence;
 import com.liferay.portal.kernel.service.version.VersionService;
 import com.liferay.portal.kernel.service.version.VersionServiceListener;
+import com.liferay.portal.kernel.systemevent.SystemEvent;
 import com.liferay.portal.kernel.transaction.Isolation;
 import com.liferay.portal.kernel.transaction.Propagation;
 import com.liferay.portal.kernel.transaction.Transactional;
@@ -147,7 +149,6 @@ public interface StyleBookEntryLocalService
 	public StyleBookEntry deleteStyleBookEntry(long styleBookEntryId)
 		throws PortalException;
 
-	@Indexable(type = IndexableType.DELETE)
 	public StyleBookEntry deleteStyleBookEntry(
 			String externalReferenceCode, long groupId)
 		throws PortalException;
@@ -164,6 +165,10 @@ public interface StyleBookEntryLocalService
 	 * @throws PortalException
 	 */
 	@Indexable(type = IndexableType.DELETE)
+	@SystemEvent(
+		action = SystemEventConstants.ACTION_SKIP,
+		type = SystemEventConstants.TYPE_DELETE
+	)
 	public StyleBookEntry deleteStyleBookEntry(StyleBookEntry styleBookEntry)
 		throws PortalException;
 
@@ -292,6 +297,9 @@ public interface StyleBookEntryLocalService
 
 	public String generateStyleBookEntryName(long groupId, String name);
 
+	public String generateStyleBookEntryName(
+		long groupId, String name, long styleBookEntryId);
+
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public ActionableDynamicQuery getActionableDynamicQuery();
 
@@ -310,12 +318,6 @@ public interface StyleBookEntryLocalService
 
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public IndexableActionableDynamicQuery getIndexableActionableDynamicQuery();
-
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public StyleBookEntry getOrAddEmptyStyleBookEntry(
-			String externalReferenceCode, long userId, long groupId,
-			String themeId)
-		throws Exception;
 
 	/**
 	 * Returns the OSGi service identifier.
@@ -501,13 +503,6 @@ public interface StyleBookEntryLocalService
 			String themeId, ServiceContext serviceContext)
 		throws PortalException;
 
-	@Indexable(type = IndexableType.REINDEX)
-	public StyleBookEntry updateStyleBookEntry(
-			long styleBookEntryId, String frontendTokenDefinition,
-			String frontendTokensValues, String name,
-			ServiceContext serviceContext)
-		throws PortalException;
-
 	/**
 	 * Updates the style book entry in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
 	 *
@@ -539,4 +534,4 @@ public interface StyleBookEntryLocalService
 		throws E;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:447538805
+// LIFERAY-SERVICE-BUILDER-HASH:-1027315156

@@ -19,6 +19,7 @@ import {
 	performUserSwitchViaApi,
 } from '../../../utils/performLogin';
 import {cmsPagesTest} from './fixtures/cmsPagesTest';
+import {registerUserCredentials} from './spaces/helpers/roleMembership';
 
 const test = mergeTests(
 	cmsPagesTest,
@@ -32,10 +33,15 @@ const test = mergeTests(
 const APPLICATION_NAME = 'cms/basic-web-contents';
 const DATE_DISPLAYED = '12/31/2099, 10:00 AM';
 const DATE_INPUT = '12/31/2099 10:00 AM';
+const FILE_APPLICATION_NAME = 'cms/basic-documents';
 const LONG_STANDING_DRAFT_AGE_DAYS = 45;
 const PAST_DATE = '2020-01-01T00:00:00Z';
+const PNG_BASE64 =
+	'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGNgAAACAAEABToPCwAAAABJRU5ErkJggg==';
 const TIME_ZONE_BROWSER = 'America/Los_Angeles';
 const TIME_ZONE_USER = 'UTC';
+const UNLINKED_CONTENT_ALERT_MESSAGE =
+	'Unlinked content may still be in use. Some uses are not detected, such as default display pages, API requests or external links. Review it before deleting it.';
 
 test.use({timezoneId: TIME_ZONE_BROWSER});
 
@@ -163,6 +169,127 @@ async function updateExpirationDate(
 	await page.getByRole('menuitem', {name: 'Update Expiration Date'}).click();
 
 	await fillScheduleDateModal(page, expirationDate);
+}
+
+async function addSpaceMember(
+	apiHelpers: DataApiHelpers,
+	space: {externalReferenceCode: string},
+	user: TUserAccount,
+	roleName?: string
+) {
+	await apiHelpers.headlessAssetLibrary.putAssetLibraryUserAccount(
+		space.externalReferenceCode,
+		user.externalReferenceCode
+	);
+
+	if (roleName) {
+		await apiHelpers.headlessAssetLibrary.putAssetLibraryUserAccountRoles(
+			space.externalReferenceCode,
+			user.externalReferenceCode,
+			[roleName]
+		);
+	}
+}
+
+async function addSpaceWithOverdueContent(
+	apiHelpers: DataApiHelpers,
+	spaceName: string,
+	title: string
+) {
+	const space = await apiHelpers.headlessAssetLibrary.createSpace({
+		name: spaceName,
+	});
+
+	const overdueContent = await apiHelpers.objectEntry.postObjectEntry(
+		{
+			displayDate: PAST_DATE,
+			objectEntryFolderExternalReferenceCode: 'L_CONTENTS',
+			reviewDate: PAST_DATE,
+			title,
+		},
+		APPLICATION_NAME,
+		spaceName
+	);
+
+	apiHelpers.data.push({id: overdueContent.id, type: 'document'});
+
+	return space;
+}
+
+async function addSpaceMemberAndSwitch(
+	apiHelpers: DataApiHelpers,
+	page: Page,
+	spaceName: string,
+	roleName?: string
+) {
+	const space = await apiHelpers.headlessAssetLibrary.createSpace({
+		name: spaceName,
+	});
+
+	const user = await apiHelpers.headlessAdminUser.postUserAccount();
+
+	registerUserCredentials(user);
+
+	await addSpaceMember(apiHelpers, space, user, roleName);
+
+	await performUserSwitchViaApi(page, user.alternateName);
+}
+
+async function expectNoDashboardAccess(page: Page) {
+	await page.goto('/web/cms/home');
+
+	await expect(page.getByRole('menuitem', {name: 'Home'})).toBeVisible();
+
+	await expect(page.getByRole('menuitem', {name: 'Dashboard'})).toBeHidden();
+
+	await page.goto('/web/cms/dashboard');
+
+	await expect(
+		page.getByText('The requested resource could not be found.')
+	).toBeVisible();
+}
+
+async function expectSpaceOption(
+	page: Page,
+	spaceName: string,
+	visible: boolean
+) {
+	const searchInput = page.getByRole('textbox', {name: 'Search'});
+
+	await searchInput.fill(spaceName);
+
+	const option = page.getByRole('option', {name: spaceName});
+
+	if (visible) {
+		await expect(option).toBeVisible();
+	}
+	else {
+		await expect(option).toBeHidden();
+	}
+}
+
+async function viewAndEditContent(page: Page, title: string) {
+	const actionsButton = page.getByRole('button', {name: `${title} Actions`});
+
+	await actionsButton.click();
+
+	await page.getByRole('menuitem', {exact: true, name: 'View'}).click();
+
+	await expect(page.getByTestId('modal-header-name')).toHaveText(title);
+
+	await expect(
+		page
+			.frameLocator('iframe[title="Preview"]')
+			.getByLabel('Title (Read Only)')
+	).toHaveValue(title);
+
+	await page.locator('.modal').getByRole('button', {name: 'Close'}).click();
+
+	await actionsButton.click();
+
+	await page.getByRole('menuitem', {name: 'Edit'}).click();
+
+	await expect(page.getByLabel('Title')).toHaveValue(title);
 }
 
 async function selectSpace(page: Page, spaceName: string) {
@@ -702,16 +829,8 @@ test.describe('Quality section', () => {
 				).toBeVisible();
 			});
 
-			await test.step('Edit the content from the list', async () => {
-				await page
-					.getByRole('button', {name: `${referringTitle} Actions`})
-					.click();
-
-				await page.getByRole('menuitem', {name: 'Edit'}).click();
-
-				await expect(page.getByLabel('Title')).toHaveValue(
-					referringTitle
-				);
+			await test.step('View and edit the content from the page', async () => {
+				await viewAndEditContent(page, referringTitle);
 			});
 		}
 	);
@@ -847,22 +966,8 @@ test.describe('Quality section', () => {
 				).toBeVisible();
 			});
 
-			await test.step('Offer only the edit action in the page', async () => {
-				await page
-					.getByRole('button', {name: `${title} Actions`})
-					.click();
-
-				const editMenuItem = page.getByRole('menuitem', {name: 'Edit'});
-
-				await expect(editMenuItem).toBeVisible();
-
-				await expect(
-					page.getByRole('menuitem', {name: 'View'})
-				).toBeHidden();
-
-				await editMenuItem.click();
-
-				await expect(page.getByLabel('Title')).toHaveValue(title);
+			await test.step('View and edit the content from the page', async () => {
+				await viewAndEditContent(page, title);
 			});
 
 			await test.step('Check the content leaves the list once the field is filled', async () => {
@@ -880,6 +985,135 @@ test.describe('Quality section', () => {
 					spaceName,
 					text: 'No Missing Required Data',
 				});
+			});
+		}
+	);
+
+	test(
+		'Lists the approved assets nothing uses and drops a file once a content embeds it',
+		{tag: '@LPD-105769'},
+		async ({apiHelpers, page}) => {
+			const spaceName = `space ${getRandomString()}`;
+			const contentTitle = `content ${getRandomString()}`;
+			const fileTitle = `file ${getRandomString()}`;
+
+			let fileExternalReferenceCode: string;
+
+			await test.step('Publish a content and a file nothing uses', async () => {
+				await apiHelpers.headlessAssetLibrary.createSpace({
+					name: spaceName,
+				});
+
+				const content = await apiHelpers.objectEntry.postObjectEntry(
+					{
+						objectEntryFolderExternalReferenceCode: 'L_CONTENTS',
+						title: contentTitle,
+					},
+					APPLICATION_NAME,
+					spaceName
+				);
+
+				const file = await apiHelpers.objectEntry.postObjectEntry(
+					{
+						file: {
+							fileBase64: PNG_BASE64,
+							name: `${getRandomString()}.png`,
+						},
+						objectEntryFolderExternalReferenceCode: 'L_FILES',
+						title: fileTitle,
+					},
+					FILE_APPLICATION_NAME,
+					spaceName
+				);
+
+				fileExternalReferenceCode = file.externalReferenceCode;
+
+				for (const objectEntry of [content, file]) {
+					apiHelpers.data.push({
+						id: objectEntry.id,
+						type: 'document',
+					});
+
+					expect(objectEntry.id).toBeTruthy();
+				}
+			});
+
+			await test.step('Check the dashboard lists both as unlinked', async () => {
+				const unlinkedContentList = await openQualityList(page, {
+					cardTitle: 'Unlinked Content',
+					spaceName,
+					text: contentTitle,
+				});
+
+				await expect(
+					unlinkedContentList.getByText(
+						UNLINKED_CONTENT_ALERT_MESSAGE
+					)
+				).toBeVisible();
+
+				await expect(
+					unlinkedContentList.getByText(fileTitle, {exact: true})
+				).toBeVisible();
+
+				await expect(
+					unlinkedContentList.getByText(
+						'This asset is not used in any content or page.',
+						{exact: true}
+					)
+				).toHaveCount(2);
+			});
+
+			await test.step('Open the unlinked content page of the space', async () => {
+				await page
+					.getByRole('link', {name: 'View All Unlinked Content'})
+					.click();
+
+				await expect(page).toHaveURL(/unlinked-content\?groupId=/);
+
+				await expect(
+					page.getByText(UNLINKED_CONTENT_ALERT_MESSAGE)
+				).toBeVisible();
+
+				await expect(
+					page.getByText(contentTitle, {exact: true})
+				).toBeVisible();
+
+				await expect(
+					page.getByText(fileTitle, {exact: true})
+				).toBeVisible();
+			});
+
+			await test.step('View and edit the content from the page', async () => {
+				await viewAndEditContent(page, contentTitle);
+			});
+
+			await test.step('Check the file leaves the list once a content embeds it', async () => {
+				const embeddingContent =
+					await apiHelpers.objectEntry.postObjectEntry(
+						{
+							content: getDocumentHTML(fileExternalReferenceCode),
+							objectEntryFolderExternalReferenceCode:
+								'L_CONTENTS',
+							title: `content ${getRandomString()}`,
+						},
+						APPLICATION_NAME,
+						spaceName
+					);
+
+				apiHelpers.data.push({
+					id: embeddingContent.id,
+					type: 'document',
+				});
+
+				const unlinkedContentList = await openQualityList(page, {
+					cardTitle: 'Unlinked Content',
+					spaceName,
+					text: contentTitle,
+				});
+
+				await expect(
+					unlinkedContentList.getByText(fileTitle, {exact: true})
+				).toBeHidden();
 			});
 		}
 	);
@@ -1130,6 +1364,120 @@ test.describe('Operations section', () => {
 					page.getByText(recentDraftTitle, {exact: true})
 				).toBeHidden();
 			});
+		}
+	);
+});
+
+test.describe('Permissions', () => {
+	test.beforeEach(async ({page}) => {
+		await performUserSwitchViaApi(page, 'test');
+	});
+
+	test(
+		'A Space Administrator only sees the data and the spaces they administer',
+		{tag: '@LPD-111502'},
+		async ({apiHelpers, page}) => {
+			const administeredSpaceName = `space ${getRandomString()}`;
+			const administeredTitle = `overdue ${getRandomString()}`;
+			const reviewedSpaceName = `space ${getRandomString()}`;
+			const reviewedTitle = `overdue ${getRandomString()}`;
+
+			const administeredSpace = await addSpaceWithOverdueContent(
+				apiHelpers,
+				administeredSpaceName,
+				administeredTitle
+			);
+
+			const reviewedSpace = await addSpaceWithOverdueContent(
+				apiHelpers,
+				reviewedSpaceName,
+				reviewedTitle
+			);
+
+			const user = await apiHelpers.headlessAdminUser.postUserAccount();
+
+			registerUserCredentials(user);
+
+			await addSpaceMember(
+				apiHelpers,
+				administeredSpace,
+				user,
+				'Asset Library Administrator'
+			);
+			await addSpaceMember(
+				apiHelpers,
+				reviewedSpace,
+				user,
+				'Asset Library Content Reviewer'
+			);
+
+			await performUserSwitchViaApi(page, user.alternateName);
+
+			await page.goto('/web/cms/home');
+
+			await page.getByRole('menuitem', {name: 'Dashboard'}).click();
+
+			await expect(
+				page.getByRole('button', {exact: true, name: 'Governance'})
+			).toBeVisible();
+
+			await test.step('Lists only the content of the administered space', async () => {
+				await page
+					.getByRole('button', {name: /^Overdue Reviews/})
+					.click();
+
+				const overdueReviewsList = page.getByRole('region', {
+					name: 'Overdue Reviews',
+				});
+
+				await expect(
+					overdueReviewsList.getByText(administeredTitle, {
+						exact: true,
+					})
+				).toBeVisible();
+
+				await expect(
+					overdueReviewsList.getByText(reviewedTitle, {exact: true})
+				).toBeHidden();
+			});
+
+			await test.step('Offers only the administered space in the filter', async () => {
+				await page
+					.getByRole('combobox', {name: 'Filter by Spaces'})
+					.click();
+
+				await expectSpaceOption(page, administeredSpaceName, true);
+				await expectSpaceOption(page, reviewedSpaceName, false);
+			});
+		}
+	);
+
+	test(
+		'A Space Content Reviewer does not see the Governance tab',
+		{tag: '@LPD-111502'},
+		async ({apiHelpers, page}) => {
+			await addSpaceMemberAndSwitch(
+				apiHelpers,
+				page,
+				`space ${getRandomString()}`,
+				'Asset Library Content Reviewer'
+			);
+
+			await expectNoDashboardAccess(page);
+		}
+	);
+
+	test(
+		'A Space Member does not see the Governance tab',
+		{tag: '@LPD-111502'},
+		async ({apiHelpers, page}) => {
+			await addSpaceMemberAndSwitch(
+				apiHelpers,
+				page,
+				`space ${getRandomString()}`
+			);
+
+			await expectNoDashboardAccess(page);
 		}
 	);
 });

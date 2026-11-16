@@ -34,14 +34,46 @@ test.afterEach(async ({apiHelpers}) => {
 
 test(
 	'Execute a connector and open its schedule',
-	{tag: ['@LPD-108228']},
-	async ({connectorSchedulePage, connectorsPage}) => {
+	{tag: ['@LPD-108228', '@LPD-109731']},
+	async ({connectorSchedulePage, connectorsPage, fieldMappingsPage}) => {
 		const connectorName = getRandomString();
 
 		await connectorsPage.createConnector({
 			active: true,
 			connector: 'Liferay Commerce',
 			name: connectorName,
+		});
+
+		await test.step('An incomplete mapping cannot be executed', async () => {
+			await expect(
+				connectorsPage.getConnectorMappingStatus(connectorName)
+			).toHaveText('Incomplete');
+
+			await connectorsPage.dataSetFragmentPage.expectItemActionHidden({
+				action: 'Execute',
+				filter: connectorName,
+			});
+		});
+
+		await test.step('Map the required channel fields', async () => {
+			await connectorsPage.getConnector(connectorName).click();
+
+			await fieldMappingsPage.mapRequiredChannelFields();
+
+			await connectorsPage.goto();
+
+			await expect(
+				connectorsPage.getConnectorMappingStatus(connectorName)
+			).toHaveText('Complete');
+		});
+
+		await test.step('The connector was never executed', async () => {
+			await expect(
+				connectorsPage.getConnectorLastExecutionStatus(connectorName)
+			).toHaveText('Never Executed');
+			await expect(
+				connectorsPage.getConnectorLastExecutionDate(connectorName)
+			).toHaveText('');
 		});
 
 		await test.step('Execute the connector', async () => {
@@ -72,7 +104,6 @@ test(
 	async ({
 		connectorSchedulePage,
 		connectorsPage,
-		editFieldMappingsPage,
 		fieldMappingsPage,
 		productPage,
 		productsPage,
@@ -103,42 +134,24 @@ test(
 			await test.step('Map only the required channel fields', async () => {
 				await connectorsPage.getConnector(connectorName).click();
 
-				for (const {channelField, sourceAttribute, value} of [
-					{channelField: 'Catalog ID', value: '1'},
-					{channelField: 'Name', sourceAttribute: 'Title (title)'},
-					{channelField: 'Product Type', value: 'simple'},
-					{channelField: 'SKU', sourceAttribute: 'SKU (sku)'},
-				]) {
-					await fieldMappingsPage.channelField(channelField).click();
-
-					if (sourceAttribute) {
-						await editFieldMappingsPage.mapToSourceAttribute(
-							sourceAttribute
-						);
-					}
-					else {
-						await editFieldMappingsPage.mapToValue(value);
-					}
-
-					await editFieldMappingsPage.saveButton.click();
-
-					await expect(
-						fieldMappingsPage.status(channelField)
-					).toHaveText('Mapped');
-				}
+				await fieldMappingsPage.mapRequiredChannelFields();
 			});
 
 			await test.step('Execute the connector from its field mappings', async () => {
 				await fieldMappingsPage.executeConnector();
 			});
 
-			await test.step('The job log holds the products JSON', async () => {
+			await test.step('The job log holds the requests sent to the remote instance', async () => {
 				await fieldMappingsPage.openConnectorSchedule();
 
-				await connectorSchedulePage.openLatestSuccessfulLog();
+				await connectorSchedulePage.openLatestLog('Failed');
 
-				await expect(connectorSchedulePage.logOutput).toHaveText(/^\[/);
-				await expect(connectorSchedulePage.logError).toBeHidden();
+				await expect(connectorSchedulePage.logError).toHaveText(
+					'Unable to connect to the remote instance.'
+				);
+				await expect(connectorSchedulePage.logOutput).toContainText(
+					'http://localhost:1/o/oauth2/token'
+				);
 			});
 		}
 		finally {

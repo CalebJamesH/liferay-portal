@@ -1,0 +1,70 @@
+.highlights-date {
+	color: #282934;
+	font-size: 14px;
+	line-height: 24px;
+	width: 140px;
+}
+
+.highlights-item {
+	border-bottom: 1px solid #e2e2e4;
+
+	> td {
+		padding: 24px 12px;
+	}
+}
+
+.highlights-none {
+	color: #6c6c75;
+	line-height: 24px;
+}
+
+.highlights-section-body {
+	color: #282934;
+	line-height: 24px;
+	overflow-wrap: anywhere;
+	overflow-x: auto;
+
+	img {
+		height: auto;
+		max-width: 100%;
+	}
+
+	pre {
+		white-space: pre-wrap;
+	}
+
+	> :last-child {
+		margin-bottom: 0;
+	}
+}
+
+.highlights-section-title {
+	color: #282934;
+	line-height: 24px;
+}
+
+.highlights-sort {
+	color: inherit;
+	font-size: inherit;
+	font-weight: inherit;
+
+	.lexicon-icon {
+		height: 12px;
+		width: 12px;
+	}
+}
+
+.highlights-table {
+	thead th {
+		text-align: left;
+	}
+
+	tbody tr:hover > td {
+		background-color: transparent;
+	}
+}
+
+.highlights-title {
+	color: #282934;
+	line-height: 28px;
+}

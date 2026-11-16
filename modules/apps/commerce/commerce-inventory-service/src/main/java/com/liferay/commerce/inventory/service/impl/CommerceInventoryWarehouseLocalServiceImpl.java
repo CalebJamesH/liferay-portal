@@ -57,6 +57,7 @@ import com.liferay.portal.kernel.util.LinkedHashMapBuilder;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.kernel.workflow.WorkflowConstants;
 
 import java.io.Serializable;
 
@@ -119,6 +120,7 @@ public class CommerceInventoryWarehouseLocalServiceImpl
 			commerceCountryCode);
 		commerceInventoryWarehouse.setLatitude(latitude);
 		commerceInventoryWarehouse.setLongitude(longitude);
+		commerceInventoryWarehouse.setStatus(WorkflowConstants.STATUS_APPROVED);
 		commerceInventoryWarehouse.setExpandoBridgeAttributes(serviceContext);
 
 		commerceInventoryWarehouse =
@@ -204,26 +206,6 @@ public class CommerceInventoryWarehouseLocalServiceImpl
 		long companyId) {
 
 		return commerceInventoryWarehousePersistence.findByCompanyId(companyId);
-	}
-
-	@Override
-	public List<CommerceInventoryWarehouse> getCommerceInventoryWarehouses(
-		long companyId, boolean active, int start, int end,
-		OrderByComparator<CommerceInventoryWarehouse> orderByComparator) {
-
-		return commerceInventoryWarehousePersistence.filterFindByC_A(
-			companyId, active, start, end, orderByComparator);
-	}
-
-	@Override
-	public List<CommerceInventoryWarehouse> getCommerceInventoryWarehouses(
-		long companyId, boolean active, String commerceCountryCode, int start,
-		int end,
-		OrderByComparator<CommerceInventoryWarehouse> orderByComparator) {
-
-		return commerceInventoryWarehousePersistence.findByC_A_C(
-			companyId, active, commerceCountryCode, start, end,
-			orderByComparator);
 	}
 
 	@Override
@@ -384,20 +366,6 @@ public class CommerceInventoryWarehouseLocalServiceImpl
 	}
 
 	@Override
-	public int getCommerceInventoryWarehousesCount(long companyId) {
-		return commerceInventoryWarehousePersistence.countByCompanyId(
-			companyId);
-	}
-
-	@Override
-	public int getCommerceInventoryWarehousesCount(
-		long companyId, boolean active) {
-
-		return commerceInventoryWarehousePersistence.countByC_A(
-			companyId, active);
-	}
-
-	@Override
 	public int getCommerceInventoryWarehousesCount(
 		long companyId, boolean active, String commerceCountryCode) {
 
@@ -406,8 +374,8 @@ public class CommerceInventoryWarehouseLocalServiceImpl
 				companyId, active, commerceCountryCode);
 		}
 
-		return commerceInventoryWarehouseLocalService.
-			getCommerceInventoryWarehousesCount(companyId, active);
+		return commerceInventoryWarehousePersistence.countByC_A(
+			companyId, active);
 	}
 
 	@Override
@@ -589,9 +557,8 @@ public class CommerceInventoryWarehouseLocalServiceImpl
 				document.get(Field.ENTRY_CLASS_PK));
 
 			CommerceInventoryWarehouse commerceInventoryWarehouse =
-				commerceInventoryWarehouseLocalService.
-					fetchCommerceInventoryWarehouse(
-						commerceInventoryWarehouseId);
+				commerceInventoryWarehousePersistence.fetchByPrimaryKey(
+					commerceInventoryWarehouseId);
 
 			if (commerceInventoryWarehouse == null) {
 				commerceInventoryWarehouses = null;

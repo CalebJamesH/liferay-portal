@@ -18,6 +18,7 @@ import com.liferay.exportimport.rest.dto.v1_0.PortletDataHandlerChoice;
 import com.liferay.exportimport.rest.dto.v1_0.PortletDataHandlerControl;
 import com.liferay.exportimport.rest.dto.v1_0.PortletDataHandlerTreeSelection;
 import com.liferay.exportimport.rest.dto.v1_0.PublishProcessRequest;
+import com.liferay.exportimport.rest.dto.v1_0.SyncProcessRequest;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.model.User;
@@ -55,29 +56,62 @@ public class ParameterMapUtilTest {
 		LiferayUnitTestRule.INSTANCE;
 
 	@Test
-	public void testPutSiteExternalReferenceCodes() {
-		_testPutSiteExternalReferenceCodes(
-			new String[] {_SITE_EXTERNAL_REFERENCE_CODE_1},
-			new String[] {_SITE_EXTERNAL_REFERENCE_CODE_1, null});
-		_testPutSiteExternalReferenceCodes(
+	public void testPutDateRangeParametersWhenDateFilterIsInvalid() {
+		long time = (System.currentTimeMillis() / Time.SECOND) * Time.SECOND;
+
+		_assertBadRequest(
+			new Date(time + (2 * Time.HOUR)),
+			"The start date must not be in the future",
+			new Date(time + Time.HOUR));
+		_assertBadRequest(
+			new Date(time + Time.HOUR),
+			"The end date must not be in the future",
+			new Date(time - Time.HOUR));
+		_assertBadRequest(
+			new Date(time - Time.HOUR + 300),
+			"The start date must be before the end date",
+			new Date(time - Time.HOUR + 100));
+		_assertBadRequest(
+			null, "The start date must not be in the future",
+			new Date(time + Time.HOUR));
+	}
+
+	@Test
+	public void testPutDateRangeParametersWhenDateFilterIsValid() {
+		long time = (System.currentTimeMillis() / Time.SECOND) * Time.SECOND;
+
+		_assertDateRange(new Date(time + 999), new Date(time - Time.SECOND));
+		_assertDateRange(new Date(time), new Date(time - Time.SECOND + 999));
+	}
+
+	@Test
+	public void testPutGroupExternalReferenceCodes() {
+		_testPutGroupExternalReferenceCodes(
+			new String[] {_GROUP_EXTERNAL_REFERENCE_CODE_1},
+			new String[] {_GROUP_EXTERNAL_REFERENCE_CODE_1, null});
+		_testPutGroupExternalReferenceCodes(
 			new String[] {
-				_SITE_EXTERNAL_REFERENCE_CODE_1, _SITE_EXTERNAL_REFERENCE_CODE_2
+				_GROUP_EXTERNAL_REFERENCE_CODE_1,
+				_GROUP_EXTERNAL_REFERENCE_CODE_2
 			},
 			new String[] {
-				_SITE_EXTERNAL_REFERENCE_CODE_1, _SITE_EXTERNAL_REFERENCE_CODE_2
+				_GROUP_EXTERNAL_REFERENCE_CODE_1,
+				_GROUP_EXTERNAL_REFERENCE_CODE_2
 			});
-		_testPutSiteExternalReferenceCodes(
+		_testPutGroupExternalReferenceCodes(
 			new String[] {
-				_SITE_EXTERNAL_REFERENCE_CODE_1, _SITE_EXTERNAL_REFERENCE_CODE_2
+				_GROUP_EXTERNAL_REFERENCE_CODE_1,
+				_GROUP_EXTERNAL_REFERENCE_CODE_2
 			},
 			new String[] {
-				_SITE_EXTERNAL_REFERENCE_CODE_1,
-				_SITE_EXTERNAL_REFERENCE_CODE_2, _SITE_EXTERNAL_REFERENCE_CODE_1
+				_GROUP_EXTERNAL_REFERENCE_CODE_1,
+				_GROUP_EXTERNAL_REFERENCE_CODE_2,
+				_GROUP_EXTERNAL_REFERENCE_CODE_1
 			});
-		_testPutSiteExternalReferenceCodes(null, new String[0]);
-		_testPutSiteExternalReferenceCodes(
+		_testPutGroupExternalReferenceCodes(null, new String[0]);
+		_testPutGroupExternalReferenceCodes(
 			null, new String[] {StringPool.BLANK, StringPool.THREE_SPACES});
-		_testPutSiteExternalReferenceCodes(null, null);
+		_testPutGroupExternalReferenceCodes(null, null);
 	}
 
 	@Test
@@ -225,6 +259,8 @@ public class ParameterMapUtilTest {
 				"preview of this scope",
 			_toPortletDataHandler("unknown", null));
 		_assertBadRequest(
+			"Portlet data handlers must not contain null values", null);
+		_assertBadRequest(
 			"The choice \"z\" is not one of the choices of the control \"" +
 				_CONTROL_NAME_CHOICE + "\"",
 			_toPortletDataHandler(
@@ -265,6 +301,32 @@ public class ParameterMapUtilTest {
 	}
 
 	@Test
+	public void testToParameterMapWithSyncProcessRequest() {
+		Map<String, String[]> parameterMap = ParameterMapUtil.toParameterMap(
+			_toSyncProcessRequest(
+				_toPortletDataHandler(
+					PortletDataHandlerUtil.
+						PORTLET_DATA_HANDLER_NAME_LOOK_AND_FEEL,
+					null,
+					_toPortletDataHandlerBoolean(
+						PortletDataHandlerKeys.LOGO, true))),
+			_getAvailablePortletDataHandlers());
+
+		Assert.assertArrayEquals(
+			new String[] {"true"},
+			parameterMap.get(PortletDataHandlerKeys.FAVICON));
+
+		parameterMap = ParameterMapUtil.toParameterMap(
+			_toSyncProcessRequest(
+				_toPortletDataHandler(_PORTLET_DATA_HANDLER_NAME, null)),
+			_getAvailablePortletDataHandlers());
+
+		Assert.assertArrayEquals(
+			new String[] {"false"},
+			parameterMap.get(PortletDataHandlerKeys.FAVICON));
+	}
+
+	@Test
 	public void testToPublishProcessRequest() {
 		PublishProcessRequest publishProcessRequest =
 			new PublishProcessRequest();
@@ -275,8 +337,8 @@ public class ParameterMapUtilTest {
 
 		long time = System.currentTimeMillis() / Time.SECOND * Time.SECOND;
 
-		dateRangeDateFilter.setEndDate(new Date(time + Time.DAY));
-		dateRangeDateFilter.setStartDate(new Date(time));
+		dateRangeDateFilter.setEndDate(new Date(time));
+		dateRangeDateFilter.setStartDate(new Date(time - Time.DAY));
 
 		dateRangeDateFilter.setType(DateFilter.Type.DATE_RANGE);
 
@@ -304,20 +366,6 @@ public class ParameterMapUtilTest {
 		PortletDataHandler[] availablePortletDataHandlers =
 			_getAvailablePortletDataHandlers();
 
-		User user = Mockito.mock(User.class);
-
-		Mockito.when(
-			user.getLocale()
-		).thenReturn(
-			LocaleUtil.US
-		);
-
-		Mockito.when(
-			user.getTimeZone()
-		).thenReturn(
-			TimeZoneUtil.GMT
-		);
-
 		PublishProcessRequest reversedPublishProcessRequest =
 			ParameterMapUtil.toPublishProcessRequest(
 				availablePortletDataHandlers, LocaleUtil.US,
@@ -325,7 +373,7 @@ public class ParameterMapUtilTest {
 					dateRangeDateFilter,
 					ParameterMapUtil.toParameterMap(
 						publishProcessRequest, availablePortletDataHandlers),
-					user),
+					_toUser()),
 				TimeZoneUtil.GMT);
 
 		Assert.assertEquals(
@@ -438,6 +486,16 @@ public class ParameterMapUtilTest {
 	}
 
 	private void _assertBadRequest(
+		Date endDate, String message, Date startDate) {
+
+		AssertUtils.assertFailure(
+			BadRequestException.class, message,
+			() -> ParameterMapUtil.putDateRangeParameters(
+				_toDateRangeDateFilter(endDate, startDate), new HashMap<>(),
+				null));
+	}
+
+	private void _assertBadRequest(
 		String message, PortletDataHandler portletDataHandler) {
 
 		AssertUtils.assertFailure(
@@ -445,6 +503,17 @@ public class ParameterMapUtilTest {
 			() -> ParameterMapUtil.toParameterMap(
 				_toExportProcessRequest(portletDataHandler),
 				_getAvailablePortletDataHandlers(), false));
+	}
+
+	private void _assertDateRange(Date endDate, Date startDate) {
+		Map<String, String[]> parameterMap =
+			ParameterMapUtil.putDateRangeParameters(
+				_toDateRangeDateFilter(endDate, startDate), new HashMap<>(),
+				_toUser());
+
+		Assert.assertArrayEquals(
+			new String[] {ExportImportDateUtil.RANGE_DATE_RANGE},
+			parameterMap.get(ExportImportDateUtil.RANGE));
 	}
 
 	private PortletDataHandler[] _getAvailablePortletDataHandlers() {
@@ -463,17 +532,17 @@ public class ParameterMapUtilTest {
 		};
 	}
 
-	private void _testPutSiteExternalReferenceCodes(
-		String[] expectedSiteExternalReferenceCodes,
-		String[] siteExternalReferenceCodes) {
+	private void _testPutGroupExternalReferenceCodes(
+		String[] expectedGroupExternalReferenceCodes,
+		String[] groupExternalReferenceCodes) {
 
 		Map<String, String[]> parameterMap = new HashMap<>();
 
-		ParameterMapUtil.putSiteExternalReferenceCodes(
-			parameterMap, siteExternalReferenceCodes);
+		ParameterMapUtil.putGroupExternalReferenceCodes(
+			parameterMap, groupExternalReferenceCodes);
 
 		Assert.assertArrayEquals(
-			expectedSiteExternalReferenceCodes,
+			expectedGroupExternalReferenceCodes,
 			parameterMap.get(
 				PortletDataHandlerKeys.GROUP_EXTERNAL_REFERENCE_CODES));
 	}
@@ -513,6 +582,18 @@ public class ParameterMapUtilTest {
 		choice.setName(name);
 
 		return choice;
+	}
+
+	private DateRangeDateFilter _toDateRangeDateFilter(
+		Date endDate, Date startDate) {
+
+		DateRangeDateFilter dateRangeDateFilter = new DateRangeDateFilter();
+
+		dateRangeDateFilter.setEndDate(endDate);
+		dateRangeDateFilter.setStartDate(startDate);
+		dateRangeDateFilter.setType(DateFilter.Type.DATE_RANGE);
+
+		return dateRangeDateFilter;
 	}
 
 	private ExportProcessRequest _toExportProcessRequest(
@@ -599,6 +680,34 @@ public class ParameterMapUtilTest {
 		return portletDataHandlerTreeSelection;
 	}
 
+	private SyncProcessRequest _toSyncProcessRequest(
+		PortletDataHandler... portletDataHandlers) {
+
+		SyncProcessRequest syncProcessRequest = new SyncProcessRequest();
+
+		syncProcessRequest.setPortletDataHandlers(portletDataHandlers);
+
+		return syncProcessRequest;
+	}
+
+	private User _toUser() {
+		User user = Mockito.mock(User.class);
+
+		Mockito.when(
+			user.getLocale()
+		).thenReturn(
+			LocaleUtil.US
+		);
+
+		Mockito.when(
+			user.getTimeZone()
+		).thenReturn(
+			TimeZoneUtil.GMT
+		);
+
+		return user;
+	}
+
 	private static final String _CONTROL_NAME_BOOLEAN =
 		"_" + RandomTestUtil.randomString() + "_boolean";
 
@@ -614,13 +723,13 @@ public class ParameterMapUtilTest {
 	private static final String _CONTROL_NAME_VISIBILITY =
 		"_" + RandomTestUtil.randomString() + "_visibility";
 
+	private static final String _GROUP_EXTERNAL_REFERENCE_CODE_1 =
+		RandomTestUtil.randomString();
+
+	private static final String _GROUP_EXTERNAL_REFERENCE_CODE_2 =
+		RandomTestUtil.randomString();
+
 	private static final String _PORTLET_DATA_HANDLER_NAME =
 		"PORTLET_DATA_" + RandomTestUtil.randomString();
-
-	private static final String _SITE_EXTERNAL_REFERENCE_CODE_1 =
-		RandomTestUtil.randomString();
-
-	private static final String _SITE_EXTERNAL_REFERENCE_CODE_2 =
-		RandomTestUtil.randomString();
 
 }

@@ -44,6 +44,8 @@ public class CampaignFaroController extends BaseFaroController {
 	@RolesAllowed(RoleConstants.SITE_MEMBER)
 	public FaroFDSResultsDisplay<Account> getAccountsFaroFDSResultsDisplay(
 			@PathParam("groupId") long groupId, @PathParam("id") String id,
+			@QueryParam("accountIds") String accountIds,
+			@QueryParam("accountLifecycleId") String accountLifecycleId,
 			@QueryParam("channelId") long channelId,
 			@QueryParam("filter") String filterString,
 			@QueryParam("page") int page,
@@ -59,8 +61,9 @@ public class CampaignFaroController extends BaseFaroController {
 		return new FaroFDSResultsDisplay<>(
 			contactsEngineClient.getCampaignAccounts(
 				faroProjectLocalService.getFaroProjectByGroupId(groupId),
-				channelId, filterString, id, search, rangeEnd, rangeKey,
-				rangeStart, sortString, page, pageSize),
+				accountIds, accountLifecycleId, channelId, filterString, id,
+				search, rangeEnd, rangeKey, rangeStart, sortString, page,
+				pageSize),
 			AccountDisplay::new, page, pageSize);
 	}
 
@@ -69,13 +72,14 @@ public class CampaignFaroController extends BaseFaroController {
 	@RolesAllowed(RoleConstants.SITE_MEMBER)
 	public CampaignDisplay getCampaignDisplay(
 			@PathParam("groupId") long groupId, @PathParam("id") String id,
+			@QueryParam("accountIds") String accountIds,
 			@QueryParam("channelId") long channelId)
 		throws Exception {
 
 		return new CampaignDisplay(
 			contactsEngineClient.getCampaign(
 				faroProjectLocalService.getFaroProjectByGroupId(groupId),
-				channelId, id));
+				accountIds, channelId, id));
 	}
 
 	@GET
@@ -83,6 +87,7 @@ public class CampaignFaroController extends BaseFaroController {
 	@RolesAllowed(RoleConstants.SITE_MEMBER)
 	public List<CampaignMetric> getCampaignMetrics(
 			@PathParam("groupId") long groupId,
+			@QueryParam("accountIds") String accountIds,
 			@QueryParam("channelId") long channelId,
 			@QueryParam("rangeEnd") String rangeEnd,
 			@QueryParam("rangeKey") Integer rangeKey,
@@ -90,8 +95,8 @@ public class CampaignFaroController extends BaseFaroController {
 		throws Exception {
 
 		return contactsEngineClient.getCampaignMetrics(
-			faroProjectLocalService.getFaroProjectByGroupId(groupId), channelId,
-			rangeEnd, rangeKey, rangeStart);
+			faroProjectLocalService.getFaroProjectByGroupId(groupId),
+			accountIds, channelId, rangeEnd, rangeKey, rangeStart);
 	}
 
 	@GET

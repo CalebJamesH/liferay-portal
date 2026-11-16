@@ -20,6 +20,7 @@ import com.liferay.exportimport.rest.dto.v1_0.PortletDataHandlerChoice;
 import com.liferay.exportimport.rest.dto.v1_0.PortletDataHandlerControl;
 import com.liferay.exportimport.rest.dto.v1_0.PortletDataHandlerTreeSelection;
 import com.liferay.exportimport.rest.dto.v1_0.PublishProcessRequest;
+import com.liferay.exportimport.rest.dto.v1_0.SyncProcessRequest;
 import com.liferay.petra.function.transform.TransformUtil;
 import com.liferay.petra.string.CharPool;
 import com.liferay.petra.string.StringBundler;
@@ -30,6 +31,7 @@ import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.kernel.util.Time;
 import com.liferay.portal.kernel.util.Validator;
 
 import jakarta.ws.rs.BadRequestException;
@@ -144,8 +146,24 @@ public class ParameterMapUtil {
 				"A \"DateRange\" date filter needs a start or end date");
 		}
 
+		Date date = new Date();
+
+		if ((startDate != null) &&
+			(_truncateToSecond(startDate) > date.getTime())) {
+
+			throw new BadRequestException(
+				"The start date must not be in the future");
+		}
+
+		if ((endDate != null) &&
+			(_truncateToSecond(endDate) > date.getTime())) {
+
+			throw new BadRequestException(
+				"The end date must not be in the future");
+		}
+
 		if ((endDate != null) && (startDate != null) &&
-			!startDate.before(endDate)) {
+			(_truncateToSecond(startDate) >= _truncateToSecond(endDate))) {
 
 			throw new BadRequestException(
 				"The start date must be before the end date");
@@ -168,17 +186,17 @@ public class ParameterMapUtil {
 		return parameterMap;
 	}
 
-	public static void putSiteExternalReferenceCodes(
+	public static void putGroupExternalReferenceCodes(
 		Map<String, String[]> parameterMap,
-		String[] siteExternalReferenceCodes) {
+		String[] groupExternalReferenceCodes) {
 
-		siteExternalReferenceCodes = ArrayUtil.filter(
-			siteExternalReferenceCodes, Validator::isNotNull);
+		groupExternalReferenceCodes = ArrayUtil.filter(
+			groupExternalReferenceCodes, Validator::isNotNull);
 
-		if (ArrayUtil.isNotEmpty(siteExternalReferenceCodes)) {
+		if (ArrayUtil.isNotEmpty(groupExternalReferenceCodes)) {
 			parameterMap.put(
 				PortletDataHandlerKeys.GROUP_EXTERNAL_REFERENCE_CODES,
-				ArrayUtil.unique(siteExternalReferenceCodes));
+				ArrayUtil.unique(groupExternalReferenceCodes));
 		}
 	}
 
@@ -323,6 +341,39 @@ public class ParameterMapUtil {
 			new String[] {
 				String.valueOf(
 					GetterUtil.getBoolean(publishProcessRequest.getRatings()))
+			});
+
+		return parameterMap;
+	}
+
+	public static Map<String, String[]> toParameterMap(
+		SyncProcessRequest syncProcessRequest,
+		PortletDataHandler[] portletDataHandlers) {
+
+		Map<String, String[]> parameterMap = _getDefaultParameterMap(false);
+
+		_putPortletDataHandlers(
+			portletDataHandlers, parameterMap,
+			syncProcessRequest.getPortletDataHandlers());
+
+		parameterMap.put(
+			PortletDataHandlerKeys.COMMENTS,
+			new String[] {
+				String.valueOf(
+					GetterUtil.getBoolean(syncProcessRequest.getComments()))
+			});
+		parameterMap.put(
+			PortletDataHandlerKeys.FAVICON,
+			new String[] {
+				String.valueOf(
+					MapUtil.getBoolean(
+						parameterMap, PortletDataHandlerKeys.LOGO))
+			});
+		parameterMap.put(
+			PortletDataHandlerKeys.RATINGS,
+			new String[] {
+				String.valueOf(
+					GetterUtil.getBoolean(syncProcessRequest.getRatings()))
 			});
 
 		return parameterMap;
@@ -664,6 +715,11 @@ public class ParameterMapUtil {
 		}
 
 		for (PortletDataHandler portletDataHandler : portletDataHandlers) {
+			if (portletDataHandler == null) {
+				throw new BadRequestException(
+					"Portlet data handlers must not contain null values");
+			}
+
 			String name = portletDataHandler.getName();
 
 			PortletDataHandler availablePortletDataHandler =
@@ -830,6 +886,10 @@ public class ParameterMapUtil {
 				return availablePortletDataHandler;
 			},
 			PortletDataHandler.class);
+	}
+
+	private static long _truncateToSecond(Date date) {
+		return Math.floorDiv(date.getTime(), Time.SECOND) * Time.SECOND;
 	}
 
 	private static final String _TREE_SELECTION_SUFFIX_ALL = "_all";

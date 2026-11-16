@@ -26,16 +26,20 @@ export class ConnectorSchedulePage {
 			.getByRole('link');
 		this.latestLogStatus = page.locator('td.lfr-status-column').first();
 		this.logError = page
-			.locator('.row', {has: page.getByText('Error', {exact: true})})
+			.locator('.row:not(:has(.row))', {
+				has: page.getByText('Error', {exact: true}),
+			})
 			.locator('pre');
 		this.logOutput = page
-			.locator('.row', {has: page.getByText('Output', {exact: true})})
+			.locator('.row:not(:has(.row))', {
+				has: page.getByText('Output', {exact: true}),
+			})
 			.locator('pre');
 		this.logsTab = page.getByRole('link', {exact: true, name: 'Logs'});
 		this.page = page;
 	}
 
-	async openLatestSuccessfulLog() {
+	async openLatestLog(status: string) {
 		await this.logsTab.click();
 
 		await this.page.waitForURL(/screenNavigationCategoryKey=logs/);
@@ -43,7 +47,7 @@ export class ConnectorSchedulePage {
 		await expect(async () => {
 			await this.page.reload();
 
-			await expect(this.latestLogStatus).toHaveText('Successful', {
+			await expect(this.latestLogStatus).toHaveText(status, {
 				timeout: 2000,
 			});
 		}).toPass({timeout: 60000});

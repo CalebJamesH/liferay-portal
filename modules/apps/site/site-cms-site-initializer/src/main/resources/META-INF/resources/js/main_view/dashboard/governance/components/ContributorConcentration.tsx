@@ -43,13 +43,15 @@ function getBars({contributors, totalCount}: Contributors): BarDatum[] {
 		});
 	}
 
+	bars.sort((a, b) => b.value - a.value);
+
 	const othersCount = totalCount - contributorsCount;
 
 	if (othersCount > 0) {
 		bars.push({label: Liferay.Language.get('others'), value: othersCount});
 	}
 
-	return bars.sort((a, b) => b.value - a.value);
+	return bars;
 }
 
 export function ContributorConcentration({
@@ -61,7 +63,7 @@ export function ContributorConcentration({
 	const [error, setError] = useState<string | null>(null);
 	const [chartWidth, setChartWidth] = useState<number>();
 	const [showPercentages, setShowPercentages] = useState(false);
-	const {space} = useContext(GovernanceContext);
+	const {groupIds} = useContext(GovernanceContext);
 
 	const chartContainerRef = useRef<HTMLDivElement>(null);
 
@@ -78,7 +80,7 @@ export function ContributorConcentration({
 
 			const {data, error} = await GovernanceService.getContributors(
 				additionalProps.contentProgressFilter,
-				space.siteId
+				groupIds
 			);
 
 			if (stale) {
@@ -94,7 +96,7 @@ export function ContributorConcentration({
 		return () => {
 			stale = true;
 		};
-	}, [additionalProps.contentProgressFilter, space.siteId]);
+	}, [additionalProps.contentProgressFilter, groupIds]);
 
 	const bars = contributors ? getBars(contributors) : [];
 

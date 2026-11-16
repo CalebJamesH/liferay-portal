@@ -54,7 +54,7 @@ EqualClauseIfStatementsCheck | [Styling](styling_checks.md#styling-checks) | Fin
 [ExceptionMessageCheck](check/message_check.md#messagecheck) | [Styling](styling_checks.md#styling-checks) | Validates messages that are passed to exceptions. |
 ExceptionPrintStackTraceCheck | [Bug Prevention](bug_prevention_checks.md#bug-prevention-checks) | Avoid using printStackTrace. |
 ExceptionVariableNameCheck | [Naming Conventions](naming_conventions_checks.md#naming-conventions-checks) | Validates variable names that have type `*Exception`. |
-FIPSTLSVerificationCheck | [Security](security_checks.md#security-checks) | Finds outbound TLS verification bypasses that are not guarded by `PropsValues.FIPS_ENABLED`, see LPD-93649. |
+FIPSTLSVerificationCheck | [Security](security_checks.md#security-checks) | Finds outbound TLS verification bypasses that are not guarded by `PropsValues.FIPS_ENABLED`. |
 FactoryCheck | [Bug Prevention](bug_prevention_checks.md#bug-prevention-checks) | Finds cases where `*Factory` should be used when creating new instances of an object. |
 [FetchContractCatchCheck](check/fetch_contract_catch_check.md#fetchcontractcatchcheck) | [Bug Prevention](bug_prevention_checks.md#bug-prevention-checks) | Finds code blocks that use `try-catch` to handle `NoSuch*Exception` or `PortalException` during entity lookups, which should be replaced by `fetch*` methods. |
 FilterStringWhitespaceCheck | [Bug Prevention](bug_prevention_checks.md#bug-prevention-checks) | Finds missing and unnecessary whitespace in the value of the filter string in `ServiceTrackerFactory.open` or `WaiterUtil.waitForFilter`. |
@@ -168,6 +168,7 @@ JavaReturnStatementCheck | [Styling](styling_checks.md#styling-checks) | Finds u
 JavaRunSQLCheck | [Styling](styling_checks.md#styling-checks) | Applies rules to enforce consistency in code style. |
 JavaSQLStatementCheck | [Bug Prevention](bug_prevention_checks.md#bug-prevention-checks) | Perform several checks in SQL statements. |
 [JavaSeeAnnotationCheck](check/java_see_annotation_check.md#javaseeannotationcheck) | [Bug Prevention](bug_prevention_checks.md#bug-prevention-checks) | Checks for nested annotations inside `@see`. |
+JavaServiceHopCheck | [Performance](performance_checks.md#performance-checks) | Flags a service method that delegates to a passthrough service method in the same bundle, so it can call persistence directly and skip the AOP proxy hop. |
 JavaServiceImplCheck | [Bug Prevention](bug_prevention_checks.md#bug-prevention-checks) | Ensures that `afterPropertiesSet` and `destroy` methods in `*ServiceImpl` always call the method with the same name in the superclass. |
 JavaServiceImplErcUsageCheck | [Productivity](productivity_checks.md#productivity-checks) | Automatically generates and ensures that `externalReferenceCode` is properly used in remote `*ServiceImpl` add method. |
 JavaServiceImplGetFetchCheck | [Bug Prevention](bug_prevention_checks.md#bug-prevention-checks) | Flags a get-prefixed service method that returns a nullable fetch result, violating the non-null promise its name implies. |
@@ -276,6 +277,7 @@ PlusStatementCheck | [Styling](styling_checks.md#styling-checks) | Performs seve
 [PortletURLBuilderCheck](check/builder_check.md#buildercheck) | [Miscellaneous](miscellaneous_checks.md#miscellaneous-checks) | Checks that `PortletURLBuilder` is used when possible. |
 PrimitiveWrapperInstantiationCheck | [Bug Prevention](bug_prevention_checks.md#bug-prevention-checks) | Finds cases where `new Type` is used for primitive types (use `Type.valueOf` instead). |
 PrincipalExceptionCheck | [Bug Prevention](bug_prevention_checks.md#bug-prevention-checks) | Finds calls to `PrincipalException.class.getName()` (use `PrincipalException.getNestedClasses()` instead). |
+[PrintWriterWrapperCheck](check/print_writer_wrapper_check.md#printwriterwrappercheck) | [Performance](performance_checks.md#performance-checks) | Finds a `PrintWriter` or `UnsyncPrintWriter` that only wraps another writer or stream to print to it, which should write to the wrapped writer directly instead. |
 RESTDTOSetCallCheck | [Performance](performance_checks.md#performance-checks) | Ensures using set calls with `UnsafeSupplier` parameter for REST DTO. |
 RecordClassCheck | [Performance](performance_checks.md#performance-checks) | Finds usage of `record`. |
 RecordPatternCheck | [Performance](performance_checks.md#performance-checks) | Finds usage of record patterns. |
@@ -293,6 +295,7 @@ ReturnVariableDeclarationAsUsedCheck | [Miscellaneous](miscellaneous_checks.md#m
 SafeCloseableMissingCloseCheck | [Bug Prevention](bug_prevention_checks.md#bug-prevention-checks) | Finds missing `close()` calls for `SafeCloseable` instances. |
 SealedAndNonsealedModifierCheck | [Performance](performance_checks.md#performance-checks) | Finds usage of `sealed` and `non-sealed`. |
 SecretComparisonCheck | [Security](security_checks.md#security-checks) | Finds secrets compared with a method that returns at the first differing byte. |
+SecretResolverCheck | [Security](security_checks.md#security-checks) | Finds configuration credentials read without resolving them through `SecretResolver` or `SecretResolverUtil`. |
 SelfReferenceCheck | [Bug Prevention](bug_prevention_checks.md#bug-prevention-checks) | Finds cases of unnecessary reference to its own class. |
 SemiColonCheck | [Styling](styling_checks.md#styling-checks) | Finds cases of unnecessary semicolon. |
 [ServiceComponentRuntimeCheck](check/service_component_runtime_check.md#servicecomponentruntimecheck) | [Bug Prevention](bug_prevention_checks.md#bug-prevention-checks) | Checks `ServiceComponentRuntime` usage in test classes. |
@@ -324,9 +327,11 @@ TextBlockCheck | [Styling](styling_checks.md#styling-checks) | Finds usage of te
 ThreadLocalUtilCheck | [Performance](performance_checks.md#performance-checks) | Finds new instances of `java.lang.Thread` (use `ThreadLocalUtil.create` instead). |
 ThreadLocalVariableNameCheck | [Naming Conventions](naming_conventions_checks.md#naming-conventions-checks) | Checks for consistent naming on variables of type '*ThreadLocal'. |
 ThreadNameCheck | [Naming Conventions](naming_conventions_checks.md#naming-conventions-checks) | Checks that names of threads follow naming conventions. |
+[ToSQLCallCheck](check/to_sql_call_check.md#tosqlcallcheck) | [Performance](performance_checks.md#performance-checks) | Finds `toSQL(ASTNodeListener)` calls whose SQL string is unused, which should pass a consumer that ignores the text to `toSQL(Consumer, ASTNodeListener)` instead. |
 TransactionalTestRuleCheck | [Bug Prevention](bug_prevention_checks.md#bug-prevention-checks) | Finds usage of `TransactionalTestRule` in `*StagedModelDataHandlerTest`. |
 TryWithResourcesCheck | [Performance](performance_checks.md#performance-checks) | Ensures using Try-With-Resources statement to properly close the resource. |
 [TypeNameCheck](https://checkstyle.sourceforge.io/checks/naming/typename.html) | [Naming Conventions](naming_conventions_checks.md#naming-conventions-checks) | Checks that type names conform to a specified pattern. |
+[TypedPropertyKeyCheck](check/typed_property_key_check.md#typedpropertykeycheck) | [Bug Prevention](bug_prevention_checks.md#bug-prevention-checks) | Checks that a typed property key such as `service.ranking:Integer` is not used outside component property strings. |
 URLInputStreamCheck | [Bug Prevention](bug_prevention_checks.md#bug-prevention-checks) | Checks usages of `URL.openStream()`. |
 [UnicodePropertiesBuilderCheck](check/builder_check.md#buildercheck) | [Miscellaneous](miscellaneous_checks.md#miscellaneous-checks) | Checks that `UnicodePropertiesBuilder` is used when possible. |
 [UnnecessaryAssignCheck](check/unnecessary_assign_check.md#unnecessaryassigncheck) | [Performance](performance_checks.md#performance-checks) | Finds unnecessary assign statements (when it is either reassigned or returned right after). |

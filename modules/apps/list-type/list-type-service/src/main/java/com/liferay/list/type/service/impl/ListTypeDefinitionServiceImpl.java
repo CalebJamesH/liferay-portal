@@ -85,9 +85,8 @@ public class ListTypeDefinitionServiceImpl
 		throws PortalException {
 
 		ListTypeDefinition listTypeDefinition =
-			listTypeDefinitionLocalService.
-				fetchListTypeDefinitionByExternalReferenceCode(
-					externalReferenceCode, companyId);
+			listTypeDefinitionPersistence.fetchByERC_C(
+				externalReferenceCode, companyId);
 
 		if (listTypeDefinition != null) {
 			_listTypeDefinitionModelResourcePermission.check(
@@ -115,9 +114,8 @@ public class ListTypeDefinitionServiceImpl
 		throws PortalException {
 
 		ListTypeDefinition listTypeDefinition =
-			listTypeDefinitionLocalService.
-				getListTypeDefinitionByExternalReferenceCode(
-					externalReferenceCode, companyId);
+			listTypeDefinitionPersistence.findByERC_C(
+				externalReferenceCode, companyId);
 
 		_listTypeDefinitionModelResourcePermission.check(
 			getPermissionChecker(),
@@ -127,13 +125,21 @@ public class ListTypeDefinitionServiceImpl
 	}
 
 	@Override
-	public List<ListTypeDefinition> getListTypeDefinitions(int start, int end) {
-		return listTypeDefinitionPersistence.findAll(start, end);
+	public List<ListTypeDefinition> getListTypeDefinitions(int start, int end)
+		throws PortalException {
+
+		PermissionChecker permissionChecker = getPermissionChecker();
+
+		return listTypeDefinitionPersistence.filterFindByCompanyId(
+			permissionChecker.getCompanyId(), start, end);
 	}
 
 	@Override
-	public int getListTypeDefinitionsCount() {
-		return listTypeDefinitionPersistence.countAll();
+	public int getListTypeDefinitionsCount() throws PortalException {
+		PermissionChecker permissionChecker = getPermissionChecker();
+
+		return listTypeDefinitionPersistence.filterCountByCompanyId(
+			permissionChecker.getCompanyId());
 	}
 
 	@Override

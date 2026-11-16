@@ -54,6 +54,8 @@ import {
 	includeAnonymousToggle,
 	saveSegment,
 	selectAsset,
+	selectBehaviorAsset,
+	selectBehaviorPage,
 	selectOperator,
 	setSegmentName,
 	viewSegmentCriteriaCard,
@@ -730,7 +732,7 @@ test.skip(
 
 			await expect(
 				page.getByText(
-					'There are no results found.Please try a different search term.'
+					'No results were found.Please try a different search term.'
 				)
 			).toBeVisible();
 		});
@@ -1682,7 +1684,7 @@ test(
 			});
 
 			await expect(
-				page.getByText('There are no results found.')
+				page.getByText('No results were found.')
 			).toBeVisible();
 
 			// Sort by Name ascending then toggle to descending
@@ -1793,9 +1795,7 @@ test(
 
 		// The cancelled segment is not persisted to the list
 
-		await expect(
-			page.getByText('There are no segments found.')
-		).toBeVisible();
+		await expect(page.getByText('No segments were found.')).toBeVisible();
 	}
 );
 
@@ -1955,12 +1955,12 @@ test(
 		});
 
 		await addSegmentField({
-			criterionName: 'Viewed Page',
+			criterionName: 'View',
 			criterionType: 'Events',
 			page,
 		});
 
-		await selectAsset({assetName: pageTitle, page});
+		await selectBehaviorPage({page, pageName: pageTitle});
 
 		await includeAnonymousToggle({enable: true, page});
 
@@ -2329,7 +2329,7 @@ test(
 
 			await page.keyboard.press('Escape');
 
-			await page.locator('button[type="submit"]').click();
+			await page.getByRole('button', {name: 'Save Segment'}).click();
 
 			await waitForAlert(page, 'This segment name is currently in use', {
 				autoClose: false,
@@ -2394,7 +2394,7 @@ test(
 				segmentName: secondSegmentName,
 			});
 
-			await page.locator('button[type="submit"]').click();
+			await page.getByRole('button', {name: 'Save Segment'}).click();
 
 			await waitForAlert(page, 'This segment name is currently in use', {
 				autoClose: false,
@@ -2490,12 +2490,16 @@ test(
 		await setSegmentName({page, segmentName});
 
 		await addSegmentField({
-			criterionName: 'Viewed Blog',
+			criterionName: 'View',
 			criterionType: 'Events',
 			page,
 		});
 
-		await selectAsset({assetName: assetTitle, page});
+		await selectBehaviorAsset({
+			assetName: assetTitle,
+			assetType: 'Blogs',
+			page,
+		});
 
 		await page.locator('input[type="number"]').fill('4');
 
@@ -2568,9 +2572,7 @@ test(
 			autoClose: false,
 		});
 
-		await expect(
-			page.getByText('There are no segments found.')
-		).toBeVisible();
+		await expect(page.getByText('No segments were found.')).toBeVisible();
 	}
 );
 
@@ -2615,12 +2617,16 @@ test(
 		await setSegmentName({page, segmentName});
 
 		await addSegmentField({
-			criterionName: 'Viewed Document & Media',
+			criterionName: 'View',
 			criterionType: 'Events',
 			page,
 		});
 
-		await selectAsset({assetName: 'DM AC Title', page});
+		await selectBehaviorAsset({
+			assetName: 'DM AC Title',
+			assetType: 'Documents and Media',
+			page,
+		});
 
 		await saveSegment(page);
 
@@ -2682,12 +2688,16 @@ test(
 		await setSegmentName({page, segmentName});
 
 		await addSegmentField({
-			criterionName: 'Viewed Web Content',
+			criterionName: 'View',
 			criterionType: 'Events',
 			page,
 		});
 
-		await selectAsset({assetName: assetTitle, page});
+		await selectBehaviorAsset({
+			assetName: assetTitle,
+			assetType: 'Web Content',
+			page,
+		});
 
 		// Switch the time period dropdown to Last 7 days
 
@@ -2750,12 +2760,16 @@ test(
 		await setSegmentName({page, segmentName});
 
 		await addSegmentField({
-			criterionName: 'Viewed Blog',
+			criterionName: 'View',
 			criterionType: 'Events',
 			page,
 		});
 
-		await selectAsset({assetName: assetTitle, page});
+		await selectBehaviorAsset({
+			assetName: assetTitle,
+			assetType: 'Blogs',
+			page,
+		});
 
 		// Switch the "has" operator to "has not"
 
@@ -2834,9 +2848,7 @@ test(
 			autoClose: false,
 		});
 
-		await expect(
-			page.getByText('There are no segments found.')
-		).toBeVisible();
+		await expect(page.getByText('No segments were found.')).toBeVisible();
 	}
 );
 

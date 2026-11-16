@@ -20,6 +20,7 @@ import com.liferay.portal.kernel.test.AssertUtils;
 import com.liferay.portal.kernel.test.rule.DataGuard;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
+import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.kernel.workflow.WorkflowException;
 import com.liferay.portal.test.rule.Inject;
@@ -138,6 +139,7 @@ public class KaleoDefinitionLocalServiceTest
 		_testUpdateKaleoDefinitionWithEmptyStatus();
 		_testUpdateKaleoDefinitionWithScope();
 		_testUpdateKaleoDefinitionWithSystem();
+		_testUpdateKaleoDefinitionWithoutExternalReferenceCode();
 	}
 
 	private AccountEntry _addAccountEntry() throws Exception {
@@ -155,6 +157,18 @@ public class KaleoDefinitionLocalServiceTest
 		KaleoDefinition kaleoDefinition = addKaleoDefinition(null);
 
 		Assert.assertEquals(1, kaleoDefinition.getVersion());
+
+		String title = RandomTestUtil.randomString(4001);
+
+		kaleoDefinition = addKaleoDefinition(
+			RandomTestUtil.randomString(), RandomTestUtil.randomString(),
+			RandomTestUtil.randomString(), title, null);
+
+		kaleoDefinition = _kaleoDefinitionLocalService.getKaleoDefinition(
+			kaleoDefinition.getKaleoDefinitionId());
+
+		Assert.assertEquals(
+			title, kaleoDefinition.getTitle(LocaleUtil.getDefault()));
 	}
 
 	private void _testAddKaleoDefinitionWithScope() throws Exception {
@@ -296,6 +310,23 @@ public class KaleoDefinitionLocalServiceTest
 		kaleoDefinition = updateKaleoDefinition(kaleoDefinition, false);
 
 		Assert.assertFalse(kaleoDefinition.isSystem());
+	}
+
+	private void _testUpdateKaleoDefinitionWithoutExternalReferenceCode()
+		throws Exception {
+
+		KaleoDefinition kaleoDefinition = addKaleoDefinition(null);
+
+		String externalReferenceCode =
+			kaleoDefinition.getExternalReferenceCode();
+
+		kaleoDefinition = _kaleoDefinitionLocalService.updatedKaleoDefinition(
+			null, kaleoDefinition.getKaleoDefinitionId(),
+			RandomTestUtil.randomString(), RandomTestUtil.randomString(),
+			kaleoDefinition.getContent(), false, serviceContext);
+
+		Assert.assertEquals(
+			externalReferenceCode, kaleoDefinition.getExternalReferenceCode());
 	}
 
 	@Inject

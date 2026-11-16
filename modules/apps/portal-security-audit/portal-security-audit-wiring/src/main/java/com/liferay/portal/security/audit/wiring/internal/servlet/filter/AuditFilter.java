@@ -24,12 +24,10 @@ import com.liferay.portal.kernel.servlet.BaseFilter;
 import com.liferay.portal.kernel.servlet.HttpHeaders;
 import com.liferay.portal.kernel.servlet.TryFilter;
 import com.liferay.portal.kernel.util.HashMapBuilder;
-import com.liferay.portal.kernel.util.HashMapDictionary;
 import com.liferay.portal.kernel.util.PrefsPropsUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
-import com.liferay.portal.kernel.uuid.PortalUUIDUtil;
 import com.liferay.portal.security.audit.wiring.internal.configuration.AuditLogContextConfiguration;
 
 import jakarta.servlet.Filter;
@@ -127,13 +125,19 @@ public class AuditFilter extends BaseFilter implements TryFilter {
 			HttpHeaders.X_REQUEST_ID);
 
 		if (FeatureFlagManagerUtil.isEnabled(companyId, "LPD-6417")) {
-			if (!_isValidXRequestId(xRequestId)) {
-				xRequestId = PortalUUIDUtil.generate();
-
-				auditRequestContext.setRequestIdGenerated(true);
+			if (_isValidXRequestId(xRequestId)) {
+				auditRequestContext.setRequestId(xRequestId);
+				auditRequestContext.setRequestIdGenerated(false);
+			}
+			else {
+				xRequestId = auditRequestContext.getRequestId();
 			}
 
-			auditRequestContext.setRequestId(xRequestId);
+			auditRequestContext.setHttpMethod(
+				_truncate(75, httpServletRequest.getMethod()));
+			auditRequestContext.setUserAgent(
+				_truncate(
+					255, httpServletRequest.getHeader(HttpHeaders.USER_AGENT)));
 		}
 
 		if (!_auditLogContextConfiguration.enabled()) {
@@ -144,7 +148,7 @@ public class AuditFilter extends BaseFilter implements TryFilter {
 			(!_auditLogContextConfiguration.useIncomingXRequestId() ||
 			 !_isValidXRequestId(xRequestId))) {
 
-			xRequestId = PortalUUIDUtil.generate();
+			xRequestId = auditRequestContext.getRequestId();
 		}
 
 		httpServletResponse.setHeader(HttpHeaders.X_REQUEST_ID, xRequestId);
@@ -163,7 +167,7 @@ public class AuditFilter extends BaseFilter implements TryFilter {
 		_auditLogContext = new AuditLogContext();
 
 		_serviceRegistration = bundleContext.registerService(
-			LogContext.class, _auditLogContext, new HashMapDictionary());
+			LogContext.class, _auditLogContext, null);
 
 		_auditLogContextConfiguration = ConfigurableUtil.createConfigurable(
 			AuditLogContextConfiguration.class, properties);
@@ -230,6 +234,14 @@ public class AuditFilter extends BaseFilter implements TryFilter {
 		}
 
 		return true;
+	}
+
+	private String _truncate(int length, String s) {
+		if ((s == null) || (s.length() <= length)) {
+			return s;
+		}
+
+		return s.substring(0, length);
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(AuditFilter.class);

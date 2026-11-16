@@ -292,36 +292,6 @@ public class CommerceShippingFixedOptionRelLocalServiceUtil {
 		return getService().getCommerceShippingFixedOptionRels(start, end);
 	}
 
-	public static List<CommerceShippingFixedOptionRel>
-		getCommerceShippingFixedOptionRels(
-			long commerceShippingFixedOptionId, int start, int end) {
-
-		return getService().getCommerceShippingFixedOptionRels(
-			commerceShippingFixedOptionId, start, end);
-	}
-
-	public static List<CommerceShippingFixedOptionRel>
-		getCommerceShippingFixedOptionRels(
-			long commerceShippingFixedOptionId, int start, int end,
-			OrderByComparator<CommerceShippingFixedOptionRel>
-				orderByComparator) {
-
-		return getService().getCommerceShippingFixedOptionRels(
-			commerceShippingFixedOptionId, start, end, orderByComparator);
-	}
-
-	public static List<CommerceShippingFixedOptionRel>
-		getCommerceShippingFixedOptionRels(
-			long commerceShippingFixedOptionId, long commerceShippingMethodId,
-			int start, int end,
-			OrderByComparator<CommerceShippingFixedOptionRel>
-				orderByComparator) {
-
-		return getService().getCommerceShippingFixedOptionRels(
-			commerceShippingFixedOptionId, commerceShippingMethodId, start, end,
-			orderByComparator);
-	}
-
 	/**
 	 * Returns the number of commerce shipping fixed option rels.
 	 *
@@ -329,45 +299,6 @@ public class CommerceShippingFixedOptionRelLocalServiceUtil {
 	 */
 	public static int getCommerceShippingFixedOptionRelsCount() {
 		return getService().getCommerceShippingFixedOptionRelsCount();
-	}
-
-	public static int getCommerceShippingFixedOptionRelsCount(
-		long commerceShippingFixedOptionId) {
-
-		return getService().getCommerceShippingFixedOptionRelsCount(
-			commerceShippingFixedOptionId);
-	}
-
-	public static int getCommerceShippingFixedOptionRelsCount(
-		long commerceShippingFixedOptionId, long commerceShippingMethodId) {
-
-		return getService().getCommerceShippingFixedOptionRelsCount(
-			commerceShippingFixedOptionId, commerceShippingMethodId);
-	}
-
-	public static List<CommerceShippingFixedOptionRel>
-		getCommerceShippingMethodFixedOptionRels(
-			long commerceShippingMethodId, int start, int end) {
-
-		return getService().getCommerceShippingMethodFixedOptionRels(
-			commerceShippingMethodId, start, end);
-	}
-
-	public static List<CommerceShippingFixedOptionRel>
-		getCommerceShippingMethodFixedOptionRels(
-			long commerceShippingMethodId, int start, int end,
-			OrderByComparator<CommerceShippingFixedOptionRel>
-				orderByComparator) {
-
-		return getService().getCommerceShippingMethodFixedOptionRels(
-			commerceShippingMethodId, start, end, orderByComparator);
-	}
-
-	public static int getCommerceShippingMethodFixedOptionRelsCount(
-		long commerceShippingMethodId) {
-
-		return getService().getCommerceShippingMethodFixedOptionRelsCount(
-			commerceShippingMethodId);
 	}
 
 	public static
@@ -438,4 +369,4 @@ public class CommerceShippingFixedOptionRelLocalServiceUtil {
 			CommerceShippingFixedOptionRelLocalService.class);
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:900554004
+// LIFERAY-SERVICE-BUILDER-HASH:-603238626

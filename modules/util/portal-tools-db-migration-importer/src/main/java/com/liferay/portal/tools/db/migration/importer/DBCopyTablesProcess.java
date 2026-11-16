@@ -5,8 +5,8 @@
 
 package com.liferay.portal.tools.db.migration.importer;
 
-import com.liferay.petra.io.unsync.UnsyncBufferedReader;
 import com.liferay.petra.reflect.ReflectionUtil;
+import com.liferay.petra.string.CharPool;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.dao.jdbc.postgresql.PostgreSQLJDBCUtil;
@@ -21,21 +21,23 @@ import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.tools.db.migration.importer.jdbc.AutoBatchPreparedStatementUtil;
 import com.liferay.portal.tools.db.migration.importer.jdbc.ConnectionConfigUtil;
 
-import java.io.Reader;
-
 import java.math.BigDecimal;
 
+import java.nio.charset.StandardCharsets;
+
 import java.sql.Blob;
-import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
 
 import java.text.DateFormat;
+
+import java.time.LocalTime;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -61,17 +63,15 @@ import javax.sql.DataSource;
 public class DBCopyTablesProcess {
 
 	public DBCopyTablesProcess(
-		boolean includeCustomSchema, DataSource sourceDataSource,
-		DataSource targetDataSource) {
+		DataSource sourceDataSource, DataSource targetDataSource) {
 
-		this(includeCustomSchema, null, sourceDataSource, targetDataSource);
+		this(null, sourceDataSource, targetDataSource);
 	}
 
 	public DBCopyTablesProcess(
-		boolean includeCustomSchema, String partitionName,
-		DataSource sourceDataSource, DataSource targetDataSource) {
+		String partitionName, DataSource sourceDataSource,
+		DataSource targetDataSource) {
 
-		_includeCustomSchema = includeCustomSchema;
 		_sourceDataSource = sourceDataSource;
 		_targetDataSource = targetDataSource;
 
@@ -86,14 +86,12 @@ public class DBCopyTablesProcess {
 	public void run() throws Exception {
 		_loadColumnsMetadata();
 
-		if (_includeCustomSchema) {
-			_addCustomColumns();
-		}
+		_addCustomColumnsAndTables();
 
 		_copyTables();
 	}
 
-	private void _addCustomColumns() throws Exception {
+	private void _addCustomColumnsAndTables() throws Exception {
 		try (Connection sourceConnection = _sourceDataSource.getConnection();
 
 			Connection targetConnection = _targetDataSource.getConnection();
@@ -101,6 +99,11 @@ public class DBCopyTablesProcess {
 			Statement statement = targetConnection.createStatement()) {
 
 			DatabaseMetaData databaseMetaData = sourceConnection.getMetaData();
+
+			Map<String, List<String>> columnDefinitionsMap = new TreeMap<>(
+				String.CASE_INSENSITIVE_ORDER);
+			Set<String> longNameTableNames = new TreeSet<>(
+				String.CASE_INSENSITIVE_ORDER);
 
 			try (ResultSet resultSet = databaseMetaData.getColumns(
 					sourceConnection.getCatalog(), sourceConnection.getSchema(),
@@ -113,14 +116,35 @@ public class DBCopyTablesProcess {
 						continue;
 					}
 
+					String columnName = resultSet.getString("COLUMN_NAME");
+
 					List<String> targetColumnNames = _targetColumnNamesMap.get(
 						tableName);
 
 					if (targetColumnNames == null) {
+						if (_isLongName(columnName) || _isLongName(tableName)) {
+							longNameTableNames.add(tableName);
+
+							continue;
+						}
+
+						String columnDefinition = _getColumnDefinition(
+							columnName, resultSet);
+
+						if (resultSet.getInt("NULLABLE") ==
+								DatabaseMetaData.columnNoNulls) {
+
+							columnDefinition += " not null";
+						}
+
+						List<String> columnDefinitions =
+							columnDefinitionsMap.computeIfAbsent(
+								tableName, newTableName -> new ArrayList<>());
+
+						columnDefinitions.add(columnDefinition);
+
 						continue;
 					}
-
-					String columnName = resultSet.getString("COLUMN_NAME");
 
 					if (ListUtil.exists(
 							targetColumnNames,
@@ -130,14 +154,45 @@ public class DBCopyTablesProcess {
 						continue;
 					}
 
+					if (_isLongName(columnName)) {
+						System.out.println(
+							StringBundler.concat(
+								"Unable to add column ", columnName,
+								" to table ", tableName, _partitionMessage,
+								" because its name is longer than ",
+								_POSTGRESQL_NAME_MAX_LENGTH, " bytes"));
+
+						continue;
+					}
+
 					statement.executeUpdate(
 						StringBundler.concat(
-							"alter table ", tableName, " add ", columnName, " ",
-							_getPostgreSQLColumnType(
-								resultSet.getInt("COLUMN_SIZE"),
-								resultSet.getInt("DATA_TYPE"),
-								resultSet.getInt("DECIMAL_DIGITS"))));
+							"alter table ",
+							_getQuotedName(StringUtil.toLowerCase(tableName)),
+							" add ",
+							_getColumnDefinition(columnName, resultSet)));
 				}
+			}
+
+			for (String longNameTableName : longNameTableNames) {
+				columnDefinitionsMap.remove(longNameTableName);
+
+				System.out.println(
+					StringBundler.concat(
+						"Unable to create table ", longNameTableName,
+						_partitionMessage, " because its name or the name of ",
+						"one of its columns is longer than ",
+						_POSTGRESQL_NAME_MAX_LENGTH, " bytes"));
+			}
+
+			for (Map.Entry<String, List<String>> entry :
+					columnDefinitionsMap.entrySet()) {
+
+				statement.executeUpdate(
+					StringBundler.concat(
+						"create table ",
+						_getQuotedName(StringUtil.toLowerCase(entry.getKey())),
+						" (", StringUtil.merge(entry.getValue()), ")"));
 			}
 		}
 
@@ -171,8 +226,10 @@ public class DBCopyTablesProcess {
 			"select ", StringUtil.merge(sourceColumnNames), " from ",
 			sourceTableName);
 		String insertSQL = StringBundler.concat(
-			"insert into ", targetTableName, "(",
-			StringUtil.merge(targetColumnNames), ") values (",
+			"insert into ", _getQuotedName(targetTableName), " (",
+			StringUtil.merge(
+				ListUtil.toList(targetColumnNames, this::_getQuotedName), ", "),
+			") values (",
 			StringUtil.merge(
 				Collections.nCopies(targetColumnNames.size(), "?")),
 			")");
@@ -361,8 +418,14 @@ public class DBCopyTablesProcess {
 
 			valueString = value ? "1" : "0";
 		}
-		else if (sourceType == Types.CLOB) {
-			Clob value = resultSet.getClob(columnName);
+		else if ((sourceType == Types.CHAR) ||
+				 (sourceType == Types.LONGNVARCHAR) ||
+				 (sourceType == Types.LONGVARCHAR) ||
+				 (sourceType == Types.NCHAR) || (sourceType == Types.NCLOB) ||
+				 (sourceType == Types.NVARCHAR) || (sourceType == Types.TIME) ||
+				 (sourceType == Types.VARCHAR)) {
+
+			String value = resultSet.getString(columnName);
 
 			if (value == null) {
 				preparedStatement.setNull(index, targetType);
@@ -370,25 +433,50 @@ public class DBCopyTablesProcess {
 				return;
 			}
 
-			try (Reader reader = value.getCharacterStream();
+			if ((targetType == Types.LONGNVARCHAR) ||
+				(targetType == Types.VARCHAR)) {
 
-				UnsyncBufferedReader unsyncBufferedReader =
-					new UnsyncBufferedReader(reader)) {
+				preparedStatement.setString(index, _getSanitizedString(value));
 
-				StringBundler sb = new StringBundler();
-
-				String line = null;
-
-				while ((line = unsyncBufferedReader.readLine()) != null) {
-					if (sb.length() != 0) {
-						sb.append("\n");
-					}
-
-					sb.append(line);
-				}
-
-				valueString = sb.toString();
+				return;
 			}
+
+			valueString = value;
+		}
+		else if (sourceType == Types.CLOB) {
+			String value = resultSet.getString(columnName);
+
+			if (value == null) {
+				preparedStatement.setNull(index, targetType);
+
+				return;
+			}
+
+			valueString = value;
+		}
+		else if ((sourceType == Types.DATE) ||
+				 (sourceType == Types.TIMESTAMP) ||
+				 (sourceType == Types.TIMESTAMP_WITH_TIMEZONE) ||
+				 (sourceType ==
+					 _SQL_TYPE_ORACLE_TIMESTAMP_WITH_LOCAL_TIME_ZONE) ||
+				 (sourceType == _SQL_TYPE_ORACLE_TIMESTAMP_WITH_TIME_ZONE) ||
+				 (sourceType == _SQL_TYPE_SQL_SERVER_DATETIMEOFFSET)) {
+
+			Timestamp value = resultSet.getTimestamp(columnName);
+
+			if (value == null) {
+				preparedStatement.setNull(index, targetType);
+
+				return;
+			}
+
+			if (targetType == Types.TIMESTAMP) {
+				preparedStatement.setTimestamp(index, value);
+
+				return;
+			}
+
+			valueString = value.toString();
 		}
 		else if ((sourceType == Types.DECIMAL) ||
 				 (sourceType == Types.NUMERIC)) {
@@ -463,44 +551,18 @@ public class DBCopyTablesProcess {
 
 			valueString = String.valueOf(value);
 		}
-		else if ((sourceType == Types.LONGVARCHAR) ||
-				 (sourceType == Types.NVARCHAR) ||
-				 (sourceType == Types.VARCHAR)) {
+		else if ((sourceType == Types.REAL) ||
+				 (sourceType == _SQL_TYPE_ORACLE_BINARY_FLOAT)) {
 
-			String value = resultSet.getString(columnName);
+			float value = resultSet.getFloat(columnName);
 
-			if (value == null) {
+			if ((value == 0.0F) && resultSet.wasNull()) {
 				preparedStatement.setNull(index, targetType);
 
 				return;
 			}
 
-			if ((targetType == Types.LONGNVARCHAR) ||
-				(targetType == Types.VARCHAR)) {
-
-				preparedStatement.setString(index, _getSanitizedString(value));
-
-				return;
-			}
-
-			valueString = value;
-		}
-		else if (sourceType == Types.TIMESTAMP) {
-			Timestamp value = resultSet.getTimestamp(columnName);
-
-			if (value == null) {
-				preparedStatement.setNull(index, targetType);
-
-				return;
-			}
-
-			if (targetType == Types.TIMESTAMP) {
-				preparedStatement.setTimestamp(index, value);
-
-				return;
-			}
-
-			valueString = value.toString();
+			valueString = String.valueOf(value);
 		}
 		else if ((sourceType == Types.TINYINT) ||
 				 (sourceType == Types.SMALLINT)) {
@@ -515,9 +577,8 @@ public class DBCopyTablesProcess {
 
 			valueString = String.valueOf(value);
 		}
-		else if (_includeCustomSchema &&
-				 ((targetType == Types.LONGVARCHAR) ||
-				  (targetType == Types.VARCHAR))) {
+		else if ((targetType == Types.LONGVARCHAR) ||
+				 (targetType == Types.VARCHAR)) {
 
 			String value = resultSet.getString(columnName);
 
@@ -534,6 +595,16 @@ public class DBCopyTablesProcess {
 		}
 
 		_setColumn(index, preparedStatement, targetType, valueString);
+	}
+
+	private String _getColumnDefinition(String columnName, ResultSet resultSet)
+		throws SQLException {
+
+		return StringBundler.concat(
+			_getQuotedName(StringUtil.toLowerCase(columnName)), " ",
+			_getPostgreSQLColumnType(
+				resultSet.getInt("COLUMN_SIZE"), resultSet.getInt("DATA_TYPE"),
+				resultSet.getInt("DECIMAL_DIGITS")));
 	}
 
 	private String _getPostgreSQLColumnType(
@@ -557,6 +628,18 @@ public class DBCopyTablesProcess {
 			return "oid";
 		}
 
+		if (((dataType == Types.CHAR) || (dataType == Types.NCHAR) ||
+			 (dataType == Types.NVARCHAR) || (dataType == Types.VARCHAR)) &&
+			(columnSize > 0) &&
+			(columnSize < DB.SQL_VARCHAR_MAX_SIZE_THRESHOLD)) {
+
+			return "varchar(" + columnSize + ")";
+		}
+
+		if ((dataType == Types.DATE) || (dataType == Types.TIMESTAMP)) {
+			return "timestamp";
+		}
+
 		if ((dataType == Types.DECIMAL) || (dataType == Types.NUMERIC)) {
 			if ((columnSize <= 0) || (decimalDigits < 0)) {
 				return "numeric";
@@ -573,7 +656,9 @@ public class DBCopyTablesProcess {
 		}
 
 		if ((dataType == Types.DOUBLE) || (dataType == Types.FLOAT) ||
-			(dataType == _SQL_TYPE_ORACLE_BINARY_DOUBLE)) {
+			(dataType == Types.REAL) ||
+			(dataType == _SQL_TYPE_ORACLE_BINARY_DOUBLE) ||
+			(dataType == _SQL_TYPE_ORACLE_BINARY_FLOAT)) {
 
 			return "double precision";
 		}
@@ -584,17 +669,26 @@ public class DBCopyTablesProcess {
 			return "integer";
 		}
 
-		if (((dataType == Types.NVARCHAR) || (dataType == Types.VARCHAR)) &&
-			(columnSize < DB.SQL_VARCHAR_MAX_SIZE_THRESHOLD)) {
-
-			return "varchar(" + columnSize + ")";
+		if (dataType == Types.TIME) {
+			return "time";
 		}
 
-		if (dataType == Types.TIMESTAMP) {
-			return "timestamp";
+		if ((dataType == Types.TIMESTAMP_WITH_TIMEZONE) ||
+			(dataType == _SQL_TYPE_ORACLE_TIMESTAMP_WITH_LOCAL_TIME_ZONE) ||
+			(dataType == _SQL_TYPE_ORACLE_TIMESTAMP_WITH_TIME_ZONE) ||
+			(dataType == _SQL_TYPE_SQL_SERVER_DATETIMEOFFSET)) {
+
+			return "timestamp with time zone";
 		}
 
 		return "text";
+	}
+
+	private String _getQuotedName(String name) {
+		return StringBundler.concat(
+			StringPool.QUOTE,
+			StringUtil.replace(name, CharPool.QUOTE, StringPool.DOUBLE_QUOTE),
+			StringPool.QUOTE);
 	}
 
 	private String _getSanitizedString(String value) {
@@ -618,6 +712,16 @@ public class DBCopyTablesProcess {
 		}
 
 		return views;
+	}
+
+	private boolean _isLongName(String name) {
+		byte[] bytes = name.getBytes(StandardCharsets.UTF_8);
+
+		if (bytes.length > _POSTGRESQL_NAME_MAX_LENGTH) {
+			return true;
+		}
+
+		return false;
 	}
 
 	private void _loadColumnNamesMap(
@@ -663,6 +767,60 @@ public class DBCopyTablesProcess {
 	private void _loadColumnsMetadata() throws Exception {
 		_loadColumnNamesMap(
 			_sourceColumnNamesMap, _sourceColumnsType, _sourceDataSource);
+
+		Set<String> toolTableNames = new HashSet<>();
+
+		try (Connection connection = _sourceDataSource.getConnection()) {
+			DatabaseMetaData databaseMetaData = connection.getMetaData();
+
+			String databaseProductName =
+				databaseMetaData.getDatabaseProductName();
+
+			String sql = null;
+
+			if (databaseProductName.startsWith("DB2")) {
+				Collections.addAll(
+					toolTableNames, "ADVISE_INDEX", "ADVISE_INSTANCE",
+					"ADVISE_MQT", "ADVISE_PARTITION", "ADVISE_TABLE",
+					"ADVISE_WORKLOAD", "EXPLAIN_ACTUALS", "EXPLAIN_ARGUMENT",
+					"EXPLAIN_DIAGNOSTIC", "EXPLAIN_DIAGNOSTIC_DATA",
+					"EXPLAIN_INSTANCE", "EXPLAIN_OBJECT", "EXPLAIN_OPERATOR",
+					"EXPLAIN_PREDICATE", "EXPLAIN_STATEMENT", "EXPLAIN_STREAM",
+					"OBJECT_METRICS");
+			}
+			else if (databaseProductName.equals("Microsoft SQL Server")) {
+				sql = "select name from sys.tables where is_ms_shipped = 1";
+			}
+			else if (databaseProductName.equals("Oracle")) {
+				sql =
+					"select job_name from user_datapump_jobs union select " +
+						"log_table from user_mview_logs";
+			}
+
+			if (sql != null) {
+				try (PreparedStatement preparedStatement =
+						connection.prepareStatement(sql);
+
+					ResultSet resultSet = preparedStatement.executeQuery()) {
+
+					while (resultSet.next()) {
+						toolTableNames.add(resultSet.getString(1));
+					}
+				}
+			}
+		}
+
+		for (String toolTableName : toolTableNames) {
+			if (_sourceColumnNamesMap.remove(toolTableName) == null) {
+				continue;
+			}
+
+			System.out.println(
+				StringBundler.concat(
+					"Skipping table ", toolTableName, _partitionMessage,
+					" because it belongs to a database tool"));
+		}
+
 		_loadColumnNamesMap(
 			_targetColumnNamesMap, _targetColumnsType, _targetDataSource);
 	}
@@ -697,6 +855,9 @@ public class DBCopyTablesProcess {
 		else if (targetType == Types.NUMERIC) {
 			preparedStatement.setBigDecimal(
 				index, (BigDecimal)GetterUtil.get(value, BigDecimal.ZERO));
+		}
+		else if (targetType == Types.TIME) {
+			preparedStatement.setObject(index, LocalTime.parse(value));
 		}
 		else if (targetType == Types.TIMESTAMP) {
 			DateFormat dateFormat = DateUtil.getISOFormat();
@@ -752,9 +913,19 @@ public class DBCopyTablesProcess {
 		}
 	}
 
+	private static final int _POSTGRESQL_NAME_MAX_LENGTH = 63;
+
 	private static final int _SQL_TYPE_ORACLE_BINARY_DOUBLE = 101;
 
-	private final boolean _includeCustomSchema;
+	private static final int _SQL_TYPE_ORACLE_BINARY_FLOAT = 100;
+
+	private static final int _SQL_TYPE_ORACLE_TIMESTAMP_WITH_LOCAL_TIME_ZONE =
+		-102;
+
+	private static final int _SQL_TYPE_ORACLE_TIMESTAMP_WITH_TIME_ZONE = -101;
+
+	private static final int _SQL_TYPE_SQL_SERVER_DATETIMEOFFSET = -155;
+
 	private final String _partitionMessage;
 	private final Map<String, List<String>> _sourceColumnNamesMap =
 		new TreeMap<>(String.CASE_INSENSITIVE_ORDER);

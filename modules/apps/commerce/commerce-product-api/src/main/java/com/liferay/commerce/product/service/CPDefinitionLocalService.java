@@ -222,7 +222,8 @@ public interface CPDefinitionLocalService
 
 	public void deleteCPDefinitions(long companyId) throws PortalException;
 
-	public void deleteCPDefinitions(long cProductId, int status);
+	public void deleteCPDefinitions(long cProductId, int status)
+		throws PortalException;
 
 	/**
 	 * @throws PortalException
@@ -427,10 +428,6 @@ public interface CPDefinitionLocalService
 
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public List<CPDefinition> getCPDefinitions(
-		long groupId, boolean subscriptionEnabled);
-
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public List<CPDefinition> getCPDefinitions(
 		long groupId, int status, int start, int end);
 
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
@@ -477,9 +474,6 @@ public interface CPDefinitionLocalService
 	 */
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public int getCPDefinitionsCount();
-
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public int getCPDefinitionsCount(long groupId, boolean subscriptionEnabled);
 
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public int getCPDefinitionsCount(long groupId, int status);
@@ -726,4 +720,4 @@ public interface CPDefinitionLocalService
 		throws E;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-1866230856
+// LIFERAY-SERVICE-BUILDER-HASH:10443816

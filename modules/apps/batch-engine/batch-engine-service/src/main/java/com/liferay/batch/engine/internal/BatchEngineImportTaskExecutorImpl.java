@@ -47,6 +47,7 @@ import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMapFactory
 import com.liferay.petra.function.UnsafeFunction;
 import com.liferay.petra.lang.SafeCloseable;
 import com.liferay.petra.string.StringBundler;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.configuration.module.configuration.ConfigurationProvider;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskStatusMessageSender;
 import com.liferay.portal.kernel.change.tracking.CTCollectionThreadLocal;
@@ -63,6 +64,8 @@ import com.liferay.portal.kernel.transaction.TransactionConfig;
 import com.liferay.portal.kernel.transaction.TransactionInvokerUtil;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.ListUtil;
+import com.liferay.portal.kernel.util.PropsValues;
+import com.liferay.portal.kernel.util.Validator;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -75,6 +78,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 
 import org.osgi.framework.BundleContext;
@@ -240,12 +244,16 @@ public class BatchEngineImportTaskExecutorImpl
 		_serviceTrackerMap = ServiceTrackerMapFactory.openMultiValueMap(
 			bundleContext, BatchEngineContentProcessor.class, null,
 			(serviceReference, emitter) -> {
+				String modelClassName = (String)serviceReference.getProperty(
+					"model.class.name");
+
 				if (serviceReference.getProperty("field.name") == null) {
-					emitter.emit("*");
+					emitter.emit(_getKey("*", modelClassName));
 				}
 				else {
 					propertyServiceReferenceMapper.map(
-						serviceReference, emitter);
+						serviceReference,
+						key -> emitter.emit(_getKey(key, modelClassName)));
 				}
 			});
 	}
@@ -405,6 +413,14 @@ public class BatchEngineImportTaskExecutorImpl
 		};
 	}
 
+	private String _getKey(String key, String modelClassName) {
+		if (modelClassName == null) {
+			return key;
+		}
+
+		return modelClassName + StringPool.POUND + key;
+	}
+
 	private Map<String, Serializable> _getParameters(
 		BatchEngineImportTask batchEngineImportTask) {
 
@@ -497,6 +513,13 @@ public class BatchEngineImportTaskExecutorImpl
 			Class<?> itemClass = _itemClassRegistry.getItemClass(
 				batchEngineTaskItemDelegate);
 
+			Set<String> passwordFieldNames = Collections.emptySet();
+
+			if (Validator.isNotNull(PropsValues.BATCH_ENGINE_ENCRYPTION_KEY)) {
+				passwordFieldNames = PasswordFieldUtil.getPasswordFieldNames(
+					itemClass);
+			}
+
 			int processedItemsCount = 0;
 
 			while (true) {
@@ -507,7 +530,8 @@ public class BatchEngineImportTaskExecutorImpl
 				try {
 					T item = _readItem(
 						batchEngineImportTask, batchEngineImportTaskItemReader,
-						batchEngineImportTask.getFieldNameMapping(), itemClass);
+						batchEngineImportTask.getFieldNameMapping(), itemClass,
+						passwordFieldNames);
 
 					if (item == null) {
 						break;
@@ -607,10 +631,8 @@ public class BatchEngineImportTaskExecutorImpl
 	}
 
 	private String _invokeBatchEngineContentProcessors(
-		String fieldName, String value) {
-
-		List<BatchEngineContentProcessor> batchEngineContentProcessors =
-			_serviceTrackerMap.getService(fieldName);
+		List<BatchEngineContentProcessor> batchEngineContentProcessors,
+		Map<String, Object> fieldNameValueMap, String value) {
 
 		if (ListUtil.isEmpty(batchEngineContentProcessors)) {
 			return value;
@@ -619,44 +641,69 @@ public class BatchEngineImportTaskExecutorImpl
 		for (BatchEngineContentProcessor batchEngineContentProcessor :
 				batchEngineContentProcessors) {
 
-			value = batchEngineContentProcessor.process(value);
+			value = batchEngineContentProcessor.process(
+				value, fieldNameValueMap);
 		}
 
 		return value;
 	}
 
+	private String _invokeBatchEngineContentProcessors(
+		Map<String, Object> fieldNameValueMap, String key,
+		String modelClassName, String value) {
+
+		value = _invokeBatchEngineContentProcessors(
+			_serviceTrackerMap.getService(key), fieldNameValueMap, value);
+
+		return _invokeBatchEngineContentProcessors(
+			_serviceTrackerMap.getService(_getKey(key, modelClassName)),
+			fieldNameValueMap, value);
+	}
+
 	private Map<String, Object> _processFieldNameValueMap(
-		Map<String, Object> map, String name) {
+		Map<String, Object> map, String modelClassName, String name) {
+
+		Map<String, Object> fieldNameValueMap = Collections.unmodifiableMap(
+			map);
 
 		for (Map.Entry<String, Object> entry : map.entrySet()) {
 			entry.setValue(
-				_processValue(entry.getKey(), name, entry.getValue()));
+				_processValue(
+					entry.getKey(), fieldNameValueMap, modelClassName, name,
+					entry.getValue()));
 		}
 
 		return map;
 	}
 
 	private Object _processValue(
-		String fieldName, String parentFieldName, Object value) {
+		String fieldName, Map<String, Object> fieldNameValueMap,
+		String modelClassName, String parentFieldName, Object value) {
 
 		if (value instanceof List) {
 			List<Object> list = (List<Object>)value;
 
 			list.replaceAll(
-				item -> _processValue(fieldName, parentFieldName, item));
+				item -> _processValue(
+					fieldName, fieldNameValueMap, modelClassName,
+					parentFieldName, item));
 		}
 		else if (value instanceof Map) {
-			_processFieldNameValueMap((Map<String, Object>)value, fieldName);
+			_processFieldNameValueMap(
+				(Map<String, Object>)value, modelClassName, fieldName);
 		}
 		else if (value instanceof String valueString) {
-			valueString = _invokeBatchEngineContentProcessors("*", valueString);
+			valueString = _invokeBatchEngineContentProcessors(
+				fieldNameValueMap, "*", modelClassName, valueString);
+
+			String key = fieldName;
 
 			if (parentFieldName != null) {
-				valueString = _invokeBatchEngineContentProcessors(
-					parentFieldName + "." + fieldName, valueString);
+				key = parentFieldName + StringPool.PERIOD + fieldName;
 			}
 
-			return _invokeBatchEngineContentProcessors(fieldName, valueString);
+			return _invokeBatchEngineContentProcessors(
+				fieldNameValueMap, key, modelClassName, valueString);
 		}
 
 		return value;
@@ -665,7 +712,8 @@ public class BatchEngineImportTaskExecutorImpl
 	private <T> T _readItem(
 			BatchEngineImportTask batchEngineImportTask,
 			BatchEngineImportTaskItemReader batchEngineImportTaskItemReader,
-			Map<String, Serializable> fieldNameMapping, Class<?> itemClass)
+			Map<String, Serializable> fieldNameMapping, Class<?> itemClass,
+			Set<String> passwordFieldNames)
 		throws Exception {
 
 		Map<String, Object> fieldNameValueMap =
@@ -679,13 +727,16 @@ public class BatchEngineImportTaskExecutorImpl
 			batchEngineImportTask.getCompanyId(), fieldNameValueMap);
 
 		if (ExportImportThreadLocal.isImportInProcess()) {
-			_processFieldNameValueMap(fieldNameValueMap, null);
+			_processFieldNameValueMap(
+				fieldNameValueMap, itemClass.getName(), null);
 		}
 
 		return (T)BatchEngineImportTaskItemReaderUtil.convertValue(
 			batchEngineImportTask, itemClass,
-			BatchEngineImportTaskItemReaderUtil.mapFieldNames(
-				fieldNameMapping, fieldNameValueMap),
+			PasswordFieldUtil.replacePasswordFields(
+				BatchEngineImportTaskItemReaderUtil.mapFieldNames(
+					fieldNameMapping, fieldNameValueMap),
+				passwordFieldNames, PasswordFieldUtil::decrypt),
 			_itemReaderPostActions.toList());
 	}
 

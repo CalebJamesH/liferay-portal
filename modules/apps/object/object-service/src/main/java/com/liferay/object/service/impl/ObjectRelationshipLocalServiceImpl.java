@@ -18,6 +18,8 @@ import com.liferay.object.exception.DuplicateObjectRelationshipExternalReference
 import com.liferay.object.exception.NoSuchObjectRelationshipException;
 import com.liferay.object.exception.ObjectDefinitionScopeException;
 import com.liferay.object.exception.ObjectEntryGroupIdException;
+import com.liferay.object.exception.ObjectFieldDBColumnNameException;
+import com.liferay.object.exception.ObjectFieldNameException;
 import com.liferay.object.exception.ObjectRelationshipDeletionTypeException;
 import com.liferay.object.exception.ObjectRelationshipEdgeException;
 import com.liferay.object.exception.ObjectRelationshipNameException;
@@ -26,7 +28,8 @@ import com.liferay.object.exception.ObjectRelationshipReverseException;
 import com.liferay.object.exception.ObjectRelationshipSystemException;
 import com.liferay.object.exception.ObjectRelationshipTypeException;
 import com.liferay.object.internal.dao.db.ObjectDBManagerUtil;
-import com.liferay.object.internal.info.collection.provider.RelatedInfoCollectionProviderFactory;
+import com.liferay.object.internal.info.collection.provider.ManyToManyObjectRelationshipRelatedInfoCollectionProvider;
+import com.liferay.object.internal.info.collection.provider.OneToManyObjectRelationshipRelatedInfoCollectionProvider;
 import com.liferay.object.model.ObjectDefinition;
 import com.liferay.object.model.ObjectEntry;
 import com.liferay.object.model.ObjectEntryTable;
@@ -65,12 +68,14 @@ import com.liferay.petra.sql.dsl.Column;
 import com.liferay.petra.sql.dsl.DSLQueryFactoryUtil;
 import com.liferay.petra.sql.dsl.expression.Predicate;
 import com.liferay.petra.sql.dsl.query.DSLQuery;
+import com.liferay.petra.string.CharPool;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.aop.AopService;
 import com.liferay.portal.kernel.dao.jdbc.CurrentConnection;
 import com.liferay.portal.kernel.dao.orm.FinderCacheUtil;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.language.Language;
 import com.liferay.portal.kernel.license.util.App;
 import com.liferay.portal.kernel.license.util.LicenseManagerUtil;
 import com.liferay.portal.kernel.log.Log;
@@ -1223,6 +1228,11 @@ public class ObjectRelationshipLocalServiceImpl
 				ObjectRelationshipUtil.getObjectRelationshipFieldName(
 					objectDefinition1, name);
 		}
+		else {
+			_validateObjectFieldDBColumnName(dbColumnName);
+			_validateObjectFieldName(
+				objectDefinition1, objectDefinition2, dbColumnName, name);
+		}
 
 		_validateRelationshipName(dbColumnName, name);
 
@@ -1270,15 +1280,6 @@ public class ObjectRelationshipLocalServiceImpl
 			DynamicObjectDefinitionTableUtil.getAlterTableAddColumnSQL(
 				dbTableName, objectField.getBusinessType(),
 				objectField.getDBColumnName(), "Long"));
-
-		if (!objectDefinition2.isUnmodifiableSystemObject()) {
-			runSQL(
-				DynamicObjectDefinitionTableUtil.
-					getInsertMissingExtensionTableRowsSQL(
-						dbTableName,
-						objectDefinition2.getPKObjectFieldDBColumnName(),
-						objectDefinition2.getDBTableName()));
-		}
 
 		_objectEntryPersistence.clearCache();
 
@@ -1464,6 +1465,36 @@ public class ObjectRelationshipLocalServiceImpl
 
 		return objectRelationshipLocalService.updateObjectRelationship(
 			objectRelationship);
+	}
+
+	private RelatedInfoItemCollectionProvider
+		_createRelatedInfoItemCollectionProvider(
+			ObjectDefinition objectDefinition1,
+			ObjectDefinition objectDefinition2,
+			ObjectRelationship objectRelationship) {
+
+		if (objectDefinition2.isUnmodifiableSystemObject()) {
+			return null;
+		}
+
+		if (Objects.equals(
+				objectRelationship.getType(),
+				ObjectRelationshipConstants.TYPE_MANY_TO_MANY)) {
+
+			return new ManyToManyObjectRelationshipRelatedInfoCollectionProvider(
+				_language, objectDefinition1, objectDefinition2,
+				_objectEntryLocalService, objectRelationship);
+		}
+		else if (Objects.equals(
+					objectRelationship.getType(),
+					ObjectRelationshipConstants.TYPE_ONE_TO_MANY)) {
+
+			return new OneToManyObjectRelationshipRelatedInfoCollectionProvider(
+				_language, objectDefinition1, objectDefinition2,
+				_objectEntryLocalService, objectRelationship);
+		}
+
+		return null;
 	}
 
 	private void _deleteObjectFields(
@@ -1702,7 +1733,7 @@ public class ObjectRelationshipLocalServiceImpl
 		}
 
 		RelatedInfoItemCollectionProvider relatedInfoItemCollectionProvider =
-			_relatedInfoCollectionProviderFactory.create(
+			_createRelatedInfoItemCollectionProvider(
 				objectDefinition1, objectDefinition2, objectRelationship);
 
 		if (relatedInfoItemCollectionProvider == null) {
@@ -2120,6 +2151,51 @@ public class ObjectRelationshipLocalServiceImpl
 		}
 	}
 
+	private void _validateObjectFieldDBColumnName(
+			String objectFieldDBColumnName)
+		throws PortalException {
+
+		for (char c : objectFieldDBColumnName.toCharArray()) {
+			if (!Validator.isChar(c) && !Validator.isDigit(c) &&
+				(c != CharPool.UNDERLINE)) {
+
+				throw new ObjectFieldDBColumnNameException(
+					"DB column name must only contain letters, digits, and " +
+						"underscores");
+			}
+		}
+	}
+
+	private void _validateObjectFieldName(
+			ObjectDefinition objectDefinition1,
+			ObjectDefinition objectDefinition2, String objectFieldName,
+			String objectRelationshipName)
+		throws PortalException {
+
+		if (objectFieldName.equals(objectRelationshipName)) {
+			throw new ObjectFieldNameException.
+				MustNotBeEqualToObjectRelationshipName(
+					objectDefinition1.getShortName());
+		}
+
+		ObjectRelationship objectRelationship =
+			objectRelationshipLocalService.
+				fetchObjectRelationshipByObjectDefinitionId(
+					objectDefinition2.getObjectDefinitionId(), objectFieldName);
+
+		if (objectRelationship == null) {
+			return;
+		}
+
+		ObjectDefinition objectDefinition3 =
+			_objectDefinitionPersistence.findByPrimaryKey(
+				objectRelationship.getObjectDefinitionId1());
+
+		throw new ObjectFieldNameException.
+			MustNotBeEqualToObjectRelationshipName(
+				objectDefinition3.getShortName());
+	}
+
 	private void _validateParameterObjectFieldId(
 			ObjectDefinition objectDefinition1,
 			ObjectDefinition objectDefinition2, long parameterObjectFieldId,
@@ -2312,6 +2388,9 @@ public class ObjectRelationshipLocalServiceImpl
 	private CurrentConnection _currentConnection;
 
 	@Reference
+	private Language _language;
+
+	@Reference
 	private ObjectActionPersistence _objectActionPersistence;
 
 	@Reference
@@ -2347,10 +2426,6 @@ public class ObjectRelationshipLocalServiceImpl
 
 	@Reference
 	private ObjectLayoutTabLocalService _objectLayoutTabLocalService;
-
-	@Reference
-	private RelatedInfoCollectionProviderFactory
-		_relatedInfoCollectionProviderFactory;
 
 	private final Map<String, ServiceRegistration<?>> _serviceRegistrations =
 		new ConcurrentHashMap<>();

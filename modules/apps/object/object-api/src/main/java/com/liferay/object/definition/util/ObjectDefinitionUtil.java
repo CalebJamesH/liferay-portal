@@ -273,7 +273,12 @@ public class ObjectDefinitionUtil {
 		).put(
 			"PIMConnector", "/pim/connectors"
 		).put(
+			"PIMConnectorConfigurationLiferayCommerce",
+			"/pim/connector-configuration-liferay-commerce"
+		).put(
 			"PIMConnectorFieldMapping", "/pim/connector-field-mappings"
+		).put(
+			"PIMConnectorFieldMappingRule", "/pim/connector-field-mapping-rules"
 		).put(
 			"PIMLink", "/pim/links"
 		).build();

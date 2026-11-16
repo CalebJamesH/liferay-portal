@@ -16,19 +16,24 @@ import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
 import com.liferay.portal.kernel.security.fips.FIPSAuditEventFactory;
 import com.liferay.portal.kernel.security.fips.FIPSAuditUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.PropsValues;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.saml.constants.SamlWebKeys;
+import com.liferay.saml.opensaml.integration.internal.binding.HttpPostBinding;
+import com.liferay.saml.opensaml.integration.internal.binding.HttpRedirectBinding;
+import com.liferay.saml.opensaml.integration.internal.binding.HttpSoap11Binding;
 import com.liferay.saml.opensaml.integration.internal.binding.SamlBinding;
-import com.liferay.saml.opensaml.integration.internal.binding.SamlBindingProvider;
 import com.liferay.saml.opensaml.integration.internal.bootstrap.ParserPoolUtil;
 import com.liferay.saml.opensaml.integration.internal.identifier.IdentifierGeneratorStrategyFactory;
 import com.liferay.saml.opensaml.integration.internal.metadata.MetadataManagerUtil;
 import com.liferay.saml.opensaml.integration.internal.provider.CachingChainingMetadataResolver;
 import com.liferay.saml.opensaml.integration.internal.provider.DBMetadataResolver;
+import com.liferay.saml.opensaml.integration.internal.transport.HttpClientFactory;
 import com.liferay.saml.opensaml.integration.internal.util.ConfigurationServiceBootstrapUtil;
 import com.liferay.saml.opensaml.integration.internal.util.OpenSamlUtil;
+import com.liferay.saml.opensaml.integration.internal.velocity.VelocityEngineFactory;
 import com.liferay.saml.persistence.model.SamlIdpSpConnection;
 import com.liferay.saml.persistence.model.SamlSpIdpConnection;
 import com.liferay.saml.persistence.model.SamlSpSession;
@@ -47,6 +52,7 @@ import jakarta.servlet.http.HttpSession;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
@@ -60,6 +66,7 @@ import org.opensaml.core.xml.XMLObject;
 import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.messaging.context.InOutOperationContext;
 import org.opensaml.messaging.context.MessageContext;
+import org.opensaml.messaging.decoder.MessageDecodingException;
 import org.opensaml.messaging.decoder.servlet.HttpServletRequestMessageDecoder;
 import org.opensaml.messaging.encoder.servlet.HttpServletResponseMessageEncoder;
 import org.opensaml.messaging.handler.MessageHandler;
@@ -126,6 +133,9 @@ public abstract class BaseProfile {
 			HttpServletResponse httpServletResponse, SamlBinding samlBinding,
 			boolean requireSignature)
 		throws Exception {
+
+		_validateMessageSize(httpServletRequest.getParameter("SAMLRequest"));
+		_validateMessageSize(httpServletRequest.getParameter("SAMLResponse"));
 
 		MessageContext<SAMLObject> messageContext = getMessageContext(
 			httpServletRequest, httpServletResponse);
@@ -559,8 +569,7 @@ public abstract class BaseProfile {
 
 		Endpoint endpoint = samlPeerEndpointContext.getEndpoint();
 
-		SamlBinding samlBinding = samlBindingProvider.getSamlBinding(
-			endpoint.getBinding());
+		SamlBinding samlBinding = getSamlBinding(endpoint.getBinding());
 
 		if (_log.isDebugEnabled()) {
 			try {
@@ -646,6 +655,22 @@ public abstract class BaseProfile {
 			this::_createMetadataCredentialResolver);
 	}
 
+	protected SamlBinding getSamlBinding(String communicationProfileId)
+		throws PortalException {
+
+		Map<String, SamlBinding> samlBindings =
+			_samlBindingsDCLSingleton.getSingleton(this::_createSamlBindings);
+
+		SamlBinding samlBinding = samlBindings.get(communicationProfileId);
+
+		if (samlBinding != null) {
+			return samlBinding;
+		}
+
+		throw new SamlException(
+			"Unsupported SAML binding " + communicationProfileId);
+	}
+
 	protected SignatureTrustEngine getSignatureTrustEngine()
 		throws SamlException {
 
@@ -724,13 +749,13 @@ public abstract class BaseProfile {
 	protected CredentialResolver credentialResolver;
 
 	@Reference
+	protected HttpClientFactory httpClientFactory;
+
+	@Reference
 	protected LocalEntityManager localEntityManager;
 
 	@Reference
 	protected Portal portal;
-
-	@Reference
-	protected SamlBindingProvider samlBindingProvider;
 
 	@Reference
 	protected SamlIdpSpConnectionLocalService samlIdpSpConnectionLocalService;
@@ -836,6 +861,25 @@ public abstract class BaseProfile {
 		}
 
 		return predicateRoleDescriptorResolver;
+	}
+
+	private Map<String, SamlBinding> _createSamlBindings() {
+		ParserPool parserPool = ParserPoolUtil.getParserPool();
+
+		HttpPostBinding httpPostBinding = new HttpPostBinding(
+			parserPool, VelocityEngineFactory.getVelocityEngine());
+		HttpRedirectBinding httpRedirectBinding = new HttpRedirectBinding(
+			parserPool);
+		HttpSoap11Binding httpSoap11Binding = new HttpSoap11Binding(
+			parserPool, httpClientFactory.getHttpClient());
+
+		return HashMapBuilder.<String, SamlBinding>put(
+			httpPostBinding.getCommunicationProfileId(), httpPostBinding
+		).put(
+			httpRedirectBinding.getCommunicationProfileId(), httpRedirectBinding
+		).put(
+			httpSoap11Binding.getCommunicationProfileId(), httpSoap11Binding
+		).build();
 	}
 
 	private String _getRejectedValue(
@@ -966,6 +1010,27 @@ public abstract class BaseProfile {
 		return samlProviderConfiguration.sslRequired();
 	}
 
+	private void _validateMessageSize(String message) throws Exception {
+		if (message == null) {
+			return;
+		}
+
+		SamlProviderConfiguration samlProviderConfiguration =
+			samlProviderConfigurationHelper.getSamlProviderConfiguration();
+
+		int maximumMessageSize = samlProviderConfiguration.maximumMessageSize();
+
+		if ((maximumMessageSize > 0) &&
+			(message.length() > maximumMessageSize)) {
+
+			throw new MessageDecodingException(
+				StringBundler.concat(
+					"Rejecting SAML message of size ", message.length(),
+					" because it exceeds the maximum allowed size ",
+					maximumMessageSize));
+		}
+	}
+
 	private static final Log _log = LogFactoryUtil.getLog(BaseProfile.class);
 
 	private BundleContext _bundleContext;
@@ -977,6 +1042,8 @@ public abstract class BaseProfile {
 		_metadataCredentialResolverDCLSingleton = new DCLSingleton<>();
 	private final DCLSingleton<PredicateRoleDescriptorResolver>
 		_predicateRoleDescriptorResolverDCLSingleton = new DCLSingleton<>();
+	private final DCLSingleton<Map<String, SamlBinding>>
+		_samlBindingsDCLSingleton = new DCLSingleton<>();
 
 	private static class RejectedValueSignatureAlgorithmValidator
 		extends SignatureAlgorithmValidator {

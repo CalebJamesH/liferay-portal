@@ -349,11 +349,11 @@ public class JenkinsMasterTest extends com.liferay.jenkins.results.parser.Test {
 			).put(
 				"id", 7800
 			).toString(),
-			JenkinsResultsParserUtil.fixURL(
-				JenkinsResultsParserUtil.combine(
-					"http://test-9-1/queue/item/7800/api/json?tree=",
-					"actions[parameters[name,value]],cancelled,",
-					"executable[url],id,inQueueSince,task[name,url],url,why")));
+			JenkinsResultsParserUtil.combine(
+				"http://test-9-1/queue/item/7800/api/json?tree=actions%5B",
+				"parameters%5Bname%2Cvalue%5D%5D%2Ccancelled%2C",
+				"executable%5Burl%5D%2Cid%2CinQueueSince%2C",
+				"task%5Bname%2Curl%5D%2Curl%2Cwhy"));
 
 		JenkinsMaster.QueueItem queueItem = _jenkinsMaster.getQueueItem(7800);
 
@@ -479,6 +479,92 @@ public class JenkinsMasterTest extends com.liferay.jenkins.results.parser.Test {
 		Assert.assertTrue(
 			offlineRunningBuild.isJenkinsSlaveOfflineUnexpectedly());
 		Assert.assertTrue(offlineRunningBuild.isJenkinsSlaveBeingRemoved());
+	}
+
+	@Test
+	public void testIsBlocked() throws Exception {
+		_setQueueAPIJSONObject(
+			_newQueueItemJSONObject("hudson.model.Queue$BlockedItem"),
+			_newQueueItemJSONObject("hudson.model.Queue$BuildableItem"),
+			_newQueueItemJSONObject("hudson.model.Queue$LeftItem"),
+			_newQueueItemJSONObject("hudson.model.Queue$WaitingItem"),
+			_newQueueItemJSONObject(null));
+
+		List<JenkinsMaster.QueueItem> queueItems =
+			_jenkinsMaster.readQueueItems(1, 1, 7000);
+
+		Assert.assertEquals(queueItems.toString(), 5, queueItems.size());
+
+		JenkinsMaster.QueueItem blockedQueueItem = queueItems.get(0);
+
+		Assert.assertTrue(blockedQueueItem.isBlocked());
+
+		for (JenkinsMaster.QueueItem queueItem : queueItems.subList(1, 5)) {
+			Assert.assertFalse(queueItem.isBlocked());
+		}
+	}
+
+	@Test
+	public void testReadQueueItems() throws Exception {
+		_setQueueAPIJSONObject();
+
+		List<JenkinsMaster.QueueItem> queueItems =
+			_jenkinsMaster.readQueueItems(1, 1, 7000);
+
+		Assert.assertTrue(queueItems.isEmpty());
+
+		JSONObject queueItemJSONObject = _newQueueItemJSONObject(
+			"hudson.model.Queue$BuildableItem");
+
+		_setQueueAPIJSONObject(queueItemJSONObject);
+
+		queueItems = _jenkinsMaster.readQueueItems(1, 1, 7000);
+
+		verifyURLReaderRead(false, 2, 1, 7000);
+
+		Assert.assertEquals(queueItems.toString(), 1, queueItems.size());
+
+		JenkinsMaster.QueueItem queueItem = queueItems.get(0);
+
+		Assert.assertEquals(
+			queueItemJSONObject.getLong("id"), queueItem.getId());
+		Assert.assertEquals(
+			queueItemJSONObject.getLong("inQueueSince"),
+			queueItem.getInQueueSince());
+		Assert.assertSame(_jenkinsMaster, queueItem.getJenkinsMaster());
+
+		JSONObject taskJSONObject = queueItemJSONObject.getJSONObject("task");
+
+		Assert.assertEquals(
+			taskJSONObject.getString("name"), queueItem.getTaskName());
+		Assert.assertEquals(
+			taskJSONObject.getString("url"), queueItem.getTaskURL());
+
+		Assert.assertEquals(
+			_jenkinsMaster.getURL() + queueItemJSONObject.getString("url"),
+			queueItem.getURL());
+		Assert.assertEquals(
+			queueItemJSONObject.getString("why"), queueItem.getWhy());
+
+		Assert.assertNull(
+			ReflectionTestUtil.getFieldValue(
+				_jenkinsMaster, "_queueUpdateTime"));
+	}
+
+	@Test
+	public void testReadQueueItemsFailure() throws Exception {
+		setURLReaderException(
+			new IOException(RandomTestUtil.randomString()),
+			"http://test-9-1/queue/api/json");
+
+		Assert.assertThrows(
+			IOException.class, () -> _jenkinsMaster.readQueueItems(1, 1, 7000));
+
+		setURLReaderOutput("{}", "http://test-9-1/queue/api/json");
+
+		Assert.assertThrows(
+			JSONException.class,
+			() -> _jenkinsMaster.readQueueItems(1, 1, 7000));
 	}
 
 	@Test
@@ -705,6 +791,46 @@ public class JenkinsMasterTest extends com.liferay.jenkins.results.parser.Test {
 	private long _getTimestamp() {
 		return JenkinsResultsParserUtil.getCurrentTimeMillis() -
 			Math.abs(RandomTestUtil.randomInt());
+	}
+
+	private JSONObject _newQueueItemJSONObject(String className) {
+		JSONObject queueItemJSONObject = new JSONObject(
+		).put(
+			"id", _getQueueId()
+		).put(
+			"inQueueSince", _getTimestamp()
+		).put(
+			"task",
+			new JSONObject(
+			).put(
+				"name", RandomTestUtil.randomString()
+			).put(
+				"url", "http://test-9-1/job/" + RandomTestUtil.randomString()
+			)
+		).put(
+			"url",
+			JenkinsResultsParserUtil.combine(
+				"queue/item/", String.valueOf(RandomTestUtil.randomInt()), "/")
+		).put(
+			"why", RandomTestUtil.randomString()
+		);
+
+		if (className != null) {
+			queueItemJSONObject.put("_class", className);
+		}
+
+		return queueItemJSONObject;
+	}
+
+	private void _setQueueAPIJSONObject(JSONObject... queueItemJSONObjects)
+		throws Exception {
+
+		setURLReaderOutput(
+			new JSONObject(
+			).put(
+				"items", new JSONArray(queueItemJSONObjects)
+			).toString(),
+			"http://test-9-1/queue/api/json");
 	}
 
 	private void _setQueueItemIds(long... queueIds) throws Exception {

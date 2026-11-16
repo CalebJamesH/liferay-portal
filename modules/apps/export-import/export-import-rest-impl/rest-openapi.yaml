@@ -1,5 +1,32 @@
 components:
     schemas:
+        AssetLibrary:
+            description:
+                Represents an asset library an instance process can export or import in full.
+            properties:
+                descriptiveName:
+                    description:
+                        The asset library's name.
+                    readOnly: true
+                    type: string
+                existsInInstance:
+                    description:
+                        A flag that indicates whether the instance already has an asset library of the same external reference code and type, which only the import preview sets.
+                    readOnly: true
+                    type: boolean
+                externalReferenceCode:
+                    description:
+                        The asset library's external reference code, which is the only property the instance requests send.
+                    type: string
+                type:
+                    description:
+                        The asset library's type.
+                    enum: [AssetLibrary, DesignLibrary, Project, Space]
+                    readOnly: true
+                    type: string
+            required:
+                -   externalReferenceCode
+            type: object
         DateFilter:
             description:
                 Represents the dates that select the content of a process. The type determines the other properties.
@@ -140,6 +167,13 @@ components:
                     format: int64
                     readOnly: true
                     type: integer
+                assetLibraries:
+                    description:
+                        The asset libraries the file contains, when it was exported from an instance.
+                    items:
+                        $ref: "#/components/schemas/AssetLibrary"
+                    readOnly: true
+                    type: array
                 author:
                     description:
                         The name of the user who exported the file.
@@ -261,6 +295,12 @@ components:
             allOf:
                 -   $ref: "#/components/schemas/ExportProcessRequest"
                 -   properties:
+                        assetLibraries:
+                            description:
+                                The asset libraries to export in full, from the export preview's asset libraries.
+                            items:
+                                $ref: "#/components/schemas/AssetLibrary"
+                            type: array
                         sites:
                             description:
                                 The sites to export in full, from the export preview's sites.
@@ -268,7 +308,7 @@ components:
                                 $ref: "#/components/schemas/Site"
                             type: array
             description:
-                Represents an export of the instance, which can include whole sites.
+                Represents an export of the instance, which can include whole sites and asset libraries.
             required:
                 -   name
             type: object
@@ -276,6 +316,12 @@ components:
             allOf:
                 -   $ref: "#/components/schemas/ImportProcessRequest"
                 -   properties:
+                        assetLibraries:
+                            description:
+                                The asset libraries to import in full, from the import preview's asset libraries.
+                            items:
+                                $ref: "#/components/schemas/AssetLibrary"
+                            type: array
                         sites:
                             description:
                                 The sites to import in full, from the import preview's sites.
@@ -283,7 +329,7 @@ components:
                                 $ref: "#/components/schemas/Site"
                             type: array
             description:
-                Represents an import into the instance, which can include whole sites.
+                Represents an import into the instance, which can include whole sites and asset libraries.
             type: object
         LastHoursDateFilter:
             allOf:
@@ -794,6 +840,43 @@ components:
                     type: integer
                 label:
                     type: string
+        SyncPreview:
+            description:
+                Represents what a site template sync can cover, with the counts of the site template's content.
+            properties:
+                additionCount:
+                    format: int64
+                    readOnly: true
+                    type: integer
+                deletionCount:
+                    format: int64
+                    readOnly: true
+                    type: integer
+                portletDataHandlers:
+                    items:
+                        $ref: "#/components/schemas/PortletDataHandler"
+                    readOnly: true
+                    type: array
+            type: object
+        SyncProcessRequest:
+            description:
+                Represents a sync of a site template to the sites linked to it.
+            properties:
+                comments:
+                    default: false
+                    type: boolean
+                portletDataHandlers:
+                    description:
+                        The portlet data handlers to sync, taken from the sync preview.
+                    items:
+                        $ref: "#/components/schemas/PortletDataHandler"
+                    type: array
+                ratings:
+                    default: false
+                    type: boolean
+            required:
+                -   portletDataHandlers
+            type: object
         Type:
             properties:
                 code:
@@ -804,7 +887,7 @@ components:
             type: object
 info:
     description:
-        "Exports, imports, and publishes the content of the instance, a site, an asset library, or one of their portlets. Get the preview first, then send its portlet data handlers back in the process request with the controls you want. Only the handlers and controls in the request are processed. A Java client JAR is available for use with the group ID 'com.liferay', artifact ID 'com.liferay.exportimport.rest.client', and version '1.0.13'."
+        "Exports, imports, and publishes the content of the instance, a site, an asset library, or one of their portlets, and syncs a site template to its sites. Get the preview first, then send its portlet data handlers back in the process request with the controls you want. Only the handlers and controls in the request are processed. A Java client JAR is available for use with the group ID 'com.liferay', artifact ID 'com.liferay.exportimport.rest.client', and version '1.0.13'."
     license:
         name: Apache 2.0
         url: http://www.apache.org/licenses/LICENSE-2.0.html
@@ -1159,6 +1242,47 @@ paths:
                             schema:
                                 $ref: "#/components/schemas/ExportPreview"
             tags: ["ExportPreview"]
+    "/export-preview/asset-libraries":
+        get:
+            description:
+                Retrieves the asset libraries the instance can export in full.
+            operationId: getExportPreviewAssetLibrariesPage
+            parameters:
+                -   in: query
+                    name: filter
+                    schema:
+                        type: string
+                -   in: query
+                    name: page
+                    schema:
+                        type: integer
+                -   in: query
+                    name: pageSize
+                    schema:
+                        type: integer
+                -   in: query
+                    name: search
+                    schema:
+                        type: string
+                -   in: query
+                    name: sort
+                    schema:
+                        type: string
+            responses:
+                200:
+                    content:
+                        application/json:
+                            schema:
+                                items:
+                                    $ref: "#/components/schemas/AssetLibrary"
+                                type: array
+                        application/xml:
+                            schema:
+                                items:
+                                    $ref: "#/components/schemas/AssetLibrary"
+                                type: array
+            tags: ["AssetLibrary"]
+            x-feature-flag: LPD-41307
     "/export-preview/sites":
         get:
             description:
@@ -1261,7 +1385,7 @@ paths:
             tags: ["ExportProcess"]
         post:
             description:
-                Starts an export of the instance, or of one of its portlets. The sites in the request are exported in full, unless a portlet ID is given.
+                Starts an export of the instance, or of one of its portlets. The sites and asset libraries in the request are exported in full, unless a portlet ID is given.
             operationId: postExportProcess
             parameters:
                 -   in: query
@@ -1499,7 +1623,7 @@ paths:
             tags: ["ImportProcess"]
         post:
             description:
-                Imports the user's last uploaded file into the instance, or into one of its portlets. The sites in the request are imported in full, unless a portlet ID is given. Returns a 404 when there is no uploaded file.
+                Imports the user's last uploaded file into the instance, or into one of its portlets. The sites and asset libraries in the request are imported in full, unless a portlet ID is given. Returns a 404 when there is no uploaded file.
             operationId: postImportProcess
             parameters:
                 -   in: query
@@ -1844,6 +1968,55 @@ paths:
                             schema:
                                 $ref: "#/components/schemas/ReportEntry"
             tags: ["ReportEntry"]
+    "/site-templates/{siteTemplateId}/sync-preview":
+        get:
+            description:
+                Retrieves the portlet data handlers and counts for a sync of the specified site template to the sites linked to it.
+            operationId: getSiteTemplateSyncPreview
+            parameters:
+                -   in: path
+                    name: siteTemplateId
+                    required: true
+                    schema:
+                        format: int64
+                        type: integer
+            responses:
+                200:
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/SyncPreview"
+                        application/xml:
+                            schema:
+                                $ref: "#/components/schemas/SyncPreview"
+            tags: ["SyncPreview"]
+            x-feature-flag: LPD-82107
+    "/site-templates/{siteTemplateId}/sync-processes":
+        post:
+            description:
+                Starts a sync of the specified site template to the sites linked to it, with a background process for each site. A notification reports the result once every site is synced.
+            parameters:
+                -   in: path
+                    name: siteTemplateId
+                    required: true
+                    schema:
+                        format: int64
+                        type: integer
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/SyncProcessRequest"
+                    application/xml:
+                        schema:
+                            $ref: "#/components/schemas/SyncProcessRequest"
+            responses:
+                204:
+                    content:
+                        application/json: {}
+                        application/xml: {}
+            tags: ["SyncProcess"]
+            x-feature-flag: LPD-82107
     "/sites/{siteExternalReferenceCode}/export-preview":
         get:
             description:

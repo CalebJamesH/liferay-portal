@@ -66,6 +66,8 @@ const ADDITIONAL_PROPS = {
 } as any;
 
 const LANGUAGE_KEYS: Record<string, string> = {
+	'content-that-has-remained-in-draft-status-for-longer-than-x-days':
+		'Content that has remained in draft status for longer than {0} days.',
 	'long-standing-drafts': 'Long-Standing Drafts',
 	'showing-x-of-x-items': 'Showing {0} of {1} Items',
 	'view-all-x': 'View All {0}',
@@ -79,6 +81,10 @@ const NOW = Date.UTC(2026, 9, 8, 12, 0);
 
 const reloadStatistics = jest.fn();
 
+function getGroupIds(space: {siteId?: number}) {
+	return space.siteId ? [space.siteId] : [];
+}
+
 function renderOperations({
 	space = {value: 'all'},
 	statistics = {longStandingDraftsCount: 9, totalCount: 350},
@@ -90,6 +96,7 @@ function renderOperations({
 		<GovernanceContext.Provider
 			value={
 				{
+					groupIds: getGroupIds(space),
 					loadingStatistics: false,
 					reloadStatistics,
 					space,
@@ -133,11 +140,14 @@ describe('[CMS Dashboard] LongStandingDrafts', () => {
 		);
 	});
 
-	it('shows the long-standing drafts count and its share of all assets', () => {
+	it('shows the long-standing drafts count, its share of all assets and the draft age threshold', () => {
 		renderOperations();
 
 		expect(getCard()).toHaveTextContent('9');
 		expect(getCard()).toHaveTextContent('2.6% of 350 Assets');
+		expect(getCard()).toHaveTextContent(
+			'Content that has remained in draft status for longer than 30 days.'
+		);
 	});
 
 	it('toggles the list of long-standing drafts when clicking the card', async () => {

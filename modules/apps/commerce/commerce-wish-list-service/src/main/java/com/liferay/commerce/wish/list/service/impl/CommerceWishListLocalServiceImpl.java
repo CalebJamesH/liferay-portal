@@ -107,7 +107,12 @@ public class CommerceWishListLocalServiceImpl
 
 	@Override
 	public void deleteCommerceWishLists(long userId, Date date) {
-		commerceWishListPersistence.removeByU_LtC(userId, date);
+		for (CommerceWishList commerceWishList :
+				commerceWishListPersistence.findByU_LtC(userId, date)) {
+
+			commerceWishListLocalService.forceDeleteCommerceWishList(
+				commerceWishList);
+		}
 	}
 
 	@Override
@@ -152,9 +157,8 @@ public class CommerceWishListLocalServiceImpl
 		CommerceWishList guestCommerceWishList = null;
 
 		if (Validator.isNotNull(guestUuid)) {
-			guestCommerceWishList =
-				commerceWishListLocalService.
-					fetchCommerceWishListByUuidAndGroupId(guestUuid, groupId);
+			guestCommerceWishList = commerceWishListPersistence.fetchByUUID_G(
+				guestUuid, groupId);
 
 			if ((guestCommerceWishList != null) &&
 				!guestCommerceWishList.isGuestWishList()) {

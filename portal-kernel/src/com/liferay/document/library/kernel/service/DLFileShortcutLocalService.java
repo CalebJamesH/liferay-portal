@@ -368,15 +368,6 @@ public interface DLFileShortcutLocalService
 	public List<DLFileShortcut> getFileShortcuts(long groupId, long folderId);
 
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public List<DLFileShortcut> getFileShortcuts(
-		long groupId, long folderId, boolean active, int status, int start,
-		int end);
-
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public int getFileShortcutsCount(
-		long groupId, long folderId, boolean active, int status);
-
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public List<DLFileShortcut> getGroupFileShortcuts(long groupId);
 
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
@@ -396,8 +387,6 @@ public interface DLFileShortcutLocalService
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public PersistedModel getPersistedModel(Serializable primaryKeyObj)
 		throws PortalException;
-
-	public void rebuildTree(long companyId) throws PortalException;
 
 	public void setTreePaths(long folderId, String treePath)
 		throws PortalException;
@@ -451,4 +440,4 @@ public interface DLFileShortcutLocalService
 		throws E;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:435050566
+// LIFERAY-SERVICE-BUILDER-HASH:-1025755485

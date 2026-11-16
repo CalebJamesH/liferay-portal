@@ -121,8 +121,8 @@ public class CPDefinitionGroupedEntryLocalServiceImpl
 		long cpDefinitionId, long newCPDefinitionId) {
 
 		List<CPDefinitionGroupedEntry> cpDefinitionGroupedEntries =
-			cpDefinitionGroupedEntryLocalService.
-				getCPDefinitionGroupedEntriesByCPDefinitionId(cpDefinitionId);
+			cpDefinitionGroupedEntryPersistence.findByCPDefinitionId(
+				cpDefinitionId);
 
 		for (CPDefinitionGroupedEntry cpDefinitionGroupedEntry :
 				cpDefinitionGroupedEntries) {
@@ -154,16 +154,26 @@ public class CPDefinitionGroupedEntryLocalServiceImpl
 			}
 		}
 
-		cpDefinitionGroupedEntryPersistence.removeByCPDefinitionId(
-			cpDefinitionId);
+		for (CPDefinitionGroupedEntry cpDefinitionGroupedEntry :
+				cpDefinitionGroupedEntryPersistence.findByCPDefinitionId(
+					cpDefinitionId)) {
+
+			cpDefinitionGroupedEntryLocalService.deleteCPDefinitionGroupedEntry(
+				cpDefinitionGroupedEntry);
+		}
 	}
 
 	@Override
 	public void deleteCPDefinitionGroupedEntriesByEntryCProductId(
 		long entryCProductId) {
 
-		cpDefinitionGroupedEntryPersistence.removeByEntryCProductId(
-			entryCProductId);
+		for (CPDefinitionGroupedEntry cpDefinitionGroupedEntry :
+				cpDefinitionGroupedEntryPersistence.findByEntryCProductId(
+					entryCProductId)) {
+
+			cpDefinitionGroupedEntryLocalService.deleteCPDefinitionGroupedEntry(
+				cpDefinitionGroupedEntry);
+		}
 	}
 
 	@Override
@@ -205,20 +215,6 @@ public class CPDefinitionGroupedEntryLocalServiceImpl
 				searchCPDefinitionGroupedEntries(searchContext);
 
 		return baseModelSearchResult.getBaseModels();
-	}
-
-	@Override
-	public List<CPDefinitionGroupedEntry>
-		getCPDefinitionGroupedEntriesByCPDefinitionId(long cpDefinitionId) {
-
-		return cpDefinitionGroupedEntryPersistence.findByCPDefinitionId(
-			cpDefinitionId);
-	}
-
-	@Override
-	public int getCPDefinitionGroupedEntriesCount(long cpDefinitionId) {
-		return cpDefinitionGroupedEntryPersistence.countByCPDefinitionId(
-			cpDefinitionId);
 	}
 
 	@Override

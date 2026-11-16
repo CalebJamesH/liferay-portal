@@ -137,9 +137,11 @@ import com.liferay.object.service.ObjectFolderLocalService;
 import com.liferay.petra.io.StreamUtil;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
-import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClassDefinition;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
+import com.liferay.portal.kernel.json.JSONArray;
+import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -837,7 +839,7 @@ public class BundleSiteInitializerTest {
 			links.toString(), assetLinkEntriesCount, links.size());
 	}
 
-	private void _assertAssetListEntries() {
+	private void _assertAssetListEntries() throws Exception {
 		List<AssetListEntry> assetListEntries =
 			_assetListEntryLocalService.getAssetListEntries(
 				_group.getGroupId());
@@ -863,7 +865,33 @@ public class BundleSiteInitializerTest {
 		Assert.assertTrue(
 			typeSettings.contains(
 				"classTypeIdsJournalArticleAssetRendererFactory"));
-		Assert.assertTrue(typeSettings.contains("queryValues0=Test Keyword"));
+
+		UnicodeProperties typeSettingsUnicodeProperties =
+			UnicodePropertiesBuilder.fastLoad(
+				typeSettings
+			).build();
+
+		JSONArray filtersJSONArray = JSONFactoryUtil.createJSONArray(
+			typeSettingsUnicodeProperties.getProperty("filters"));
+
+		Assert.assertEquals(
+			filtersJSONArray.toString(), 1, filtersJSONArray.length());
+		Assert.assertEquals(
+			"contains",
+			JSONUtil.getValueAsString(
+				filtersJSONArray, "JSONObject/0", "Object/operatorName"));
+		Assert.assertEquals(
+			"keywords",
+			JSONUtil.getValueAsString(
+				filtersJSONArray, "JSONObject/0", "Object/propertyName"));
+		Assert.assertEquals(
+			"all",
+			JSONUtil.getValueAsString(
+				filtersJSONArray, "JSONObject/0", "Object/quantifier"));
+		Assert.assertEquals(
+			"Test Keyword",
+			JSONUtil.getValueAsString(
+				filtersJSONArray, "JSONObject/0", "Object/value"));
 
 		assetListEntry = assetListEntries.get(1);
 
@@ -4535,8 +4563,7 @@ public class BundleSiteInitializerTest {
 
 	private void _assertSiteSettings() throws Exception {
 		Configuration configuration = _getFactoryConfiguration(
-			"test.pid.scoped", ExtendedObjectClassDefinition.Scope.GROUP,
-			_group.getGroupId());
+			"test.pid.scoped", _group.getGroupId());
 
 		Assert.assertNotNull(configuration);
 
@@ -4904,15 +4931,14 @@ public class BundleSiteInitializerTest {
 	}
 
 	private Configuration _getFactoryConfiguration(
-			String factoryPid, ExtendedObjectClassDefinition.Scope scope,
-			Serializable scopePK)
+			String factoryPid, long groupId)
 		throws Exception {
 
 		try {
 			Configuration[] configurations =
 				_configurationAdmin.listConfigurations(
-					ConfigurationFilterStringUtil.getScopedFilterString(
-						_group.getCompanyId(), factoryPid, scope, scopePK));
+					ConfigurationFilterStringUtil.getGroupScopedFilterString(
+						_group.getCompanyId(), groupId, factoryPid, null));
 
 			if (configurations != null) {
 				return configurations[0];

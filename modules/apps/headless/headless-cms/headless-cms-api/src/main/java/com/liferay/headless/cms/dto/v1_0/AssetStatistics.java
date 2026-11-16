@@ -132,6 +132,51 @@ public class AssetStatistics implements Serializable {
 	private Supplier<Long> _brokenLinksCountSupplier;
 
 	@io.swagger.v3.oas.annotations.media.Schema
+	public Long getCompletedWorkflowTasksCount() {
+		if (_completedWorkflowTasksCountSupplier != null) {
+			completedWorkflowTasksCount =
+				_completedWorkflowTasksCountSupplier.get();
+
+			_completedWorkflowTasksCountSupplier = null;
+		}
+
+		return completedWorkflowTasksCount;
+	}
+
+	public void setCompletedWorkflowTasksCount(
+		Long completedWorkflowTasksCount) {
+
+		this.completedWorkflowTasksCount = completedWorkflowTasksCount;
+
+		_completedWorkflowTasksCountSupplier = null;
+	}
+
+	@JsonIgnore
+	public void setCompletedWorkflowTasksCount(
+		UnsafeSupplier<Long, Exception>
+			completedWorkflowTasksCountUnsafeSupplier) {
+
+		_completedWorkflowTasksCountSupplier = () -> {
+			try {
+				return completedWorkflowTasksCountUnsafeSupplier.get();
+			}
+			catch (RuntimeException runtimeException) {
+				throw runtimeException;
+			}
+			catch (Exception exception) {
+				throw new RuntimeException(exception);
+			}
+		};
+	}
+
+	@GraphQLField
+	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
+	protected Long completedWorkflowTasksCount;
+
+	@JsonIgnore
+	private Supplier<Long> _completedWorkflowTasksCountSupplier;
+
+	@io.swagger.v3.oas.annotations.media.Schema
 	public Long getExpiredCount() {
 		if (_expiredCountSupplier != null) {
 			expiredCount = _expiredCountSupplier.get();
@@ -591,6 +636,47 @@ public class AssetStatistics implements Serializable {
 	private Supplier<Long> _totalCountSupplier;
 
 	@io.swagger.v3.oas.annotations.media.Schema
+	public Long getUnlinkedCount() {
+		if (_unlinkedCountSupplier != null) {
+			unlinkedCount = _unlinkedCountSupplier.get();
+
+			_unlinkedCountSupplier = null;
+		}
+
+		return unlinkedCount;
+	}
+
+	public void setUnlinkedCount(Long unlinkedCount) {
+		this.unlinkedCount = unlinkedCount;
+
+		_unlinkedCountSupplier = null;
+	}
+
+	@JsonIgnore
+	public void setUnlinkedCount(
+		UnsafeSupplier<Long, Exception> unlinkedCountUnsafeSupplier) {
+
+		_unlinkedCountSupplier = () -> {
+			try {
+				return unlinkedCountUnsafeSupplier.get();
+			}
+			catch (RuntimeException runtimeException) {
+				throw runtimeException;
+			}
+			catch (Exception exception) {
+				throw new RuntimeException(exception);
+			}
+		};
+	}
+
+	@GraphQLField
+	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
+	protected Long unlinkedCount;
+
+	@JsonIgnore
+	private Supplier<Long> _unlinkedCountSupplier;
+
+	@io.swagger.v3.oas.annotations.media.Schema
 	public Long getUpcomingReviewCount() {
 		if (_upcomingReviewCountSupplier != null) {
 			upcomingReviewCount = _upcomingReviewCountSupplier.get();
@@ -723,6 +809,18 @@ public class AssetStatistics implements Serializable {
 			sb.append(brokenLinksCount);
 		}
 
+		Long completedWorkflowTasksCount = getCompletedWorkflowTasksCount();
+
+		if (completedWorkflowTasksCount != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"completedWorkflowTasksCount\": ");
+
+			sb.append(completedWorkflowTasksCount);
+		}
+
 		Long expiredCount = getExpiredCount();
 
 		if (expiredCount != null) {
@@ -853,6 +951,18 @@ public class AssetStatistics implements Serializable {
 			sb.append("\"totalCount\": ");
 
 			sb.append(totalCount);
+		}
+
+		Long unlinkedCount = getUnlinkedCount();
+
+		if (unlinkedCount != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"unlinkedCount\": ");
+
+			sb.append(unlinkedCount);
 		}
 
 		Long upcomingReviewCount = getUpcomingReviewCount();
@@ -1001,4 +1111,4 @@ public class AssetStatistics implements Serializable {
 	private Map<String, Serializable> _extendedProperties;
 
 }
-// LIFERAY-REST-BUILDER-HASH:145811657
+// LIFERAY-REST-BUILDER-HASH:1117174221

@@ -8,7 +8,7 @@ import {Locator, Page, expect} from '@playwright/test';
 import {PORTLET_URLS} from '../../../../utils/portletUrls';
 import {waitForAlert} from '../../../../utils/waitForAlert';
 import {DataSetPage} from '../../../site-cms-site-initializer/main/pages/DataSetPage';
-import {EditConnectorPage} from './EditConnectorPage';
+import {ConnectorConfiguration, EditConnectorPage} from './EditConnectorPage';
 
 export class ConnectorsPage {
 	readonly dataSetFragmentPage: DataSetPage;
@@ -49,10 +49,12 @@ export class ConnectorsPage {
 
 	async createConnector({
 		active = false,
+		configuration,
 		connector,
 		name,
 	}: {
 		active?: boolean;
+		configuration?: ConnectorConfiguration;
 		connector: string;
 		name: string;
 	}) {
@@ -62,7 +64,12 @@ export class ConnectorsPage {
 
 		const editConnectorPage = new EditConnectorPage(this.page);
 
-		await editConnectorPage.createConnector({active, connector, name});
+		await editConnectorPage.createConnector({
+			active,
+			configuration,
+			connector,
+			name,
+		});
 
 		await expect(this.getConnector(name)).toBeVisible();
 	}
@@ -97,8 +104,28 @@ export class ConnectorsPage {
 		return this.dataSetFragmentPage.getRow(name).getByRole('link', {name});
 	}
 
+	getConnectorLastExecutionStatus(name: string) {
+		return this.dataSetFragmentPage
+			.getRow(name)
+			.locator('.cell-lastExecutionStatus .label');
+	}
+
+	getConnectorLastExecutionDate(name: string) {
+		return this.dataSetFragmentPage
+			.getRow(name)
+			.locator('.cell-lastExecutionDate');
+	}
+
+	getConnectorMappingStatus(name: string) {
+		return this.dataSetFragmentPage
+			.getRow(name)
+			.locator('.cell-mappingStatus .label');
+	}
+
 	getConnectorStatus(name: string) {
-		return this.dataSetFragmentPage.getRow(name).locator('.label');
+		return this.dataSetFragmentPage
+			.getRow(name)
+			.locator('.cell-active .label');
 	}
 
 	async openConnectorSchedule(name: string) {

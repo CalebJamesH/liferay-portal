@@ -25,6 +25,7 @@ import com.liferay.commerce.product.constants.CommerceChannelAccountEntryRelCons
 import com.liferay.commerce.product.exception.CPDefinitionDeliveryMaxSubscriptionCyclesException;
 import com.liferay.commerce.product.exception.CPDefinitionDisplayDateException;
 import com.liferay.commerce.product.exception.CPDefinitionExpirationDateException;
+import com.liferay.commerce.product.exception.CPDefinitionGroupIdException;
 import com.liferay.commerce.product.exception.CPDefinitionIgnoreSKUCombinationsException;
 import com.liferay.commerce.product.exception.CPDefinitionMaxSubscriptionCyclesException;
 import com.liferay.commerce.product.exception.CPDefinitionMetaDescriptionException;
@@ -449,6 +450,13 @@ public class CPDefinitionLocalServiceImpl
 				externalReferenceCode, serviceContext.getCompanyId());
 
 			if (cProduct != null) {
+				if (cProduct.getGroupId() != groupId) {
+					throw new CPDefinitionGroupIdException(
+						StringBundler.concat(
+							"Commerce product ", cProduct.getCProductId(),
+							" does not belong to group ", groupId));
+				}
+
 				if (cpDefinitionId == 0) {
 					cpDefinitionId = cProduct.getPublishedCPDefinitionId();
 				}
@@ -539,6 +547,7 @@ public class CPDefinitionLocalServiceImpl
 		CProduct newCProduct = (CProduct)originalCProduct.clone();
 
 		newCProduct.setUuid(PortalUUIDUtil.generate());
+		newCProduct.setNew(true);
 
 		long cProductId = counterLocalService.increment();
 
@@ -1454,8 +1463,14 @@ public class CPDefinitionLocalServiceImpl
 	}
 
 	@Override
-	public void deleteCPDefinitions(long cProductId, int status) {
-		cpDefinitionPersistence.removeByC_S(cProductId, status);
+	public void deleteCPDefinitions(long cProductId, int status)
+		throws PortalException {
+
+		for (CPDefinition cpDefinition :
+				cpDefinitionPersistence.findByC_S(cProductId, status)) {
+
+			cpDefinitionLocalService.deleteCPDefinition(cpDefinition);
+		}
 	}
 
 	@Override
@@ -1777,13 +1792,6 @@ public class CPDefinitionLocalServiceImpl
 
 	@Override
 	public List<CPDefinition> getCPDefinitions(
-		long groupId, boolean subscriptionEnabled) {
-
-		return cpDefinitionPersistence.findByG_SE(groupId, subscriptionEnabled);
-	}
-
-	@Override
-	public List<CPDefinition> getCPDefinitions(
 		long groupId, int status, int start, int end) {
 
 		if (status == WorkflowConstants.STATUS_ANY) {
@@ -1846,14 +1854,6 @@ public class CPDefinitionLocalServiceImpl
 			).limit(
 				start, end
 			));
-	}
-
-	@Override
-	public int getCPDefinitionsCount(
-		long groupId, boolean subscriptionEnabled) {
-
-		return cpDefinitionPersistence.countByG_SE(
-			groupId, subscriptionEnabled);
 	}
 
 	@Override

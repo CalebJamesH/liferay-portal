@@ -1520,12 +1520,11 @@ public class LayoutLocalServiceWrapper
 	@Override
 	public Layout getOrAddEmptyLayout(
 			String externalReferenceCode, long userId, long groupId,
-			boolean privateLayout, ServiceContext serviceContext)
+			boolean privateLayout)
 		throws Exception {
 
 		return _layoutLocalService.getOrAddEmptyLayout(
-			externalReferenceCode, userId, groupId, privateLayout,
-			serviceContext);
+			externalReferenceCode, userId, groupId, privateLayout);
 	}
 
 	/**
@@ -1611,13 +1610,6 @@ public class LayoutLocalServiceWrapper
 		throws com.liferay.portal.kernel.exception.PortalException {
 
 		return _layoutLocalService.hasLayout(uuid, groupId, privateLayout);
-	}
-
-	@Override
-	public boolean hasLayouts(com.liferay.portal.kernel.model.Group group)
-		throws com.liferay.portal.kernel.exception.PortalException {
-
-		return _layoutLocalService.hasLayouts(group);
 	}
 
 	@Override
@@ -2324,4 +2316,4 @@ public class LayoutLocalServiceWrapper
 	private LayoutLocalService _layoutLocalService;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:2028069245
+// LIFERAY-SERVICE-BUILDER-HASH:591932588

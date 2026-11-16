@@ -180,13 +180,21 @@ The procedure runs in two passes over the validations, in the order below. The o
 
 1. [Source Format](validations/branch/source-format.md)
 
+1. [Redundant Assert Message](validations/branch/redundant-assert-message.md)
+
 1. [Workspace Source Format](validations/workspaces/source-format.md)
 
 1. [Go Source Format](validations/portal/go-source-format.md)
 
+1. [Unused Project Dependencies](validations/branch/unused-project-dependencies.md)
+
 1. [Module Registration](validations/portal/module-registration.md)
 
+1. [BND Content](validations/branch/bnd-content.md)
+
 1. [Portlet Title](validations/portal/portlet-title.md)
+
+1. [BND DS Annotations Options](validations/branch/bnd-dsannotations-options.md)
 
 1. [Service Registration](validations/branch/service-registration.md)
 
@@ -197,6 +205,16 @@ The procedure runs in two passes over the validations, in the order below. The o
 1. [CacheField Usage](validations/branch/cache-field-usage.md)
 
 1. [Startup Sync Usage](validations/branch/startup-sync-usage.md)
+
+1. [MVC Render Command View Template](validations/branch/mvc-render-command-view-template.md)
+
+1. [Service Holder Usage](validations/branch/service-holder-usage.md)
+
+1. [Empty Service Properties](validations/branch/empty-service-properties.md)
+
+1. [Empty SafeCloseable](validations/branch/empty-safe-closeable.md)
+
+1. [BeanParamUtil Getter](validations/branch/bean-param-util-getter.md)
 
 1. [HTML Escaping](validations/branch/html-escaping.md)
 
@@ -222,7 +240,9 @@ The procedure runs in two passes over the validations, in the order below. The o
 
 1. [JavaScript Unit Tests](validations/portal/javascript-unit-test.md)
 
-1. [Workspace Unit Tests](validations/workspaces/workspace-unit-test.md)
+1. [Workspace Java Unit Tests](validations/workspaces/workspace-java-unit-test.md)
+
+1. [Workspace JavaScript Unit Tests](validations/workspaces/workspace-javascript-unit-test.md)
 
 1. [Helm Unit Test Order](validations/portal/helm-unit-test-order.md)
 

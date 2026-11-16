@@ -307,30 +307,8 @@ public class DLFileShortcutLocalServiceImpl
 	}
 
 	@Override
-	public List<DLFileShortcut> getFileShortcuts(
-		long groupId, long folderId, boolean active, int status, int start,
-		int end) {
-
-		return dlFileShortcutPersistence.findByG_F_A_S(
-			groupId, folderId, active, status, start, end);
-	}
-
-	@Override
-	public int getFileShortcutsCount(
-		long groupId, long folderId, boolean active, int status) {
-
-		return dlFileShortcutPersistence.countByG_F_A_S(
-			groupId, folderId, active, status);
-	}
-
-	@Override
 	public List<DLFileShortcut> getGroupFileShortcuts(long groupId) {
 		return dlFileShortcutPersistence.findByGroupId(groupId);
-	}
-
-	@Override
-	public void rebuildTree(long companyId) throws PortalException {
-		_dlFolderLocalService.rebuildTree(companyId);
 	}
 
 	@Override

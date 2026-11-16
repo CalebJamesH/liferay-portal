@@ -4,8 +4,6 @@
  */
 
 import ClayAlert from '@clayui/alert';
-import ClayButton from '@clayui/button';
-import ClayIcon from '@clayui/icon';
 import {Form, Formik} from 'formik';
 import {sub} from 'frontend-js-web';
 import React from 'react';
@@ -28,8 +26,11 @@ import {
 	withSelectedLayoutSetCount,
 } from '../../utils/contentSelection';
 import {getProcessFormErrors} from '../../utils/getProcessFormErrors';
+import {getScopeSubtitle} from '../../utils/getScopeSubtitle';
+import {navigateToProcesses} from '../../utils/navigateToProcesses';
+import {toGroupReferences} from '../../utils/toGroupReferences';
 import {toPortletDataHandlers} from '../../utils/toPortletDataHandlers';
-import SiteSelection from './components/SiteSelection';
+import GroupSelection from './components/GroupSelection';
 
 type ExportFormValues = {
 	contentSelection: ContentSelection | null | undefined;
@@ -38,6 +39,7 @@ type ExportFormValues = {
 	name: string;
 	permissions: boolean;
 	siteExternalReferenceCodes: string[];
+	spaceExternalReferenceCodes: string[];
 };
 
 export function NewExport({
@@ -46,9 +48,11 @@ export function NewExport({
 	exportPreview,
 	exportPreviewAPIURL,
 	exportPreviewSitesAPIURL,
+	exportPreviewSpacesAPIURL,
 	exportProcessAPIURL,
 	pageTreeModalConfiguration,
 	siteSelectionEnabled = false,
+	spaceSelectionEnabled = false,
 	timeZoneId,
 }: {
 	backURL: string;
@@ -56,9 +60,11 @@ export function NewExport({
 	exportPreview?: Preview;
 	exportPreviewAPIURL: string;
 	exportPreviewSitesAPIURL?: string;
+	exportPreviewSpacesAPIURL?: string;
 	exportProcessAPIURL: string;
 	pageTreeModalConfiguration: PageTreeModalConfiguration;
 	siteSelectionEnabled?: boolean;
+	spaceSelectionEnabled?: boolean;
 	timeZoneId: string;
 }) {
 	const {appliedDateFilterRef, error, handleApplyFilter, loading, preview} =
@@ -79,15 +85,28 @@ export function NewExport({
 		name: '',
 		permissions: false,
 		siteExternalReferenceCodes: [],
+		spaceExternalReferenceCodes: [],
 	};
+
+	const sitesAPIURL = siteSelectionEnabled
+		? exportPreviewSitesAPIURL
+		: undefined;
+	const spacesAPIURL = spaceSelectionEnabled
+		? exportPreviewSpacesAPIURL
+		: undefined;
 
 	return (
 		<Formik
 			initialValues={initialFormValues}
-			onSubmit={async (values) => {
+			onSubmit={async (values, {setStatus}) => {
 				const result = await postExportProcess({
 					exportProcessRequest: {
 						...toProcessRequestFlags(values.contentSelection),
+						...(spaceSelectionEnabled && {
+							assetLibraries: toGroupReferences(
+								values.spaceExternalReferenceCodes
+							),
+						}),
 						dateFilter: appliedDateFilterRef.current,
 						deletions: values.deletions,
 						name: values.name,
@@ -97,10 +116,8 @@ export function NewExport({
 							values.contentSelection
 						),
 						...(siteSelectionEnabled && {
-							sites: values.siteExternalReferenceCodes.map(
-								(externalReferenceCode) => ({
-									externalReferenceCode,
-								})
+							sites: toGroupReferences(
+								values.siteExternalReferenceCodes
 							),
 						}),
 					},
@@ -116,10 +133,17 @@ export function NewExport({
 					return;
 				}
 
-				Liferay.Util.navigate(backURL);
+				navigateToProcesses(
+					setStatus,
+					Liferay.Language.get('the-process-has-started'),
+					backURL
+				);
 			}}
 			validate={(values) =>
-				getProcessFormErrors(values, siteSelectionEnabled)
+				getProcessFormErrors(values, {
+					siteSelectionEnabled,
+					spaceSelectionEnabled,
+				})
 			}
 			validateOnMount
 		>
@@ -142,17 +166,28 @@ export function NewExport({
 							)}
 						/>
 
-						{siteSelectionEnabled && exportPreviewSitesAPIURL && (
+						{(sitesAPIURL || spacesAPIURL) && (
 							<ScopeSection
-								subtitle={Liferay.Language.get(
-									'export-complete-sites,-including-all-their-pages,-content,-and-settings'
-								)}
+								subtitle={getScopeSubtitle('export', {
+									siteSelectionEnabled: !!sitesAPIURL,
+									spaceSelectionEnabled: !!spacesAPIURL,
+								})}
 							>
-								<SiteSelection
-									exportPreviewSitesAPIURL={
-										exportPreviewSitesAPIURL
-									}
-								/>
+								{sitesAPIURL && (
+									<GroupSelection
+										apiURL={sitesAPIURL}
+										name="siteExternalReferenceCodes"
+										type="site"
+									/>
+								)}
+
+								{spacesAPIURL && (
+									<GroupSelection
+										apiURL={spacesAPIURL}
+										name="spaceExternalReferenceCodes"
+										type="space"
+									/>
+								)}
 							</ScopeSection>
 						)}
 
@@ -199,7 +234,8 @@ export function NewExport({
 						/>
 
 						{(formik.touched.contentSelection ||
-							formik.touched.siteExternalReferenceCodes) &&
+							formik.touched.siteExternalReferenceCodes ||
+							formik.touched.spaceExternalReferenceCodes) &&
 							selectionError && (
 								<ClayAlert
 									className="mt-4"
@@ -211,23 +247,8 @@ export function NewExport({
 							)}
 
 						<Footer
-							actionButton={
-								<ClayButton
-									disabled={
-										formik.isSubmitting || !formik.isValid
-									}
-									type="submit"
-								>
-									<span className="inline-item inline-item-before">
-										<ClayIcon
-											className="mr-1"
-											symbol="export"
-										/>
-									</span>
-
-									{Liferay.Language.get('export')}
-								</ClayButton>
-							}
+							actionButtonLabel={Liferay.Language.get('export')}
+							actionButtonSymbol="export"
 							backURL={backURL}
 						/>
 					</Form>

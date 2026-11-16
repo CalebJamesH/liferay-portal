@@ -284,6 +284,9 @@ public interface PropsKeys {
 	public static final String BASIC_AUTH_PASSWORD_REQUIRED =
 		"basic.auth.password.required";
 
+	public static final String BATCH_ENGINE_ENCRYPTION_KEY =
+		"batch.engine.encryption.key";
+
 	public static final String BLOGS_DISPLAY_TEMPLATES_CONFIG =
 		"blogs.display.templates.config";
 
@@ -1121,9 +1124,6 @@ public interface PropsKeys {
 
 	public static final String HIBERNATE_JDBC_BATCH_SIZE =
 		"hibernate.jdbc.batch_size";
-
-	public static final String HIBERNATE_JDBC_USE_STREAMS_FOR_BINARY =
-		"hibernate.jdbc.use_streams_for_binary";
 
 	public static final String HOT_DEPLOY_DEPENDENCY_MANAGEMENT_ENABLED =
 		"hot.deploy.dependency.management.enabled";

@@ -566,24 +566,6 @@ public class PatcherBuildLocalServiceWrapper
 			patcherFixId);
 	}
 
-	@Override
-	public java.util.List<com.liferay.osb.patcher.model.PatcherBuild>
-		getPatcherBuildsByPatcherProjectVersionId(
-			long patcherProjectVersionId) {
-
-		return _patcherBuildLocalService.
-			getPatcherBuildsByPatcherProjectVersionId(patcherProjectVersionId);
-	}
-
-	@Override
-	public java.util.List<com.liferay.osb.patcher.model.PatcherBuild>
-		getPatcherBuildsBySupportTicket(
-			String supportTicket, double supportTicketVersion, boolean older) {
-
-		return _patcherBuildLocalService.getPatcherBuildsBySupportTicket(
-			supportTicket, supportTicketVersion, older);
-	}
-
 	/**
 	 * Returns the number of patcher builds.
 	 *
@@ -601,15 +583,6 @@ public class PatcherBuildLocalServiceWrapper
 
 		return _patcherBuildLocalService.getPatcherBuildsCount(
 			patcherFixId, patcherProductVersionId, childBuild, type);
-	}
-
-	@Override
-	public int getPatcherBuildsCountByPatcherProjectVersionId(
-		long patcherProjectVersionId) {
-
-		return _patcherBuildLocalService.
-			getPatcherBuildsCountByPatcherProjectVersionId(
-				patcherProjectVersionId);
 	}
 
 	@Override
@@ -862,4 +835,4 @@ public class PatcherBuildLocalServiceWrapper
 	private PatcherBuildLocalService _patcherBuildLocalService;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-1571390628
+// LIFERAY-SERVICE-BUILDER-HASH:334411554

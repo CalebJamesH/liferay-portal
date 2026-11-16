@@ -319,16 +319,6 @@ public class DepotEntryGroupRelLocalServiceWrapper
 			depotEntryGroupRelId);
 	}
 
-	@Override
-	public DepotEntryGroupRel getDepotEntryGroupRelByDepotEntryIdToGroupId(
-			long depotEntryId, long toGroupId)
-		throws com.liferay.portal.kernel.exception.PortalException {
-
-		return _depotEntryGroupRelLocalService.
-			getDepotEntryGroupRelByDepotEntryIdToGroupId(
-				depotEntryId, toGroupId);
-	}
-
 	/**
 	 * Returns the depot entry group rel matching the UUID and group.
 	 *
@@ -352,14 +342,6 @@ public class DepotEntryGroupRelLocalServiceWrapper
 
 		return _depotEntryGroupRelLocalService.getDepotEntryGroupRels(
 			depotEntry);
-	}
-
-	@Override
-	public java.util.List<DepotEntryGroupRel> getDepotEntryGroupRels(
-		com.liferay.depot.model.DepotEntry depotEntry, int start, int end) {
-
-		return _depotEntryGroupRelLocalService.getDepotEntryGroupRels(
-			depotEntry, start, end);
 	}
 
 	/**
@@ -579,4 +561,4 @@ public class DepotEntryGroupRelLocalServiceWrapper
 	private DepotEntryGroupRelLocalService _depotEntryGroupRelLocalService;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1882054153
+// LIFERAY-SERVICE-BUILDER-HASH:59249127

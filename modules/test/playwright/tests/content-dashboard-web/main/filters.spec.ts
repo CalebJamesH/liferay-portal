@@ -14,6 +14,7 @@ import {loginTest} from '../../../fixtures/loginTest';
 import {ApiHelpers} from '../../../helpers/ApiHelpers';
 import {BLOGS_WORKFLOW_ACTION} from '../../../helpers/json-web-services/JSONWebServicesBlogsApiHelper';
 import {DLFILE_STATUS} from '../../../helpers/json-web-services/JSONWebServicesDocumentLibraryApiHelper';
+import addGlobalCategories from '../../../utils/addGlobalCategories';
 import {getRandomInt} from '../../../utils/getRandomInt';
 import getRandomString from '../../../utils/getRandomString';
 import {performLoginViaApi} from '../../../utils/performLogin';
@@ -24,7 +25,6 @@ import addScheduledStructuredContent from '../../../utils/structured-content/add
 import getBasicWebContentStructureId from '../../../utils/structured-content/getBasicWebContentStructureId';
 import getDataStructureDefinition from '../../journal-web/main/utils/getDataStructureDefinition';
 import {contentDashboardPagesTest} from './fixtures/contentDashboardPagesTest';
-import addGlobalCategories from './utils/addGlobalCategories';
 import addSingleApproverWorkflow from './utils/addSingleApproverWorkflow';
 import addSiteUser from './utils/addSiteUser';
 import getDocumentFile from './utils/getDocumentFile';
@@ -1080,5 +1080,64 @@ test(
 		).toBeVisible();
 
 		await expect(contentDashboardPage.getRow(documentTitle)).toBeVisible();
+	}
+);
+
+test(
+	'Content Dashboard keeps the type filter when it is selected again without changes',
+	{tag: '@LPD-110885'},
+	async ({apiHelpers, contentDashboardPage, site}) => {
+		const webContentTitle = getRandomString();
+
+		await addApprovedStructuredContent({
+			apiHelpers,
+			contentStructureId: await getBasicWebContentStructureId(apiHelpers),
+			siteId: site.id,
+			title: webContentTitle,
+		});
+
+		const documentTitle = getRandomString();
+
+		await apiHelpers.headlessDelivery.postDocument(
+			site.id,
+			getDocumentFile(`${documentTitle}.txt`),
+			{fileName: `${documentTitle}.txt`, title: documentTitle}
+		);
+
+		await contentDashboardPage.goto(undefined, {scopeId: site.id});
+
+		const typeFilter =
+			contentDashboardPage.getAppliedFilter(/^(Sub)?[Tt]ype:/);
+
+		await contentDashboardPage.filterByTreeNodes({
+			dialogTitle: 'Filter by Type',
+			menuItemName: 'Type',
+			nodeNames: [/^Web Content Article \(/],
+		});
+
+		await expect(typeFilter).not.toHaveCount(0);
+
+		await expect(contentDashboardPage.getRow(documentTitle)).toHaveCount(0);
+
+		const frame = await contentDashboardPage.openFilterModal(
+			'Type',
+			'Filter by Type'
+		);
+
+		await expect(
+			contentDashboardPage
+				.getTreeNode(frame, /^Web Content Article \(/)
+				.getByRole('checkbox')
+		).toBeChecked();
+
+		await contentDashboardPage.selectModalItems();
+
+		await expect(typeFilter).not.toHaveCount(0);
+
+		await expect(
+			contentDashboardPage.getRow(webContentTitle)
+		).toBeVisible();
+
+		await expect(contentDashboardPage.getRow(documentTitle)).toHaveCount(0);
 	}
 );

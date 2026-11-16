@@ -276,6 +276,32 @@ public class LayoutLocalServiceTest {
 		}
 	}
 
+	@Test
+	public void testAddLayout() throws Exception {
+		Map<Locale, String> nameMap = HashMapBuilder.put(
+			LocaleUtil.SPAIN, RandomTestUtil.randomString(4001)
+		).put(
+			LocaleUtil.US, RandomTestUtil.randomString()
+		).build();
+
+		Layout layout = _layoutLocalService.addLayout(
+			null, TestPropsValues.getUserId(), _group.getGroupId(), false,
+			LayoutConstants.DEFAULT_PARENT_LAYOUT_ID, nameMap, null, null, null,
+			null, LayoutConstants.TYPE_PORTLET, null, false, false,
+			HashMapBuilder.put(
+				LocaleUtil.SPAIN,
+				"/" + StringUtil.toLowerCase(RandomTestUtil.randomString())
+			).put(
+				LocaleUtil.US,
+				"/" + StringUtil.toLowerCase(RandomTestUtil.randomString())
+			).build(),
+			_serviceContext);
+
+		layout = _layoutLocalService.getLayout(layout.getPlid());
+
+		Assert.assertEquals(nameMap, layout.getNameMap());
+	}
+
 	@Test(expected = DuplicateLayoutExternalReferenceCodeException.class)
 	public void testAddLayoutWithExistingExternalReferenceCode()
 		throws Exception {
@@ -342,6 +368,9 @@ public class LayoutLocalServiceTest {
 	public void testConvertEmptyLayoutToContentLayout() throws Exception {
 		Layout layout = _addEmptyLayout();
 
+		_serviceContext.setAttribute(
+			"layout.instanceable.allowed", Boolean.TRUE);
+
 		try {
 			layout = _layoutLocalService.updateLayout(
 				_group.getGroupId(), layout.isPrivateLayout(),
@@ -366,9 +395,6 @@ public class LayoutLocalServiceTest {
 				_log.debug(layoutTypeException);
 			}
 		}
-
-		_serviceContext.setAttribute(
-			"layout.instanceable.allowed", Boolean.TRUE);
 
 		try {
 			layout = _layoutLocalService.convertEmptyLayout(
@@ -608,7 +634,7 @@ public class LayoutLocalServiceTest {
 		try {
 			_layoutLocalService.getOrAddEmptyLayout(
 				RandomTestUtil.randomString(), TestPropsValues.getUserId(),
-				_group.getGroupId(), false, _serviceContext);
+				_group.getGroupId(), false);
 
 			Assert.fail();
 		}
@@ -623,7 +649,7 @@ public class LayoutLocalServiceTest {
 
 			Layout layout = _layoutLocalService.getOrAddEmptyLayout(
 				RandomTestUtil.randomString(), TestPropsValues.getUserId(),
-				_group.getGroupId(), false, _serviceContext);
+				_group.getGroupId(), false);
 
 			Assert.assertEquals(
 				WorkflowConstants.STATUS_EMPTY, layout.getStatus());
@@ -1289,7 +1315,7 @@ public class LayoutLocalServiceTest {
 
 			return _layoutLocalService.getOrAddEmptyLayout(
 				RandomTestUtil.randomString(), TestPropsValues.getUserId(),
-				_group.getGroupId(), false, _serviceContext);
+				_group.getGroupId(), false);
 		}
 	}
 

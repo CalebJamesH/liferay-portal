@@ -6,14 +6,17 @@
 package com.liferay.dynamic.data.mapping.service.impl;
 
 import com.liferay.dynamic.data.mapping.constants.DDMFormInstanceReportConstants;
+import com.liferay.dynamic.data.mapping.form.field.type.constants.DDMFormFieldTypeConstants;
+import com.liferay.dynamic.data.mapping.internal.report.util.NumericDDMFormFieldTypeReportUtil;
 import com.liferay.dynamic.data.mapping.model.DDMFormInstance;
 import com.liferay.dynamic.data.mapping.model.DDMFormInstanceRecordVersion;
 import com.liferay.dynamic.data.mapping.model.DDMFormInstanceReport;
 import com.liferay.dynamic.data.mapping.report.DDMFormFieldTypeReportProcessor;
 import com.liferay.dynamic.data.mapping.report.DDMFormFieldTypeReportProcessorRegistry;
-import com.liferay.dynamic.data.mapping.service.DDMFormInstanceRecordVersionLocalService;
 import com.liferay.dynamic.data.mapping.service.base.DDMFormInstanceReportLocalServiceBaseImpl;
 import com.liferay.dynamic.data.mapping.service.persistence.DDMFormInstancePersistence;
+import com.liferay.dynamic.data.mapping.service.persistence.DDMFormInstanceRecordPersistence;
+import com.liferay.dynamic.data.mapping.service.persistence.DDMFormInstanceRecordVersionPersistence;
 import com.liferay.dynamic.data.mapping.storage.DDMFormFieldValue;
 import com.liferay.dynamic.data.mapping.storage.DDMFormValues;
 import com.liferay.petra.string.StringBundler;
@@ -25,8 +28,13 @@ import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.service.ExceptionRetryAcceptor;
+import com.liferay.portal.kernel.spring.aop.Property;
+import com.liferay.portal.kernel.spring.aop.Retry;
 
 import java.util.Date;
+import java.util.List;
+import java.util.Objects;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -109,15 +117,63 @@ public class DDMFormInstanceReportLocalServiceImpl
 		return ddmFormInstanceReportPersistence.update(ddmFormInstanceReport);
 	}
 
+	@Override
+	@Retry(
+		acceptor = ExceptionRetryAcceptor.class,
+		properties = {
+			@Property(
+				name = ExceptionRetryAcceptor.EXCEPTION_NAME,
+				value = "org.hibernate.StaleStateException"
+			)
+		}
+	)
+	public DDMFormInstanceReport updateFormInstanceReportByFormInstanceId(
+			long formInstanceId)
+		throws PortalException {
+
+		DDMFormInstanceReport ddmFormInstanceReport =
+			ddmFormInstanceReportPersistence.findByFormInstanceId(
+				formInstanceId);
+
+		JSONObject ddmFormInstanceReportDataJSONObject =
+			_jsonFactory.createJSONObject(ddmFormInstanceReport.getData());
+
+		List<DDMFormValues> ddmFormValuesList =
+			NumericDDMFormFieldTypeReportUtil.
+				getLatestApprovedDDMFormValuesList(
+					_ddmFormInstanceRecordPersistence.findByFormInstanceId(
+						formInstanceId));
+
+		for (String fieldName : ddmFormInstanceReportDataJSONObject.keySet()) {
+			JSONObject fieldJSONObject =
+				ddmFormInstanceReportDataJSONObject.getJSONObject(fieldName);
+
+			if ((fieldJSONObject == null) || !fieldJSONObject.has("summary") ||
+				!Objects.equals(
+					fieldJSONObject.getString("type"),
+					DDMFormFieldTypeConstants.NUMERIC)) {
+
+				continue;
+			}
+
+			NumericDDMFormFieldTypeReportUtil.updateMaxAndMin(
+				fieldName, ddmFormValuesList, fieldJSONObject);
+		}
+
+		ddmFormInstanceReport.setData(
+			ddmFormInstanceReportDataJSONObject.toString());
+
+		return ddmFormInstanceReportPersistence.update(ddmFormInstanceReport);
+	}
+
 	private String _getData(
 			long formInstanceRecordVersionId, String ddmFormInstanceReportEvent)
 		throws PortalException {
 
 		try {
 			DDMFormInstanceRecordVersion ddmFormInstanceRecordVersion =
-				_ddmFormInstanceRecordVersionLocalService.
-					getDDMFormInstanceRecordVersion(
-						formInstanceRecordVersionId);
+				_ddmFormInstanceRecordVersionPersistence.findByPrimaryKey(
+					formInstanceRecordVersionId);
 
 			DDMFormInstanceReport ddmFormInstanceReport =
 				ddmFormInstanceReportPersistence.findByFormInstanceId(
@@ -222,8 +278,11 @@ public class DDMFormInstanceReportLocalServiceImpl
 	private DDMFormInstancePersistence _ddmFormInstancePersistence;
 
 	@Reference
-	private DDMFormInstanceRecordVersionLocalService
-		_ddmFormInstanceRecordVersionLocalService;
+	private DDMFormInstanceRecordPersistence _ddmFormInstanceRecordPersistence;
+
+	@Reference
+	private DDMFormInstanceRecordVersionPersistence
+		_ddmFormInstanceRecordVersionPersistence;
 
 	@Reference
 	private JSONFactory _jsonFactory;

@@ -7,6 +7,7 @@ package com.liferay.headless.cms.resource.v1_0.test;
 
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 import com.liferay.depot.constants.DepotConstants;
+import com.liferay.depot.constants.DepotRolesConstants;
 import com.liferay.depot.model.DepotEntry;
 import com.liferay.depot.service.DepotEntryLocalService;
 import com.liferay.headless.cms.client.dto.v1_0.AssetStatistics;
@@ -35,6 +36,7 @@ import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.model.role.RoleConstants;
 import com.liferay.portal.kernel.service.RoleLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.service.UserGroupRoleLocalService;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.service.WorkflowDefinitionLinkLocalService;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
@@ -279,9 +281,12 @@ public class AssetStatisticsResourceTest
 		_depotEntryLocalService.deleteDepotEntry(depotEntry.getDepotEntryId());
 
 		_testGetAssetStatisticsBrokenLinksCount();
+		_testGetAssetStatisticsBrokenLinksCountBySpaceAdministrator();
 		_testGetAssetStatisticsByAssetLibrary();
+		_testGetAssetStatisticsBySpaceAdministrator();
 		_testGetAssetStatisticsMissingRequiredFieldsCount();
 		_testGetAssetStatisticsSLABreachedWorkflowTasksCount();
+		_testGetAssetStatisticsUnlinkedCount();
 		_testGetAssetStatisticsWithFreeTier();
 		_testGetAssetStatisticsWorkflowTasksCounts();
 	}
@@ -289,6 +294,18 @@ public class AssetStatisticsResourceTest
 	@Override
 	@Test
 	public void testGraphQLGetAssetStatistics() throws Exception {
+	}
+
+	private void _addGroupUserWithRole(long groupId, String roleName, User user)
+		throws Exception {
+
+		_userLocalService.addGroupUser(groupId, user.getUserId());
+
+		Role role = _roleLocalService.getRole(
+			testCompany.getCompanyId(), roleName);
+
+		_userGroupRoleLocalService.addUserGroupRoles(
+			user.getUserId(), groupId, new long[] {role.getRoleId()});
 	}
 
 	private ObjectEntry _addObjectEntry(
@@ -473,8 +490,39 @@ public class AssetStatisticsResourceTest
 		}
 	}
 
+	private void _assertTotalCount(
+			Long assetLibraryId,
+			AssetStatisticsResource assetStatisticsResource,
+			long expectedTotalCount)
+		throws Exception {
+
+		AssetStatistics assetStatistics =
+			assetStatisticsResource.getAssetStatistics(assetLibraryId);
+
+		Assert.assertEquals(
+			expectedTotalCount,
+			GetterUtil.getLong(assetStatistics.getTotalCount()));
+	}
+
+	private void _assertUnlinkedCount(
+			Long assetLibraryId, long expectedUnlinkedCount)
+		throws Exception {
+
+		for (AssetStatisticsResource assetStatisticsResource :
+				_assetStatisticsResources) {
+
+			AssetStatistics assetStatistics =
+				assetStatisticsResource.getAssetStatistics(assetLibraryId);
+
+			Assert.assertEquals(
+				expectedUnlinkedCount,
+				GetterUtil.getLong(assetStatistics.getUnlinkedCount()));
+		}
+	}
+
 	private void _assertWorkflowTasksCounts(
-			Long assetLibraryId, long expectedOverdueWorkflowTasksCount,
+			Long assetLibraryId, long expectedCompletedWorkflowTasksCount,
+			long expectedOverdueWorkflowTasksCount,
 			long expectedWorkflowTasksCount)
 		throws Exception {
 
@@ -484,6 +532,10 @@ public class AssetStatisticsResourceTest
 			AssetStatistics assetStatistics =
 				assetStatisticsResource.getAssetStatistics(assetLibraryId);
 
+			Assert.assertEquals(
+				expectedCompletedWorkflowTasksCount,
+				GetterUtil.getLong(
+					assetStatistics.getCompletedWorkflowTasksCount()));
 			Assert.assertEquals(
 				expectedOverdueWorkflowTasksCount,
 				GetterUtil.getLong(
@@ -658,6 +710,56 @@ public class AssetStatisticsResourceTest
 		}
 	}
 
+	private void _testGetAssetStatisticsBrokenLinksCountBySpaceAdministrator()
+		throws Exception {
+
+		ServiceContext serviceContext =
+			ServiceContextTestUtil.getServiceContext();
+
+		DepotEntry administeredDepotEntry = _addSpaceDepotEntry(serviceContext);
+		DepotEntry reviewedDepotEntry = _addSpaceDepotEntry(serviceContext);
+
+		ObjectDefinition objectDefinition =
+			_getCMSBasicWebContentObjectDefinition();
+
+		ObjectEntry reviewedObjectEntry = _addObjectEntry(
+			reviewedDepotEntry, objectDefinition);
+
+		_objectEntryLocalService.updateStatus(
+			TestPropsValues.getUserId(), reviewedObjectEntry.getObjectEntryId(),
+			WorkflowConstants.STATUS_EXPIRED, serviceContext);
+
+		_addObjectEntry(
+			CMSOutboundLinkTestUtil.getImageHTML(
+				reviewedObjectEntry.getExternalReferenceCode()),
+			administeredDepotEntry, objectDefinition);
+
+		User user = UserTestUtil.addUser(
+			testCompany, RandomTestUtil.randomString());
+
+		_addGroupUserWithRole(
+			administeredDepotEntry.getGroupId(),
+			DepotRolesConstants.ASSET_LIBRARY_ADMINISTRATOR, user);
+		_addGroupUserWithRole(
+			reviewedDepotEntry.getGroupId(),
+			DepotRolesConstants.ASSET_LIBRARY_CONTENT_REVIEWER, user);
+
+		AssetStatisticsResource assetStatisticsResource =
+			_buildAssetStatisticsResource(user);
+
+		AssetStatistics assetStatistics =
+			assetStatisticsResource.getAssetStatistics(
+				administeredDepotEntry.getDepotEntryId());
+
+		Assert.assertEquals(
+			1, GetterUtil.getLong(assetStatistics.getBrokenLinksCount()));
+
+		_depotEntryLocalService.deleteDepotEntry(
+			administeredDepotEntry.getDepotEntryId());
+		_depotEntryLocalService.deleteDepotEntry(
+			reviewedDepotEntry.getDepotEntryId());
+	}
+
 	private void _testGetAssetStatisticsByAssetLibrary() throws Exception {
 		ServiceContext serviceContext =
 			ServiceContextTestUtil.getServiceContext();
@@ -714,6 +816,48 @@ public class AssetStatisticsResourceTest
 
 		_depotEntryLocalService.deleteDepotEntry(depotEntry1.getDepotEntryId());
 		_depotEntryLocalService.deleteDepotEntry(depotEntry2.getDepotEntryId());
+	}
+
+	private void _testGetAssetStatisticsBySpaceAdministrator()
+		throws Exception {
+
+		ServiceContext serviceContext =
+			ServiceContextTestUtil.getServiceContext();
+
+		DepotEntry administeredDepotEntry = _addSpaceDepotEntry(serviceContext);
+		DepotEntry reviewedDepotEntry = _addSpaceDepotEntry(serviceContext);
+
+		User user = UserTestUtil.addUser(
+			testCompany, RandomTestUtil.randomString());
+
+		_addGroupUserWithRole(
+			administeredDepotEntry.getGroupId(),
+			DepotRolesConstants.ASSET_LIBRARY_ADMINISTRATOR, user);
+		_addGroupUserWithRole(
+			reviewedDepotEntry.getGroupId(),
+			DepotRolesConstants.ASSET_LIBRARY_CONTENT_REVIEWER, user);
+
+		ObjectDefinition objectDefinition =
+			_getCMSBasicWebContentObjectDefinition();
+
+		_addObjectEntry(administeredDepotEntry, objectDefinition);
+		_addObjectEntry(reviewedDepotEntry, objectDefinition);
+		_addObjectEntry(reviewedDepotEntry, objectDefinition);
+
+		AssetStatisticsResource assetStatisticsResource =
+			_buildAssetStatisticsResource(user);
+
+		_assertTotalCount(
+			administeredDepotEntry.getDepotEntryId(), assetStatisticsResource,
+			1);
+		_assertTotalCount(null, assetStatisticsResource, 1);
+		_assertTotalCount(
+			reviewedDepotEntry.getDepotEntryId(), assetStatisticsResource, 0);
+
+		_depotEntryLocalService.deleteDepotEntry(
+			administeredDepotEntry.getDepotEntryId());
+		_depotEntryLocalService.deleteDepotEntry(
+			reviewedDepotEntry.getDepotEntryId());
 	}
 
 	private void _testGetAssetStatisticsMissingRequiredFieldsCount()
@@ -921,6 +1065,36 @@ public class AssetStatisticsResourceTest
 		_depotEntryLocalService.deleteDepotEntry(depotEntry2.getDepotEntryId());
 	}
 
+	private void _testGetAssetStatisticsUnlinkedCount() throws Exception {
+		DepotEntry depotEntry = _addSpaceDepotEntry(
+			ServiceContextTestUtil.getServiceContext());
+
+		try {
+			ObjectDefinition objectDefinition =
+				_getCMSBasicWebContentObjectDefinition();
+
+			ObjectEntry objectEntry = _addObjectEntry(
+				depotEntry, objectDefinition);
+
+			_assertUnlinkedCount(depotEntry.getGroupId(), 1);
+
+			_addObjectEntry(depotEntry, objectDefinition);
+
+			_assertUnlinkedCount(depotEntry.getGroupId(), 2);
+
+			_addObjectEntry(
+				CMSOutboundLinkTestUtil.getImageHTML(
+					objectEntry.getExternalReferenceCode()),
+				depotEntry, objectDefinition);
+
+			_assertUnlinkedCount(depotEntry.getGroupId(), 2);
+		}
+		finally {
+			_depotEntryLocalService.deleteDepotEntry(
+				depotEntry.getDepotEntryId());
+		}
+	}
+
 	private void _testGetAssetStatisticsWithFreeTier() throws Exception {
 		try (AutoCloseable autoCloseable = CMSFreeTierTestUtil.withFreeTier()) {
 			assertHttpResponseStatusCode(
@@ -957,7 +1131,7 @@ public class AssetStatisticsResourceTest
 			true, new Date(date.getTime() - Time.DAY), objectDefinition,
 			_addObjectEntry(depotEntry1, objectDefinition));
 
-		_assertWorkflowTasksCounts(depotEntry1.getGroupId(), 0, 0);
+		_assertWorkflowTasksCounts(depotEntry1.getGroupId(), 1, 0, 0);
 
 		// Add object entry with overdue workflow task
 
@@ -965,7 +1139,7 @@ public class AssetStatisticsResourceTest
 			false, new Date(date.getTime() - Time.DAY), objectDefinition,
 			_addObjectEntry(depotEntry1, objectDefinition));
 
-		_assertWorkflowTasksCounts(depotEntry1.getGroupId(), 1, 1);
+		_assertWorkflowTasksCounts(depotEntry1.getGroupId(), 1, 1, 1);
 
 		// Add object entry with overdue workflow task on another space
 
@@ -973,11 +1147,10 @@ public class AssetStatisticsResourceTest
 			false, new Date(date.getTime() - Time.DAY), objectDefinition,
 			_addObjectEntry(depotEntry2, objectDefinition));
 
-		_assertWorkflowTasksCounts(depotEntry1.getGroupId(), 1, 1);
-		_assertWorkflowTasksCounts(depotEntry1.getDepotEntryId(), 1, 1);
-
-		_assertWorkflowTasksCounts(depotEntry2.getGroupId(), 1, 1);
-		_assertWorkflowTasksCounts(depotEntry2.getDepotEntryId(), 1, 1);
+		_assertWorkflowTasksCounts(depotEntry1.getGroupId(), 1, 1, 1);
+		_assertWorkflowTasksCounts(depotEntry1.getDepotEntryId(), 1, 1, 1);
+		_assertWorkflowTasksCounts(depotEntry2.getGroupId(), 0, 1, 1);
+		_assertWorkflowTasksCounts(depotEntry2.getDepotEntryId(), 0, 1, 1);
 
 		// Add object entry with workflow task due in the future
 
@@ -985,13 +1158,13 @@ public class AssetStatisticsResourceTest
 			false, new Date(date.getTime() + Time.DAY), objectDefinition,
 			_addObjectEntry(depotEntry1, objectDefinition));
 
-		_assertWorkflowTasksCounts(depotEntry1.getGroupId(), 1, 2);
+		_assertWorkflowTasksCounts(depotEntry1.getGroupId(), 1, 1, 2);
 
 		// Add object entry with workflow task without due date
 
 		_addObjectEntry(depotEntry1, objectDefinition);
 
-		_assertWorkflowTasksCounts(depotEntry1.getGroupId(), 1, 3);
+		_assertWorkflowTasksCounts(depotEntry1.getGroupId(), 1, 1, 3);
 
 		_depotEntryLocalService.deleteDepotEntry(depotEntry1.getDepotEntryId());
 		_depotEntryLocalService.deleteDepotEntry(depotEntry2.getDepotEntryId());
@@ -1057,6 +1230,9 @@ public class AssetStatisticsResourceTest
 	private SearchEngineAdapter _searchEngineAdapter;
 
 	private final List<String> _slaTaskResultUids = new ArrayList<>();
+
+	@Inject
+	private UserGroupRoleLocalService _userGroupRoleLocalService;
 
 	@Inject
 	private UserLocalService _userLocalService;

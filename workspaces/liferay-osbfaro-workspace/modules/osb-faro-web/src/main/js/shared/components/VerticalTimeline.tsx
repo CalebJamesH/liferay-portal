@@ -5,6 +5,7 @@ import ClayLink from '@clayui/link';
 import ClaySticker from '@clayui/sticker';
 import ClayTable from '@clayui/table';
 import CopyButton from 'shared/components/CopyButton';
+import DataValue from 'shared/components/DataValue';
 import EventCountPill from 'shared/components/EventCountPill';
 import getCN from 'classnames';
 import Loading from 'shared/components/Loading';
@@ -20,6 +21,7 @@ import {
 	PayloadTable as IPayloadTable,
 } from 'shared/util/payloadTables';
 import {
+	ACTIVITY_PAYLOAD_LAYOUT,
 	isWebhookUserAgent,
 	SessionEvent,
 	VerticalTimelineIndividual,
@@ -204,13 +206,21 @@ const PayloadTable: FC<{table: IPayloadTable}> = ({table: {rows, title}}) => (
 			</ClayTable.Head>
 
 			<ClayTable.Body>
-				{rows.map(({property, value}) => (
+				{rows.map(({href, property, value}) => (
 					<ClayTable.Row key={property}>
 						<ClayTable.Cell className="text-dark" headingCell>
 							{property}
 						</ClayTable.Cell>
 
-						<ClayTable.Cell>{value}</ClayTable.Cell>
+						<ClayTable.Cell>
+							{href ? (
+								<ClayLink className="text-dark" href={href}>
+									{value}
+								</ClayLink>
+							) : (
+								<DataValue value={value} />
+							)}
+						</ClayTable.Cell>
 					</ClayTable.Row>
 				))}
 			</ClayTable.Body>
@@ -230,7 +240,7 @@ const PayloadCode: FC<{payload: Record<string, unknown>}> = ({payload}) => {
 		<div className="payload-code-root position-relative">
 			<CopyButton
 				borderless
-				className="payload-copy"
+				className="payload-copy position-absolute"
 				displayType="secondary"
 				label={Liferay.Language.get('copy-details')}
 				monospaced
@@ -299,9 +309,9 @@ const RowAttributes: FC<{payload: Record<string, unknown>}> = ({payload}) => {
 			</div>
 
 			{view === 'table' ? (
-				formatPayloadTables(payload).map((table) => (
-					<PayloadTable key={table.title} table={table} />
-				))
+				formatPayloadTables(payload, ACTIVITY_PAYLOAD_LAYOUT).map(
+					(table) => <PayloadTable key={table.title} table={table} />
+				)
 			) : (
 				<PayloadCode payload={payload} />
 			)}
@@ -329,27 +339,30 @@ const IndividualRow: FC<{item: VerticalTimelineIndividual}> = ({
 	return (
 		<li className="timeline-row individual-row bg-white w-100">
 			<div className="row-content flex-fill d-flex align-items-center">
-				<ClaySticker className="individual-sticker" shape="user-icon">
+				<ClaySticker
+					className="flex-shrink-0 individual-sticker"
+					shape="user-icon"
+				>
 					<ClayIcon
 						color="gray"
 						symbol={isAnonymous ? 'anonymize' : 'user'}
 					/>
 				</ClaySticker>
 
-				<div className="individual-info">
+				<div className="align-items-start d-flex flex-column individual-info">
 					{individualUrl ? (
 						<ClayLink
 							className="individual-title"
 							href={individualUrl}
 						>
 							<Text size={3} weight="semi-bold">
-								{title}
+								<DataValue value={title} />
 							</Text>
 						</ClayLink>
 					) : (
 						<span className="individual-title">
 							<Text size={3} weight="semi-bold">
-								{title}
+								<DataValue value={title} />
 							</Text>
 						</span>
 					)}
@@ -518,7 +531,7 @@ const PageGroupRow: FC<IRowProps<VerticalTimelinePageGroup>> = ({
 						)}
 					</div>
 
-					<div className="page-info">
+					<div className="d-flex flex-column page-info">
 						{subtitle && <ExternalLink url={subtitle} />}
 
 						<div className="row-metrics d-flex align-items-center">
@@ -610,7 +623,7 @@ const EventRow: FC<IRowProps<SessionEvent>> = ({
 						</span>
 					</div>
 
-					<div className="event-info">
+					<div className="d-flex event-info flex-column">
 						{description && (
 							<div className="description align-self-start font-weight-normal mw-100 text-secondary">
 								{descriptionUrl ? (
@@ -691,9 +704,9 @@ type IVerticalTimelineProps = {
  * summary until the marketer drills into it.
  */
 const VerticalTimeline: FC<IVerticalTimelineProps> = ({
+	LDPEnabled = true,
 	initialExpanded,
 	items = [],
-	LDPEnabled = true,
 	loading = false,
 	nested = false,
 	timeZoneId,

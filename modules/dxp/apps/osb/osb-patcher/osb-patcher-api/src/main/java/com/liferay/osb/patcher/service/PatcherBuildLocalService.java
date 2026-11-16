@@ -345,14 +345,6 @@ public interface PatcherBuildLocalService
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public List<PatcherBuild> getPatcherBuildsByPatcherFixId(long patcherFixId);
 
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public List<PatcherBuild> getPatcherBuildsByPatcherProjectVersionId(
-		long patcherProjectVersionId);
-
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public List<PatcherBuild> getPatcherBuildsBySupportTicket(
-		String supportTicket, double supportTicketVersion, boolean older);
-
 	/**
 	 * Returns the number of patcher builds.
 	 *
@@ -365,10 +357,6 @@ public interface PatcherBuildLocalService
 	public int getPatcherBuildsCount(
 		long patcherFixId, long patcherProductVersionId, boolean childBuild,
 		int type);
-
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public int getPatcherBuildsCountByPatcherProjectVersionId(
-		long patcherProjectVersionId);
 
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public List<PatcherBuild> getPatcherFixPatcherBuilds(long patcherFixId);
@@ -495,4 +483,4 @@ public interface PatcherBuildLocalService
 		throws Exception;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-906455652
+// LIFERAY-SERVICE-BUILDER-HASH:1143144536

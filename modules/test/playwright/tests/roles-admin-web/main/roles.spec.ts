@@ -50,7 +50,7 @@ test.beforeAll(async ({browser}) => {
 	await expect(async () => {
 		await rolesPage.rolesTable.changeView('Table');
 
-		await expect(rolesPage.rolesTable.cell('Title')).toBeVisible({
+		await expect(rolesPage.rolesTable.columnHeader('Title')).toBeVisible({
 			timeout: 300,
 		});
 	}).toPass();
@@ -351,10 +351,12 @@ test(
 
 		await rolesPage.rolesTable.changeView('Table');
 
-		await expect(rolesPage.rolesTable.cell('Title')).toBeVisible();
-		await expect(rolesPage.rolesTable.cell('Description')).toBeVisible();
+		await expect(rolesPage.rolesTable.columnHeader('Title')).toBeVisible();
 		await expect(
-			rolesPage.rolesTable.cell('Number of Assignees')
+			rolesPage.rolesTable.columnHeader('Description')
+		).toBeVisible();
+		await expect(
+			rolesPage.rolesTable.columnHeader('Number of Assignees')
 		).toBeVisible();
 	}
 );
@@ -465,6 +467,88 @@ test(
 		await rolesPage.rolesTable.search(role.name);
 
 		await expect(rolesPage.rolesTable.cell(role.name)).toHaveCount(0);
+	}
+);
+
+test(
+	'Space role can be edited and deleted',
+	{tag: ['@LPD-109574']},
+	async ({
+		apiHelpers,
+		page,
+		roleDefinePermissionsPage,
+		rolePage,
+		rolesPage,
+	}) => {
+		page.on('dialog', (dialog) => dialog.accept());
+
+		const role = await apiHelpers.headlessAdminUser.postRole({
+			name: getRandomString(),
+			roleType: 'depot',
+		});
+
+		await rolesPage.goto();
+
+		await rolesPage.rolesLink('Space').click();
+
+		await expect(rolesPage.rolesLink('Space')).toHaveAttribute(
+			'aria-current',
+			'page'
+		);
+
+		await rolesPage.rolesTable.search(role.name);
+
+		await expect(async () => {
+			await (
+				await rolesPage.rolesTable.cellLink(role.name)
+			).click({timeout: 1000});
+		}).toPass();
+
+		const title = getRandomString();
+
+		await rolePage.titleInput.fill(title);
+		await rolePage.saveButton.click();
+
+		await waitForAlert(page);
+
+		await rolePage.definePermissionsLink.click();
+
+		await roleDefinePermissionsPage.changePermission(
+			'Documents and Media',
+			'Add Repository',
+			true
+		);
+
+		await expect(
+			roleDefinePermissionsPage.summaryPermissionCell('Add Repository')
+		).toBeVisible();
+
+		await rolesPage.goto();
+
+		await rolesPage.rolesLink('Space').click();
+
+		await expect(rolesPage.rolesLink('Space')).toHaveAttribute(
+			'aria-current',
+			'page'
+		);
+
+		await rolesPage.rolesTable.search(title);
+
+		await expect(async () => {
+			await (await rolesPage.rolesTable.rowActions(title)).click();
+
+			await expect(rolesPage.deleteButton).toBeVisible({timeout: 100});
+		}).toPass();
+
+		await rolesPage.deleteButton.click();
+
+		await expect(rolesPage.rolesTable.cell(title)).toHaveCount(0);
+
+		await page.reload();
+
+		await rolesPage.rolesTable.search(title);
+
+		await expect(rolesPage.rolesTable.cell(title)).toHaveCount(0);
 	}
 );
 

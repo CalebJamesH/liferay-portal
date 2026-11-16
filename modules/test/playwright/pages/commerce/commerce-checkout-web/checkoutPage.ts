@@ -59,6 +59,7 @@ export class CheckoutPage extends CommerceDNDTablePage {
 	readonly orderConfirmationContainer: Locator;
 	readonly orderItemsTabLink: Locator;
 	readonly orderItemsTableLocator: Locator;
+	readonly orderNotCompletedMessage: Locator;
 	readonly orderSuccessMessage: Locator;
 	readonly noDefaultBillingAddressError: Locator;
 	readonly orderSummaryDelivery: Locator;
@@ -100,6 +101,7 @@ export class CheckoutPage extends CommerceDNDTablePage {
 	readonly subtypeMenuItem: (name: string) => Locator;
 	readonly subtypeResetModalTitle: Locator;
 	readonly subtypeResetSubtypeInput: Locator;
+	readonly termMoreInfoLink: (label: string) => Locator;
 	readonly orderSummaryShippingMethod: Locator;
 	readonly useAsBillingCheckbox: Locator;
 	readonly viewDeliveryGroupTableButton: Locator;
@@ -189,6 +191,9 @@ export class CheckoutPage extends CommerceDNDTablePage {
 		);
 		this.orderConfirmationContainer = page.locator(
 			'.commerce-checkout-confirmation'
+		);
+		this.orderNotCompletedMessage = page.getByText(
+			'Your order has been processed but not completed yet.'
 		);
 		this.orderSuccessMessage = page.getByText(
 			'Success! Your order has been processed.'
@@ -285,6 +290,12 @@ export class CheckoutPage extends CommerceDNDTablePage {
 		this.subtypeResetSubtypeInput = page
 			.getByLabel('Reset Subtype')
 			.getByPlaceholder('Subtype');
+		this.termMoreInfoLink = (label: string) =>
+			page
+				.locator('.list-group-item', {
+					has: page.getByLabel(label, {exact: true}),
+				})
+				.getByRole('link', {name: 'More Info'});
 		this.orderSummaryShippingMethod = page.locator('div.shipping-method');
 		this.useAsBillingCheckbox = page.locator(
 			'[id="_com_liferay_commerce_checkout_web_internal_portlet_CommerceCheckoutPortlet_use-as-billing"]'
@@ -424,7 +435,12 @@ export class CheckoutPage extends CommerceDNDTablePage {
 			const previousStep = currentStep;
 
 			await expect(async () => {
-				await this.continueButton.click();
+				if (
+					(await this.activeCheckoutStep.textContent()) ===
+					previousStep
+				) {
+					await this.continueButton.click();
+				}
 
 				await expect(this.activeCheckoutStep).not.toHaveText(
 					previousStep,

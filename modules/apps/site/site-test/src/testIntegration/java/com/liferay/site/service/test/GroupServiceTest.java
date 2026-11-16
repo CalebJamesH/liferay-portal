@@ -6,6 +6,7 @@
 package com.liferay.site.service.test;
 
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
+import com.liferay.asset.kernel.model.AssetTag;
 import com.liferay.asset.kernel.service.AssetTagLocalService;
 import com.liferay.layout.test.util.LayoutTestUtil;
 import com.liferay.petra.string.StringPool;
@@ -30,6 +31,8 @@ import com.liferay.portal.kernel.model.Role;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.model.UserGroupRole;
 import com.liferay.portal.kernel.model.role.RoleConstants;
+import com.liferay.portal.kernel.security.auth.PrincipalException;
+import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.service.ClassNameLocalService;
 import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.service.GroupLocalService;
@@ -126,6 +129,32 @@ public class GroupServiceTest {
 		Assert.assertTrue(_group.isCompanyStagingGroup());
 
 		Assert.assertEquals(companyGroup.getGroupId(), _group.getLiveGroupId());
+	}
+
+	@Test(expected = PrincipalException.class)
+	public void testAddGroupWithForeignLiveGroupId() throws Exception {
+		Role role = RoleTestUtil.addRole(RoleConstants.TYPE_REGULAR);
+
+		RoleTestUtil.addResourcePermission(
+			role, PortletKeys.PORTAL, ResourceConstants.SCOPE_COMPANY,
+			String.valueOf(TestPropsValues.getCompanyId()),
+			ActionKeys.ADD_COMMUNITY);
+
+		User user = UserTestUtil.addUser();
+
+		_userLocalService.addRoleUser(role.getRoleId(), user.getUserId());
+
+		Group liveGroup = GroupTestUtil.addGroup();
+
+		UserTestUtil.setUser(user);
+
+		_groupService.addGroup(
+			RandomTestUtil.randomString(),
+			GroupConstants.DEFAULT_PARENT_GROUP_ID, liveGroup.getGroupId(),
+			RandomTestUtil.randomLocaleStringMap(), null,
+			GroupConstants.TYPE_SITE_OPEN, null, true,
+			GroupConstants.DEFAULT_MEMBERSHIP_RESTRICTION, null, false, false,
+			true, ServiceContextTestUtil.getServiceContext());
 	}
 
 	@Test
@@ -322,16 +351,19 @@ public class GroupServiceTest {
 		ServiceContext serviceContext =
 			ServiceContextTestUtil.getServiceContext(group.getGroupId());
 
-		int initialTagsCount = _assetTagLocalService.getGroupTagsCount(
+		List<AssetTag> assetTags = _assetTagLocalService.getGroupTags(
 			group.getGroupId());
+
+		int initialTagsCount = assetTags.size();
 
 		_assetTagLocalService.addTag(
 			null, TestPropsValues.getUserId(), group.getGroupId(),
 			RandomTestUtil.randomString(), serviceContext);
 
+		assetTags = _assetTagLocalService.getGroupTags(group.getGroupId());
+
 		Assert.assertEquals(
-			initialTagsCount + 1,
-			_assetTagLocalService.getGroupTagsCount(group.getGroupId()));
+			assetTags.toString(), initialTagsCount + 1, assetTags.size());
 
 		Assert.assertEquals(
 			1,
@@ -353,9 +385,10 @@ public class GroupServiceTest {
 
 		_groupService.deleteGroup(group.getGroupId());
 
+		assetTags = _assetTagLocalService.getGroupTags(group.getGroupId());
+
 		Assert.assertEquals(
-			initialTagsCount,
-			_assetTagLocalService.getGroupTagsCount(group.getGroupId()));
+			assetTags.toString(), initialTagsCount, assetTags.size());
 
 		Assert.assertEquals(
 			0,
@@ -988,10 +1021,10 @@ public class GroupServiceTest {
 	public void testInheritLocalesByDefault() throws Exception {
 		_group = GroupTestUtil.addGroup();
 
-		Assert.assertTrue(_language.isInheritLocales(_group.getGroupId()));
 		Assert.assertEquals(
 			_language.getAvailableLocales(),
 			_language.getAvailableLocales(_group.getGroupId()));
+		Assert.assertTrue(_language.isInheritLocales(_group));
 	}
 
 	@Test

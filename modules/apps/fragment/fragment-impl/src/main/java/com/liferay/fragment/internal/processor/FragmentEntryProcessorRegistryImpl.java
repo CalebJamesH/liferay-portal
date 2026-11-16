@@ -25,6 +25,7 @@ import com.liferay.osgi.service.tracker.collections.map.PropertyServiceReference
 import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMap;
 import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMapFactory;
 import com.liferay.petra.lang.CentralizedThreadLocal;
+import com.liferay.petra.string.CharPool;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.cache.PortalCache;
@@ -45,6 +46,8 @@ import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 
 import jakarta.servlet.http.HttpServletRequest;
+
+import java.io.Serializable;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -339,17 +342,38 @@ public class FragmentEntryProcessorRegistryImpl
 						document));
 		}
 
-		for (DocumentFragmentEntryProcessor documentFragmentEntryProcessor :
-				_documentFragmentEntryProcessors) {
+		Map<String, String> htmls = null;
 
-			documentFragmentEntryProcessor.processFragmentEntryLinkHTML(
-				document, editableValuesJSONObject, fragmentEntryLink,
-				fragmentEntryProcessorContext);
+		try {
+			for (DocumentFragmentEntryProcessor documentFragmentEntryProcessor :
+					_documentFragmentEntryProcessors) {
+
+				documentFragmentEntryProcessor.processFragmentEntryLinkHTML(
+					document, editableValuesJSONObject, fragmentEntryLink,
+					fragmentEntryProcessorContext);
+			}
+		}
+		finally {
+			Map<String, Serializable> attributes =
+				fragmentEntryProcessorContext.getAttributes();
+
+			htmls = (Map<String, String>)attributes.remove(
+				DocumentFragmentEntryProcessor.class.getName());
 		}
 
 		Element bodyElement = document.body();
 
-		return bodyElement.html();
+		html = bodyElement.html();
+
+		if (htmls == null) {
+			return html;
+		}
+
+		for (Map.Entry<String, String> entry : htmls.entrySet()) {
+			html = StringUtil.replace(html, entry.getKey(), entry.getValue());
+		}
+
+		return html;
 	}
 
 	@Override
@@ -515,7 +539,7 @@ public class FragmentEntryProcessorRegistryImpl
 		};
 	}
 
-	private boolean _hasMarker(String lowerCaseHTML, Object processor) {
+	private boolean _hasMarker(String html, Object processor) {
 		String[] markers = _markers.get(processor);
 
 		if (markers == null) {
@@ -523,7 +547,29 @@ public class FragmentEntryProcessorRegistryImpl
 		}
 
 		for (String marker : markers) {
-			if (lowerCaseHTML.contains(marker)) {
+			if (html.contains(marker)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private boolean _hasMarkers(
+		String html,
+		DefaultEditableValuesFragmentEntryProcessor
+			defaultEditableValuesFragmentEntryProcessor) {
+
+		if ((defaultEditableValuesFragmentEntryProcessor != null) &&
+			_hasMarker(html, defaultEditableValuesFragmentEntryProcessor)) {
+
+			return true;
+		}
+
+		for (DocumentFragmentEntryProcessor documentFragmentEntryProcessor :
+				_documentFragmentEntryProcessors) {
+
+			if (_hasMarker(html, documentFragmentEntryProcessor)) {
 				return true;
 			}
 		}
@@ -536,24 +582,18 @@ public class FragmentEntryProcessorRegistryImpl
 		DefaultEditableValuesFragmentEntryProcessor
 			defaultEditableValuesFragmentEntryProcessor) {
 
-		String lowerCaseHTML = StringUtil.toLowerCase(html, LocaleUtil.ROOT);
-
-		if ((defaultEditableValuesFragmentEntryProcessor != null) &&
-			_hasMarker(
-				lowerCaseHTML, defaultEditableValuesFragmentEntryProcessor)) {
-
+		if (_hasMarkers(html, defaultEditableValuesFragmentEntryProcessor)) {
 			return true;
 		}
 
-		for (DocumentFragmentEntryProcessor documentFragmentEntryProcessor :
-				_documentFragmentEntryProcessors) {
+		String lowerCaseHTML = _toLowerCaseASCII(html);
 
-			if (_hasMarker(lowerCaseHTML, documentFragmentEntryProcessor)) {
-				return true;
-			}
+		if (lowerCaseHTML == html) {
+			return false;
 		}
 
-		return false;
+		return _hasMarkers(
+			lowerCaseHTML, defaultEditableValuesFragmentEntryProcessor);
 	}
 
 	private String _renderWidgetHTML(
@@ -597,6 +637,32 @@ public class FragmentEntryProcessorRegistryImpl
 				httpServletRequest.getAttribute(
 					checkAccessAllowedToPortletCacheKey),
 				true));
+
+		return html;
+	}
+
+	private String _toLowerCaseASCII(char[] chars, int index) {
+		for (int i = index; i < chars.length; i++) {
+			char c = chars[i];
+
+			if ((c < CharPool.UPPER_CASE_A) || (c > CharPool.UPPER_CASE_Z)) {
+				continue;
+			}
+
+			chars[i] = (char)(c + 32);
+		}
+
+		return new String(chars);
+	}
+
+	private String _toLowerCaseASCII(String html) {
+		for (int i = 0; i < html.length(); i++) {
+			char c = html.charAt(i);
+
+			if ((c >= CharPool.UPPER_CASE_A) && (c <= CharPool.UPPER_CASE_Z)) {
+				return _toLowerCaseASCII(html.toCharArray(), i);
+			}
+		}
 
 		return html;
 	}

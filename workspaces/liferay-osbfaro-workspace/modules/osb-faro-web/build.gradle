@@ -5,9 +5,9 @@ task osbYarnTest(type: Exec)
 task osbYarnWebpack(type: Exec)
 
 dependencies {
-	compileInclude group: "com.fasterxml.jackson.core", name: "jackson-annotations", version: "2.18.11"
-	compileInclude group: "com.fasterxml.jackson.core", name: "jackson-core", version: "2.18.11"
-	compileInclude group: "com.fasterxml.jackson.core", name: "jackson-databind", version: "2.18.11"
+	compileInclude group: "com.fasterxml.jackson.core", name: "jackson-annotations", version: "2.18.12"
+	compileInclude group: "com.fasterxml.jackson.core", name: "jackson-core", version: "2.18.12"
+	compileInclude group: "com.fasterxml.jackson.core", name: "jackson-databind", version: "2.18.12"
 	compileInclude group: "com.fasterxml.jackson.jakarta.rs", name: "jackson-jakarta-rs-base", version: "2.18.6"
 	compileInclude group: "com.fasterxml.jackson.jakarta.rs", name: "jackson-jakarta-rs-json-provider", version: "2.18.6"
 	compileInclude group: "com.github.albfernandez", name: "juniversalchardet", version: "2.4.0"
@@ -26,10 +26,10 @@ dependencies {
 	compileOnly group: "org.apache.commons", name: "commons-collections4", version: "4.5.0"
 	compileOnly group: "org.apache.commons", name: "commons-lang3", version: "3.18.0"
 	compileOnly project(":modules:osb-faro-api")
-	compileOnly project(":modules:osb-faro-contacts-api")
 	compileOnly project(":modules:osb-faro-engine-client")
 	compileOnly project(":modules:osb-faro-provisioning-client")
 	testImplementation group: "com.github.albfernandez", name: "juniversalchardet", version: "2.4.0"
+	testImplementation group: "com.liferay", name: "com.liferay.petra.sql.dsl.spi", version: "default"
 	testImplementation group: "com.liferay", name: "jakarta.ws.rs", version: "3.1.0.LIFERAY-PATCHED-2"
 	testImplementation group: "com.liferay", name: "jodd.util", version: "6.0.1.LIFERAY-PATCHED-2"
 	testImplementation group: "com.liferay", name: "org.apache.commons.configuration", version: "1.10.LIFERAY-PATCHED-2"
@@ -56,7 +56,6 @@ dependencies {
 	testImplementation group: "org.springframework", name: "spring-core", version: "6.2.19"
 	testImplementation group: "org.springframework", name: "spring-test", version: "6.2.19"
 	testImplementation project(":modules:osb-faro-api")
-	testImplementation project(":modules:osb-faro-contacts-api")
 	testImplementation project(":modules:osb-faro-engine-client")
 	testImplementation project(":modules:osb-faro-provisioning-client")
 }
@@ -90,7 +89,7 @@ osbYarnInstall {
 
 osbYarnTest {
 	args = [osbYarnInstall.scriptFile, "test"]
-	dependsOn osbYarnWebpack
+	dependsOn osbYarnInstall
 	executable = new File(osbYarnInstall.nodeDir, "bin/node")
 	workingDir = projectDir
 }

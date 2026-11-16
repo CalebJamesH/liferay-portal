@@ -14,7 +14,10 @@ import {QUICK_FILTER_TYPES} from '../../../quick_filters/constants';
 import {QUICK_FILTER_UPDATES} from '../../../quick_filters/quickFilterUpdates';
 import InteractiveCard from '../../performance/components/InteractiveCard';
 import {GovernanceContext} from '../GovernanceContext';
-import GovernanceService, {MILLISECONDS_PER_DAY} from '../GovernanceService';
+import GovernanceService, {
+	LONG_STANDING_DRAFT_DAYS,
+	MILLISECONDS_PER_DAY,
+} from '../GovernanceService';
 import getAllSectionHref, {getSpaceFilters} from '../getAllSectionHref';
 import {GovernanceAdditionalProps} from '../types';
 import {
@@ -31,6 +34,15 @@ const ITEM_ACTION_IDS: IItemActionsData['id'][] = [
 ];
 
 const LIST_ID = 'longStandingDrafts';
+
+function getDescription() {
+	return sub(
+		Liferay.Language.get(
+			'content-that-has-remained-in-draft-status-for-longer-than-x-days'
+		),
+		LONG_STANDING_DRAFT_DAYS
+	);
+}
 
 function renderAuthorAndDaysInDraft(item: ISearchAssetObjectEntry) {
 	const daysInDraft = Math.floor(
@@ -66,9 +78,7 @@ export function LongStandingDraftsCard({
 			aria-controls={getGovernanceAssetListPanelId(LIST_ID)}
 			aria-expanded={expanded}
 			color="purple"
-			description={Liferay.Language.get(
-				'content-that-has-remained-in-draft-status-for-longer-than-expected'
-			)}
+			description={getDescription()}
 			icon="pencil"
 			loading={loadingStatistics}
 			onClick={onClick}
@@ -89,13 +99,13 @@ export function LongStandingDraftsList({
 }: {
 	additionalProps: GovernanceAdditionalProps;
 }) {
-	const {space, statistics} = useContext(GovernanceContext);
+	const {groupIds, space, statistics} = useContext(GovernanceContext);
 
 	const {apiURL, viewAllHref} = useMemo(
 		() => ({
 			apiURL: GovernanceService.getLongStandingDraftsURL(
 				additionalProps.contentProgressFilter,
-				space.siteId
+				groupIds
 			),
 			viewAllHref: getAllSectionHref(additionalProps.allSectionFDSName, {
 				filters: [
@@ -120,6 +130,7 @@ export function LongStandingDraftsList({
 		[
 			additionalProps.allSectionFDSName,
 			additionalProps.contentProgressFilter,
+			groupIds,
 			space,
 		]
 	);
@@ -129,9 +140,7 @@ export function LongStandingDraftsList({
 			additionalProps={additionalProps}
 			apiURL={apiURL}
 			count={statistics?.longStandingDraftsCount ?? 0}
-			description={Liferay.Language.get(
-				'content-that-has-remained-in-draft-status-for-longer-than-expected'
-			)}
+			description={getDescription()}
 			emptyStateDescription={Liferay.Language.get(
 				'no-content-has-stayed-in-draft-longer-than-expected'
 			)}

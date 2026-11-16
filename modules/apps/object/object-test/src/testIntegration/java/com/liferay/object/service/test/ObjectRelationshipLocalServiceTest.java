@@ -10,6 +10,7 @@ import com.liferay.depot.constants.DepotConstants;
 import com.liferay.depot.model.DepotEntry;
 import com.liferay.depot.service.DepotEntryLocalService;
 import com.liferay.frontend.taglib.servlet.taglib.ScreenNavigationCategory;
+import com.liferay.frontend.taglib.servlet.taglib.ScreenNavigationRegistryUtil;
 import com.liferay.info.collection.provider.RelatedInfoItemCollectionProvider;
 import com.liferay.object.constants.ObjectDefinitionConstants;
 import com.liferay.object.constants.ObjectDefinitionSettingConstants;
@@ -21,6 +22,8 @@ import com.liferay.object.constants.ObjectRelationshipConstants;
 import com.liferay.object.exception.DuplicateObjectRelationshipException;
 import com.liferay.object.exception.ObjectDefinitionScopeException;
 import com.liferay.object.exception.ObjectEntryGroupIdException;
+import com.liferay.object.exception.ObjectFieldDBColumnNameException;
+import com.liferay.object.exception.ObjectFieldNameException;
 import com.liferay.object.exception.ObjectRelationshipDeletionTypeException;
 import com.liferay.object.exception.ObjectRelationshipEdgeException;
 import com.liferay.object.exception.ObjectRelationshipNameException;
@@ -82,7 +85,7 @@ import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.util.HashMapBuilder;
-import com.liferay.portal.kernel.util.HashMapDictionary;
+import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -98,7 +101,6 @@ import java.io.Serializable;
 
 import java.sql.Connection;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -120,7 +122,6 @@ import org.junit.runner.RunWith;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 
 /**
@@ -201,6 +202,7 @@ public class ObjectRelationshipLocalServiceTest {
 			_objectDefinition1, _objectDefinition2, false);
 		_testAddObjectRelationshipOneToMany(
 			_objectDefinition1, _objectDefinition2, true);
+		_testAddObjectRelationshipWithObjectField();
 		_testCreateManyToManyObjectRelationshipTable(_objectDefinition1, false);
 		_testCreateManyToManyObjectRelationshipTable(_objectDefinition1, true);
 
@@ -828,7 +830,7 @@ public class ObjectRelationshipLocalServiceTest {
 		_objectRelationshipLocalService.deleteObjectRelationship(
 			objectRelationship);
 
-		_assertObjectLayoutTab(1, objectLayoutTabs.get(1));
+		_assertObjectLayoutTab(0, objectLayoutTabs.get(1));
 	}
 
 	@Test
@@ -1466,7 +1468,7 @@ public class ObjectRelationshipLocalServiceTest {
 				new TestSystemObjectDefinitionManager(
 					objectDefinition.getModelClass(),
 					objectDefinition.getName(), restContextPath),
-				new HashMapDictionary<>());
+				null);
 		}
 	}
 
@@ -1616,20 +1618,20 @@ public class ObjectRelationshipLocalServiceTest {
 			int expectedSize, ObjectLayoutTab objectLayoutTab)
 		throws Exception {
 
-		Bundle bundle = FrameworkUtil.getBundle(
-			ObjectRelationshipLocalServiceTest.class);
+		String categoryKey = String.valueOf(
+			objectLayoutTab.getObjectLayoutTabId());
 
-		BundleContext bundleContext = bundle.getBundleContext();
-
-		List<ServiceReference<?>> serviceReferences = new ArrayList<>(
-			bundleContext.getServiceReferences(
-				ScreenNavigationCategory.class,
-				"(screen.navigation.category.order:Integer=" +
-					objectLayoutTab.getObjectLayoutTabId() + ")"));
+		List<ScreenNavigationCategory> screenNavigationCategories =
+			ListUtil.filter(
+				ScreenNavigationRegistryUtil.getScreenNavigationCategories(
+					_objectDefinition1.getClassName(),
+					TestPropsValues.getUser(), null),
+				screenNavigationCategory -> categoryKey.equals(
+					screenNavigationCategory.getCategoryKey()));
 
 		Assert.assertEquals(
-			serviceReferences.toString(), expectedSize,
-			serviceReferences.size());
+			screenNavigationCategories.toString(), expectedSize,
+			screenNavigationCategories.size());
 	}
 
 	private ObjectRelationship _bindObjectDefinitions(
@@ -1840,6 +1842,100 @@ public class ObjectRelationshipLocalServiceTest {
 			expectedObjectField.isRequired(), actualObjectField.isRequired());
 		Assert.assertEquals(
 			expectedObjectField.isSystem(), actualObjectField.isSystem());
+
+		_objectRelationshipLocalService.deleteObjectRelationship(
+			objectRelationship);
+	}
+
+	private void _testAddObjectRelationshipWithObjectField() throws Exception {
+		AssertUtils.assertFailure(
+			ObjectFieldDBColumnNameException.class,
+			"DB column name must only contain letters, digits, and underscores",
+			() -> _objectRelationshipLocalService.addObjectRelationship(
+				null, TestPropsValues.getUserId(),
+				_objectDefinition1.getObjectDefinitionId(),
+				_objectDefinition2.getObjectDefinitionId(), 0,
+				ObjectRelationshipConstants.DELETION_TYPE_CASCADE, null, false,
+				RandomTestUtil.randomLocaleStringMap(),
+				"a" + RandomTestUtil.randomString(), false,
+				ObjectRelationshipConstants.TYPE_ONE_TO_MANY,
+				new ObjectFieldBuilder(
+				).externalReferenceCode(
+					RandomTestUtil.randomString()
+				).labelMap(
+					RandomTestUtil.randomLocaleStringMap()
+				).name(
+					"abl e"
+				).readOnly(
+					ObjectFieldConstants.READ_ONLY_FALSE
+				).build()));
+
+		String objectRelationshipName = "a" + RandomTestUtil.randomString();
+
+		ObjectRelationship objectRelationship =
+			_objectRelationshipLocalService.addObjectRelationship(
+				null, TestPropsValues.getUserId(),
+				_objectDefinition1.getObjectDefinitionId(),
+				_objectDefinition2.getObjectDefinitionId(), 0,
+				ObjectRelationshipConstants.DELETION_TYPE_CASCADE, null, false,
+				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
+				objectRelationshipName, false,
+				ObjectRelationshipConstants.TYPE_ONE_TO_MANY, null);
+
+		AssertUtils.assertFailure(
+			ObjectFieldNameException.MustNotBeEqualToObjectRelationshipName.
+				class,
+			StringBundler.concat(
+				"There is already an object relationship with this name in ",
+				"the object definition \"", _objectDefinition1.getShortName(),
+				".\" Object fields and object relationships cannot have the ",
+				"same name."),
+			() -> _objectRelationshipLocalService.addObjectRelationship(
+				null, TestPropsValues.getUserId(),
+				_objectDefinition3.getObjectDefinitionId(),
+				_objectDefinition2.getObjectDefinitionId(), 0,
+				ObjectRelationshipConstants.DELETION_TYPE_CASCADE, null, false,
+				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
+				"a" + RandomTestUtil.randomString(), false,
+				ObjectRelationshipConstants.TYPE_ONE_TO_MANY,
+				new ObjectFieldBuilder(
+				).externalReferenceCode(
+					RandomTestUtil.randomString()
+				).labelMap(
+					RandomTestUtil.randomLocaleStringMap()
+				).name(
+					objectRelationshipName
+				).readOnly(
+					ObjectFieldConstants.READ_ONLY_FALSE
+				).build()));
+
+		String name = "a" + RandomTestUtil.randomString();
+
+		AssertUtils.assertFailure(
+			ObjectFieldNameException.MustNotBeEqualToObjectRelationshipName.
+				class,
+			StringBundler.concat(
+				"There is already an object relationship with this name in ",
+				"the object definition \"", _objectDefinition3.getShortName(),
+				".\" Object fields and object relationships cannot have the ",
+				"same name."),
+			() -> _objectRelationshipLocalService.addObjectRelationship(
+				null, TestPropsValues.getUserId(),
+				_objectDefinition3.getObjectDefinitionId(),
+				_objectDefinition2.getObjectDefinitionId(), 0,
+				ObjectRelationshipConstants.DELETION_TYPE_CASCADE, null, false,
+				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
+				name, false, ObjectRelationshipConstants.TYPE_ONE_TO_MANY,
+				new ObjectFieldBuilder(
+				).externalReferenceCode(
+					RandomTestUtil.randomString()
+				).labelMap(
+					RandomTestUtil.randomLocaleStringMap()
+				).name(
+					name
+				).readOnly(
+					ObjectFieldConstants.READ_ONLY_FALSE
+				).build()));
 
 		_objectRelationshipLocalService.deleteObjectRelationship(
 			objectRelationship);

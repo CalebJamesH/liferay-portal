@@ -290,6 +290,16 @@ public abstract class BaseAssetStatisticsResourceTestCase {
 				continue;
 			}
 
+			if (Objects.equals(
+					"completedWorkflowTasksCount", additionalAssertFieldName)) {
+
+				if (assetStatistics.getCompletedWorkflowTasksCount() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
 			if (Objects.equals("expiredCount", additionalAssertFieldName)) {
 				if (assetStatistics.getExpiredCount() == null) {
 					valid = false;
@@ -387,6 +397,14 @@ public abstract class BaseAssetStatisticsResourceTestCase {
 
 			if (Objects.equals("totalCount", additionalAssertFieldName)) {
 				if (assetStatistics.getTotalCount() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("unlinkedCount", additionalAssertFieldName)) {
+				if (assetStatistics.getUnlinkedCount() == null) {
 					valid = false;
 				}
 
@@ -554,6 +572,19 @@ public abstract class BaseAssetStatisticsResourceTestCase {
 				continue;
 			}
 
+			if (Objects.equals(
+					"completedWorkflowTasksCount", additionalAssertFieldName)) {
+
+				if (!Objects.deepEquals(
+						assetStatistics1.getCompletedWorkflowTasksCount(),
+						assetStatistics2.getCompletedWorkflowTasksCount())) {
+
+					return false;
+				}
+
+				continue;
+			}
+
 			if (Objects.equals("expiredCount", additionalAssertFieldName)) {
 				if (!Objects.deepEquals(
 						assetStatistics1.getExpiredCount(),
@@ -681,6 +712,17 @@ public abstract class BaseAssetStatisticsResourceTestCase {
 				if (!Objects.deepEquals(
 						assetStatistics1.getTotalCount(),
 						assetStatistics2.getTotalCount())) {
+
+					return false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("unlinkedCount", additionalAssertFieldName)) {
+				if (!Objects.deepEquals(
+						assetStatistics1.getUnlinkedCount(),
+						assetStatistics2.getUnlinkedCount())) {
 
 					return false;
 				}
@@ -832,6 +874,11 @@ public abstract class BaseAssetStatisticsResourceTestCase {
 				"Invalid entity field " + entityFieldName);
 		}
 
+		if (entityFieldName.equals("completedWorkflowTasksCount")) {
+			throw new IllegalArgumentException(
+				"Invalid entity field " + entityFieldName);
+		}
+
 		if (entityFieldName.equals("expiredCount")) {
 			throw new IllegalArgumentException(
 				"Invalid entity field " + entityFieldName);
@@ -883,6 +930,11 @@ public abstract class BaseAssetStatisticsResourceTestCase {
 		}
 
 		if (entityFieldName.equals("totalCount")) {
+			throw new IllegalArgumentException(
+				"Invalid entity field " + entityFieldName);
+		}
+
+		if (entityFieldName.equals("unlinkedCount")) {
 			throw new IllegalArgumentException(
 				"Invalid entity field " + entityFieldName);
 		}
@@ -946,6 +998,7 @@ public abstract class BaseAssetStatisticsResourceTestCase {
 			{
 				approvedCount = RandomTestUtil.randomLong();
 				brokenLinksCount = RandomTestUtil.randomLong();
+				completedWorkflowTasksCount = RandomTestUtil.randomLong();
 				expiredCount = RandomTestUtil.randomLong();
 				expiringSoonCount = RandomTestUtil.randomLong();
 				inDraftCount = RandomTestUtil.randomLong();
@@ -957,6 +1010,7 @@ public abstract class BaseAssetStatisticsResourceTestCase {
 				scheduledCount = RandomTestUtil.randomLong();
 				slaBreachedWorkflowTasksCount = RandomTestUtil.randomLong();
 				totalCount = RandomTestUtil.randomLong();
+				unlinkedCount = RandomTestUtil.randomLong();
 				upcomingReviewCount = RandomTestUtil.randomLong();
 				workflowTasksCount = RandomTestUtil.randomLong();
 			}
@@ -1186,4 +1240,4 @@ public abstract class BaseAssetStatisticsResourceTestCase {
 		_assetStatisticsResource;
 
 }
-// LIFERAY-REST-BUILDER-HASH:1364135558
+// LIFERAY-REST-BUILDER-HASH:67483338

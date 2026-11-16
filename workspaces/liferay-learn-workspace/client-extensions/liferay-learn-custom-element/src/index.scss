@@ -1,3 +1,10 @@
-body {
-	background: white;
+:root {
+	--color-brand-primary: var(--color-action-primary-default, #0b5fff);
+	font-size: 16px;
+}
+
+liferay-learn-custom-element {
+	.container-fluid-max-xl {
+		max-width: 1460px;
+	}
 }

@@ -11,11 +11,13 @@ import com.liferay.commerce.model.CommerceAddressRestriction;
 import com.liferay.commerce.model.CommerceShippingMethod;
 import com.liferay.commerce.service.CommerceAddressRestrictionLocalService;
 import com.liferay.commerce.service.base.CommerceShippingMethodLocalServiceBaseImpl;
+import com.liferay.commerce.service.persistence.CommerceAddressRestrictionPersistence;
 import com.liferay.petra.function.transform.TransformUtil;
 import com.liferay.portal.aop.AopService;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.SystemEventConstants;
 import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.service.ClassNameLocalService;
 import com.liferay.portal.kernel.service.ImageLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.UserLocalService;
@@ -23,6 +25,7 @@ import com.liferay.portal.kernel.systemevent.SystemEvent;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.kernel.workflow.WorkflowConstants;
 
 import java.io.File;
 
@@ -109,6 +112,7 @@ public class CommerceShippingMethodLocalServiceImpl
 		commerceShippingMethod.setEngineKey(engineKey);
 		commerceShippingMethod.setPriority(priority);
 		commerceShippingMethod.setTrackingURL(trackingURL);
+		commerceShippingMethod.setStatus(WorkflowConstants.STATUS_APPROVED);
 
 		commerceShippingMethod = commerceShippingMethodPersistence.update(
 			commerceShippingMethod);
@@ -199,20 +203,20 @@ public class CommerceShippingMethodLocalServiceImpl
 		long commerceShippingMethodId, int start, int end,
 		OrderByComparator<CommerceAddressRestriction> orderByComparator) {
 
-		return _commerceAddressRestrictionLocalService.
-			getCommerceAddressRestrictions(
-				CommerceShippingMethod.class.getName(),
-				commerceShippingMethodId, start, end, orderByComparator);
+		return _commerceAddressRestrictionPersistence.findByC_C(
+			_classNameLocalService.getClassNameId(
+				CommerceShippingMethod.class.getName()),
+			commerceShippingMethodId, start, end, orderByComparator);
 	}
 
 	@Override
 	public int getCommerceAddressRestrictionsCount(
 		long commerceShippingMethodId) {
 
-		return _commerceAddressRestrictionLocalService.
-			getCommerceAddressRestrictionsCount(
-				CommerceShippingMethod.class.getName(),
-				commerceShippingMethodId);
+		return _commerceAddressRestrictionPersistence.countByC_C(
+			_classNameLocalService.getClassNameId(
+				CommerceShippingMethod.class.getName()),
+			commerceShippingMethodId);
 	}
 
 	@Override
@@ -339,8 +343,15 @@ public class CommerceShippingMethodLocalServiceImpl
 	}
 
 	@Reference
+	private ClassNameLocalService _classNameLocalService;
+
+	@Reference
 	private CommerceAddressRestrictionLocalService
 		_commerceAddressRestrictionLocalService;
+
+	@Reference
+	private CommerceAddressRestrictionPersistence
+		_commerceAddressRestrictionPersistence;
 
 	@Reference
 	private ImageLocalService _imageLocalService;

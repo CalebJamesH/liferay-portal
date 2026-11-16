@@ -1,7 +1,7 @@
 dependencies {
-	compileInclude group: "com.fasterxml.jackson.core", name: "jackson-annotations", version: "2.18.11"
-	compileInclude group: "com.fasterxml.jackson.core", name: "jackson-core", version: "2.18.11"
-	compileInclude group: "com.fasterxml.jackson.core", name: "jackson-databind", version: "2.18.11"
+	compileInclude group: "com.fasterxml.jackson.core", name: "jackson-annotations", version: "2.18.12"
+	compileInclude group: "com.fasterxml.jackson.core", name: "jackson-core", version: "2.18.12"
+	compileInclude group: "com.fasterxml.jackson.core", name: "jackson-databind", version: "2.18.12"
 
 	compileInclude(group: "com.github.javafaker", name: "javafaker", version: "1.0.2") {
 		exclude group: "org.yaml", module: "snakeyaml"
@@ -12,7 +12,6 @@ dependencies {
 	compileInclude group: "user-agent-utils", name: "user-agent-utils", version: "1.2.3"
 	compileOnly group: "com.liferay.portal", name: "release.dxp.api", version: "2026.q3.2"
 	compileOnly project(":modules:osb-faro-api")
-	compileOnly project(":modules:osb-faro-contacts-api")
 	compileOnly project(":modules:osb-faro-engine-client")
 	compileOnly project(":modules:osb-faro-provisioning-client")
 }

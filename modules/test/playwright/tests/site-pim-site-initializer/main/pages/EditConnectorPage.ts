@@ -7,16 +7,33 @@ import {Locator, Page} from '@playwright/test';
 
 import {waitForAlert} from '../../../../utils/waitForAlert';
 
+export type ConnectorConfiguration = {
+	clientId: string;
+	clientSecret: string;
+	url: string;
+};
+
+const DEFAULT_CONNECTOR_CONFIGURATION: ConnectorConfiguration = {
+	clientId: 'client-id',
+	clientSecret: 'client-secret',
+	url: 'http://localhost:1',
+};
+
 export class EditConnectorPage {
 	readonly activeToggle: Locator;
+	readonly clientIdInput: Locator;
+	readonly clientSecretInput: Locator;
 	readonly connectorSelect: Locator;
 	readonly nameInput: Locator;
 	readonly page: Page;
 	readonly referenceMark: (field: Locator) => Locator;
 	readonly saveButton: Locator;
+	readonly urlInput: Locator;
 
 	constructor(page: Page) {
 		this.activeToggle = page.getByRole('switch', {name: 'Active'});
+		this.clientIdInput = page.getByLabel('Client ID');
+		this.clientSecretInput = page.getByLabel('Client Secret');
 		this.connectorSelect = page.getByRole('combobox', {name: 'Connector'});
 		this.nameInput = page.getByRole('textbox', {name: 'Name'});
 		this.page = page;
@@ -25,20 +42,27 @@ export class EditConnectorPage {
 				.locator('.form-group', {has: field})
 				.locator('.reference-mark');
 		this.saveButton = page.getByRole('button', {name: 'Save'});
+		this.urlInput = page.getByLabel('URL');
 	}
 
 	async createConnector({
 		active = false,
+		configuration = DEFAULT_CONNECTOR_CONFIGURATION,
 		connector,
 		name,
 	}: {
 		active?: boolean;
+		configuration?: ConnectorConfiguration;
 		connector: string;
 		name: string;
 	}) {
 		await this.nameInput.fill(name);
 
 		await this.connectorSelect.selectOption({label: connector});
+
+		await this.clientIdInput.fill(configuration.clientId);
+		await this.clientSecretInput.fill(configuration.clientSecret);
+		await this.urlInput.fill(configuration.url);
 
 		if (active) {
 			await this.activeToggle.click();

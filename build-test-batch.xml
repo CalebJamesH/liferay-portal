@@ -1008,6 +1008,16 @@ mariadb.executable=${mariadb.executable}]]></echo>
 							}
 						}
 
+						if (standaloneRelease && standaloneBuildProfile.endsWith("-standalone") && !hasBuildProfileTestUtilModule(standaloneBuildProfile, releasedAppDirs)) {
+							String baseBuildProfile = StringUtils.removeEnd(standaloneBuildProfile, "-standalone");
+
+							if (hasBuildProfileTestUtilModule(baseBuildProfile, releasedAppDirs)) {
+								System.out.println("No test util module is marked \".lfrbuild-" + standaloneBuildProfile + "\", using \".lfrbuild-" + baseBuildProfile + "\"");
+
+								standaloneBuildProfile = baseBuildProfile;
+							}
+						}
+
 						boolean standaloneTestUtilModuleFound = false;
 						List testUtilModules = new ArrayList();
 
@@ -1060,6 +1070,22 @@ mariadb.executable=${mariadb.executable}]]></echo>
 						}
 
 						return testUtilModules;
+					}
+
+					public boolean hasBuildProfileTestUtilModule(String buildProfile, List releasedAppDirs) {
+						for (File releasedAppDir : releasedAppDirs) {
+							List testUtilModuleBuildGradleFiles = findFiles(releasedAppDir, ".+test-util/build.gradle");
+
+							for (File testUtilModuleBuildGradleFile : testUtilModuleBuildGradleFiles) {
+								File buildProfileFile = new File(testUtilModuleBuildGradleFile.getParent(), ".lfrbuild-" + buildProfile);
+
+								if (buildProfileFile.exists()) {
+									return true;
+								}
+							}
+						}
+
+						return false;
 					}
 
 					public boolean isPostStartupTestUtilModule(String testUtilModule) {
@@ -4736,38 +4762,55 @@ ${poshi.runner.testsuite.testcase.name}</echo>
 		<attribute default="" name="workspace.license.xml.url" />
 
 		<sequential>
-			<local name="workspace.dir" />
-			<local name="workspace.name" />
-			<local name="workspace.path" />
+			<fail message="Unable to select tests. &quot;test.task.group&quot; is empty.">
+				<condition>
+					<equals arg1="@{test.task.group}" arg2="" trim="true" />
+				</condition>
+			</fail>
 
-			<propertycopy from="workspaces.names[workspaces-integration][${env.CI_TEST_SUITE}]" name="workspace.name" silent="true" />
+			<for delimiter=";" list="@{test.task.group}" param="test.task" trim="true">
+				<sequential>
+					<local name="workspace.bundle.url" />
+					<local name="workspace.dir" />
+					<local name="workspace.path" />
 
-			<fail message="Unable to find a workspace for the &quot;workspaces-integration&quot; batch in the &quot;${env.CI_TEST_SUITE}&quot; suite." unless="workspace.name" />
+					<propertyregex
+						input="@{test.task}"
+						property="workspace.path"
+						regexp="^([^:\[]+):.*"
+						select="\1"
+					/>
 
-			<condition else="workspaces/${workspace.name}" property="workspace.path" value="${liferay.portal.private.dir}/workspaces/${workspace.name}">
-				<available file="${liferay.portal.private.dir}/workspaces/${workspace.name}" />
-			</condition>
+					<fail message="Unable to find a workspace in the test task &quot;@{test.task}&quot;" unless="workspace.path" />
 
-			<property location="${workspace.path}" name="workspace.dir" />
+					<property location="${workspace.path}" name="workspace.dir" />
 
-			<download-gradle-wrapper-binary workspace.dir="${workspace.dir}" />
+					<echo></echo>
+					<echo>##</echo>
+					<echo>## ${workspace.path}</echo>
+					<echo>##</echo>
+					<echo></echo>
 
-			<get-workspace-bundle-url mirror.dir="@{workspace.bundle.mirror.dir}" workspace.dir="${workspace.dir}" />
+					<download-gradle-wrapper-binary workspace.dir="${workspace.dir}" />
 
-			<mkdir dir="${workspace.dir}/build" />
+					<get-workspace-bundle-url mirror.dir="@{workspace.bundle.mirror.dir}" workspace.dir="${workspace.dir}" />
 
-			<mirrors-get
-				dest="${workspace.dir}/build/license.xml"
-				src="@{workspace.license.xml.url}"
-			/>
+					<mkdir dir="${workspace.dir}/build" />
 
-			<local name="gradle.args" />
+					<mirrors-get
+						dest="${workspace.dir}/build/license.xml"
+						src="@{workspace.license.xml.url}"
+					/>
 
-			<property name="gradle.args" value="--continue -Pintegration.test.target=bundle" />
+					<local name="gradle.args" />
 
-			<var if:set="workspace.bundle.url" name="gradle.args" value="${gradle.args} -Pliferay.workspace.bundle.url=${workspace.bundle.url}" />
+					<property name="gradle.args" value="--continue -Pintegration.test.target=bundle" />
 
-			<run-workspaces-junit-test gradle.target="gradle-execute-workspaces-integration" test.junit.args="${gradle.args}" test.task.group="@{test.task.group}" />
+					<var if:set="workspace.bundle.url" name="gradle.args" value="${gradle.args} -Pliferay.workspace.bundle.url=${workspace.bundle.url}" />
+
+					<run-workspaces-junit-test gradle.target="gradle-execute-workspaces-integration" test.junit.args="${gradle.args}" test.task.group="@{test.task}" />
+				</sequential>
+			</for>
 		</sequential>
 	</macrodef>
 
@@ -5629,8 +5672,8 @@ information. Make sure to commit in all build-lib-versions results.
 		<run-db-migration-container-test database.type="db2" database.version="11.1.3" />
 	</target>
 
-	<target name="db-migration-container-mariadb102">
-		<run-db-migration-container-test database.type="mariadb" database.version="10.2" />
+	<target name="db-migration-container-mariadb106">
+		<run-db-migration-container-test database.type="mariadb" database.version="10.6" />
 	</target>
 
 	<target name="db-migration-container-mysql80">
@@ -6901,12 +6944,12 @@ information. Make sure to commit in all format-javadoc results.
 		<antcall target="functional-tomcat-mariadb-jdk21_zulu" />
 	</target>
 
-	<target name="functional-smoke-tomcat-mariadb102">
-		<antcall target="functional-tomcat-mariadb102" />
+	<target name="functional-smoke-tomcat-mariadb106">
+		<antcall target="functional-tomcat-mariadb106" />
 	</target>
 
-	<target name="functional-smoke-tomcat-mariadb102-jdk21_zulu">
-		<antcall target="functional-tomcat-mariadb102-jdk21_zulu" />
+	<target name="functional-smoke-tomcat-mariadb106-jdk21_zulu">
+		<antcall target="functional-tomcat-mariadb106-jdk21_zulu" />
 	</target>
 
 	<target name="functional-smoke-tomcat-mysql">
@@ -7095,14 +7138,6 @@ information. Make sure to commit in all format-javadoc results.
 		<run-functional-test app.server.type="tomcat" database.type="mariadb" test.portal.log.assert="true" />
 	</target>
 
-	<target name="functional-smoke-tomcat101-mariadb102">
-		<run-functional-test app.server.type="tomcat" database.type="mariadb" test.portal.log.assert="true" />
-	</target>
-
-	<target name="functional-smoke-tomcat101-mariadb104">
-		<run-functional-test app.server.type="tomcat" database.type="mariadb" database.version="10.4" test.portal.log.assert="true" />
-	</target>
-
 	<target name="functional-smoke-tomcat101-mariadb106">
 		<run-functional-test app.server.type="tomcat" database.type="mariadb" database.version="10.6" test.portal.log.assert="true" />
 	</target>
@@ -7217,6 +7252,10 @@ information. Make sure to commit in all format-javadoc results.
 
 	<target name="functional-smoke-tomcat101-sqlserver2022">
 		<run-functional-test app.server.type="tomcat" database.type="sqlserver" database.version="2022" test.portal.log.assert="true" />
+	</target>
+
+	<target name="functional-smoke-tomcat101-sqlserver2025">
+		<run-functional-test app.server.type="tomcat" database.type="sqlserver" database.version="2025" test.portal.log.assert="true" />
 	</target>
 
 	<target name="functional-smoke-weblogic151-mysql">
@@ -7467,12 +7506,6 @@ information. Make sure to commit in all format-javadoc results.
 		<run-functional-test app.server.type="wildfly" app.server.version="41.0.1" database.type="mariadb" test.portal.log.assert="true" />
 	</target>
 
-	<target name="functional-smoke-wildfly410-mariadb104">
-		<set-app-server-version-number app.server.type="wildfly" app.server.version="41.0.1" />
-
-		<run-functional-test app.server.type="wildfly" app.server.version="41.0.1" database.type="mariadb" database.version="10.4" test.portal.log.assert="true" />
-	</target>
-
 	<target name="functional-smoke-wildfly410-mariadb106">
 		<set-app-server-version-number app.server.type="wildfly" app.server.version="41.0.1" />
 
@@ -7581,16 +7614,8 @@ information. Make sure to commit in all format-javadoc results.
 		<run-functional-test app.server.type="tomcat" database.type="mariadb" />
 	</target>
 
-	<target name="functional-tomcat-mariadb102">
-		<run-functional-test app.server.type="tomcat" database.type="mariadb" database.version="10.2" />
-	</target>
-
-	<target name="functional-tomcat-mariadb102-jdk21_zulu">
-		<run-functional-test app.server.type="tomcat" database.type="mariadb" database.version="10.2" />
-	</target>
-
-	<target name="functional-tomcat-mariadb104-jdk21_zulu">
-		<run-functional-test app.server.type="tomcat" database.type="mariadb" database.version="10.4" />
+	<target name="functional-tomcat-mariadb106">
+		<run-functional-test app.server.type="tomcat" database.type="mariadb" database.version="10.6" />
 	</target>
 
 	<target name="functional-tomcat-mariadb106-jdk21_zulu">
@@ -7767,6 +7792,28 @@ information. Make sure to commit in all format-javadoc results.
 		/>
 	</target>
 
+	<target name="functional-tomcat-sqlserver2025-jdk21_zulu">
+		<set-tomcat-version-number liferay.portal.bundle="${test.portal.bundle.version}" />
+
+		<run-functional-test
+			app.server.type="tomcat"
+			database.type="sqlserver"
+			database.version="2025"
+			setup.proxy="false"
+			test.build.fix.pack.zip.url="${test.build.fix.pack.zip.url}"
+			test.cmp.license.url="${test.cmp.license.url}"
+			test.dsr.license.url="${test.dsr.license.url}"
+			test.fix.pack.base.url="${test.fix.pack.base.url}"
+			test.license.xml.url="${test.license.xml.url}"
+			test.plugin.zip.url="${test.plugin.zip.url}"
+			test.plugins.war.zip.url="${test.plugins.war.zip.url}"
+			test.portal.bundle.version="${test.portal.bundle.version}"
+			test.portal.bundle.zip.url="${test.portal.bundle.zip.url}"
+			test.portal.lpkg.name="${test.portal.lpkg.name}"
+			test.sql.zip.url="${test.sql.zip.url}"
+		/>
+	</target>
+
 	<target name="functional-tomcat101-db2">
 		<run-functional-test app.server.type="tomcat" database.type="db2" />
 	</target>
@@ -7789,14 +7836,6 @@ information. Make sure to commit in all format-javadoc results.
 
 	<target name="functional-tomcat101-mariadb">
 		<run-functional-test app.server.type="tomcat" database.type="mariadb" />
-	</target>
-
-	<target name="functional-tomcat101-mariadb102">
-		<run-functional-test app.server.type="tomcat" database.type="mariadb" database.version="10.2" />
-	</target>
-
-	<target name="functional-tomcat101-mariadb104">
-		<run-functional-test app.server.type="tomcat" database.type="mariadb" database.version="10.4" />
 	</target>
 
 	<target name="functional-tomcat101-mariadb106">
@@ -7935,6 +7974,10 @@ information. Make sure to commit in all format-javadoc results.
 		<run-functional-test app.server.type="tomcat" database.type="sqlserver" database.version="2022" />
 	</target>
 
+	<target name="functional-tomcat101-sqlserver2025">
+		<run-functional-test app.server.type="tomcat" database.type="sqlserver" database.version="2025" />
+	</target>
+
 	<target name="functional-ubuntu14-tomcat101-mysql">
 		<run-functional-test app.server.type="tomcat" database.type="mysql" test.portal.log.assert="true" />
 	</target>
@@ -8055,14 +8098,6 @@ information. Make sure to commit in all format-javadoc results.
 		<run-functional-test app.server.type="tomcat" database.type="mariadb" />
 	</target>
 
-	<target name="functional-upgrade-tomcat101-mariadb102">
-		<run-functional-test app.server.type="tomcat" database.type="mariadb" database.version="10.2" />
-	</target>
-
-	<target name="functional-upgrade-tomcat101-mariadb104">
-		<run-functional-test app.server.type="tomcat" database.type="mariadb" database.version="10.4" />
-	</target>
-
 	<target name="functional-upgrade-tomcat101-mariadb106">
 		<run-functional-test app.server.type="tomcat" database.type="mariadb" database.version="10.6" />
 	</target>
@@ -8171,6 +8206,10 @@ information. Make sure to commit in all format-javadoc results.
 		<run-functional-test app.server.type="tomcat" database.type="sqlserver" database.version="2022" />
 	</target>
 
+	<target name="functional-upgrade-tomcat101-sqlserver2025">
+		<run-functional-test app.server.type="tomcat" database.type="sqlserver" database.version="2025" />
+	</target>
+
 	<target name="functional-upgrade-weblogic151-mysql">
 		<set-app-server-version-number app.server.type="weblogic" app.server.version="15.1.1" />
 
@@ -8265,50 +8304,6 @@ information. Make sure to commit in all format-javadoc results.
 		<run-functional-test
 			app.server.type="wildfly"
 			database.type="mariadb"
-			test.build.fix.pack.zip.url="${test.build.fix.pack.zip.url}"
-			test.cmp.license.url="${test.cmp.license.url}"
-			test.dsr.license.url="${test.dsr.license.url}"
-			test.fix.pack.base.url="${test.fix.pack.base.url}"
-			test.license.xml.url="${test.license.xml.url}"
-			test.plugin.zip.url="${test.plugin.zip.url}"
-			test.plugins.war.zip.url="${test.plugins.war.zip.url}"
-			test.portal.bundle.dependencies.zip.url="${test.portal.bundle.dependencies.zip.url}"
-			test.portal.bundle.osgi.zip.url="${test.portal.bundle.osgi.zip.url}"
-			test.portal.bundle.tools.zip.url="${test.portal.bundle.tools.zip.url}"
-			test.portal.bundle.war.url="${test.portal.bundle.war.url}"
-			test.portal.bundle.zip.url="${test.portal.bundle.zip.url}"
-			test.portal.lpkg.name="${test.portal.lpkg.name}"
-			test.sql.zip.url="${test.sql.zip.url}"
-		/>
-	</target>
-
-	<target name="functional-wildfly-mariadb102">
-		<run-functional-test
-			app.server.type="wildfly"
-			database.type="mariadb"
-			database.version="10.2"
-			test.build.fix.pack.zip.url="${test.build.fix.pack.zip.url}"
-			test.cmp.license.url="${test.cmp.license.url}"
-			test.dsr.license.url="${test.dsr.license.url}"
-			test.fix.pack.base.url="${test.fix.pack.base.url}"
-			test.license.xml.url="${test.license.xml.url}"
-			test.plugin.zip.url="${test.plugin.zip.url}"
-			test.plugins.war.zip.url="${test.plugins.war.zip.url}"
-			test.portal.bundle.dependencies.zip.url="${test.portal.bundle.dependencies.zip.url}"
-			test.portal.bundle.osgi.zip.url="${test.portal.bundle.osgi.zip.url}"
-			test.portal.bundle.tools.zip.url="${test.portal.bundle.tools.zip.url}"
-			test.portal.bundle.war.url="${test.portal.bundle.war.url}"
-			test.portal.bundle.zip.url="${test.portal.bundle.zip.url}"
-			test.portal.lpkg.name="${test.portal.lpkg.name}"
-			test.sql.zip.url="${test.sql.zip.url}"
-		/>
-	</target>
-
-	<target name="functional-wildfly-mariadb104">
-		<run-functional-test
-			app.server.type="wildfly"
-			database.type="mariadb"
-			database.version="10.4"
 			test.build.fix.pack.zip.url="${test.build.fix.pack.zip.url}"
 			test.cmp.license.url="${test.cmp.license.url}"
 			test.dsr.license.url="${test.dsr.license.url}"
@@ -8524,12 +8519,6 @@ information. Make sure to commit in all format-javadoc results.
 		<set-app-server-version-number app.server.type="wildfly" app.server.version="41.0.1" />
 
 		<run-functional-test app.server.type="wildfly" app.server.version="41.0.1" database.type="mariadb" />
-	</target>
-
-	<target name="functional-wildfly410-mariadb104">
-		<set-app-server-version-number app.server.type="wildfly" app.server.version="41.0.1" />
-
-		<run-functional-test app.server.type="wildfly" app.server.version="41.0.1" database.type="mariadb" database.version="10.4" />
 	</target>
 
 	<target name="functional-wildfly410-mariadb106">
@@ -9073,14 +9062,6 @@ information. Make sure to commit in all format-javadoc results.
 		<run-legacy-database-dump database.type="db2" database.version="11.5.7" />
 	</target>
 
-	<target name="legacy-functional-tomcat-mariadb102">
-		<run-legacy-database-dump database.type="mariadb" database.version="10.2" />
-	</target>
-
-	<target name="legacy-functional-tomcat-mariadb104">
-		<run-legacy-database-dump database.type="mariadb" database.version="10.4" />
-	</target>
-
 	<target name="legacy-functional-tomcat-mariadb106">
 		<run-legacy-database-dump database.type="mariadb" database.version="10.6" />
 	</target>
@@ -9107,6 +9088,10 @@ information. Make sure to commit in all format-javadoc results.
 
 	<target name="legacy-functional-tomcat-sqlserver2022">
 		<run-legacy-database-dump database.type="sqlserver" database.version="2022" />
+	</target>
+
+	<target name="legacy-functional-tomcat-sqlserver2025">
+		<run-legacy-database-dump database.type="sqlserver" database.version="2025" />
 	</target>
 
 	<target name="lpkg-container-mysql80">
@@ -9411,6 +9396,14 @@ information. Make sure to commit in all format-javadoc results.
 		/>
 	</target>
 
+	<target name="modules-integration-db-partition-mysql80">
+		<run-modules-integration-test
+			database.partition.enabled="true"
+			database.type="mysql"
+			database.version="8.0"
+		/>
+	</target>
+
 	<target name="modules-integration-db-partition-mysql84">
 		<run-modules-integration-test
 			database.partition.enabled="true"
@@ -9559,19 +9552,11 @@ information. Make sure to commit in all format-javadoc results.
 		<run-modules-integration-test database.type="mariadb" />
 	</target>
 
-	<target name="modules-integration-mariadb102">
-		<run-modules-integration-test database.type="mariadb" database.version="10.2" />
-	</target>
-
-	<target name="modules-integration-mariadb102-jdk21_zulu">
-		<run-modules-integration-test database.type="mariadb" database.version="10.2" />
-	</target>
-
-	<target name="modules-integration-mariadb104">
-		<run-modules-integration-test database.type="mariadb" database.version="10.4" />
-	</target>
-
 	<target name="modules-integration-mariadb106">
+		<run-modules-integration-test database.type="mariadb" database.version="10.6" />
+	</target>
+
+	<target name="modules-integration-mariadb106-jdk21_zulu">
 		<run-modules-integration-test database.type="mariadb" database.version="10.6" />
 	</target>
 
@@ -9707,6 +9692,10 @@ information. Make sure to commit in all format-javadoc results.
 
 	<target name="modules-integration-sqlserver2022">
 		<run-modules-integration-test database.type="sqlserver" database.version="2022" />
+	</target>
+
+	<target name="modules-integration-sqlserver2025">
+		<run-modules-integration-test database.type="sqlserver" database.version="2025" />
 	</target>
 
 	<target name="modules-unit">
@@ -9966,6 +9955,10 @@ ${output.content}</echo>
 		<run-playwright-js-test database.type="sqlserver" />
 	</target>
 
+	<target name="playwright-js-smoke-tomcat101-sqlserver2025">
+		<run-playwright-js-test database.type="sqlserver" />
+	</target>
+
 	<target name="playwright-js-smoke-wildfly410-mariadb106">
 		<run-playwright-js-test app.server.type="wildfly" database.type="mariadb" />
 	</target>
@@ -10014,6 +10007,10 @@ ${output.content}</echo>
 		<run-playwright-js-test database.type="sqlserver" />
 	</target>
 
+	<target name="playwright-js-tomcat101-sqlserver2025">
+		<run-playwright-js-test database.type="sqlserver" />
+	</target>
+
 	<target name="playwright-js-upgrade-tomcat101-db2111">
 		<run-playwright-js-test database.type="db2" />
 	</target>
@@ -10035,6 +10032,10 @@ ${output.content}</echo>
 	</target>
 
 	<target name="playwright-js-upgrade-tomcat101-sqlserver2022">
+		<run-playwright-js-test database.type="sqlserver" />
+	</target>
+
+	<target name="playwright-js-upgrade-tomcat101-sqlserver2025">
 		<run-playwright-js-test database.type="sqlserver" />
 	</target>
 
@@ -10543,20 +10544,58 @@ ${output.content}</echo>
 				</beanshell>
 			</try>
 			<catch>
-				<echo>Unable to find cached source-formatter. Building from source.</echo>
+				<local name="source.formatter.released.source.match" />
+				<local name="source.formatter.released.source.match.failure" />
 
-				<antcall target="compile" />
+				<trycatch property="source.formatter.released.source.match.failure">
+					<try>
+						<beanshell>
+							<![CDATA[
+								import com.liferay.jenkins.results.parser.GitWorkingDirectory;
+								import com.liferay.jenkins.results.parser.GitWorkingDirectoryFactory;
+								import com.liferay.jenkins.results.parser.SourceFormatterReleaseUtil;
 
-				<antcall target="install-portal-snapshots" />
+								import java.io.File;
+
+								File baseDir = project.getBaseDir();
+
+								GitWorkingDirectory gitWorkingDirectory = GitWorkingDirectoryFactory.newGitWorkingDirectory(project.getProperty("liferay.portal.branch"), baseDir.getCanonicalPath(), "liferay-portal");
+
+								if (SourceFormatterReleaseUtil.isReleasedSourceMatch(gitWorkingDirectory, "HEAD")) {
+									project.setProperty("source.formatter.released.source.match", "true");
+								}
+							]]>
+						</beanshell>
+					</try>
+					<catch>
+						<echo>Unable to compare source-formatter with the released version: ${source.formatter.released.source.match.failure}</echo>
+					</catch>
+				</trycatch>
 
 				<if>
-					<available file="modules/util/source-formatter" />
+					<equals arg1="${source.formatter.released.source.match}" arg2="true" />
 					<then>
-						<gradle-execute dir="modules/util/source-formatter" task="deploy" />
-					</then>
-				</if>
+						<echo>Unable to find cached source-formatter. Using the released source-formatter.</echo>
 
-				<antcall target="publish-source-formatter" />
+						<antcall inheritAll="false" target="setup-sdk" />
+					</then>
+					<else>
+						<echo>Unable to find cached source-formatter. Building from source.</echo>
+
+						<antcall target="compile" />
+
+						<antcall target="install-portal-snapshots" />
+
+						<if>
+							<available file="modules/util/source-formatter" />
+							<then>
+								<gradle-execute dir="modules/util/source-formatter" task="deploy" />
+							</then>
+						</if>
+
+						<antcall target="publish-source-formatter" />
+					</else>
+				</if>
 			</catch>
 		</trycatch>
 	</target>

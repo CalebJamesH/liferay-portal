@@ -16,6 +16,7 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.URL;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -112,27 +113,6 @@ public class JenkinsResultsParserUtilTest
 			"ABC%5D123",
 			JenkinsResultsParserUtil.encodeLegacyURLPart("ABC]123"));
 		testEquals("a+b", JenkinsResultsParserUtil.encodeLegacyURLPart("a+b"));
-	}
-
-	@Test
-	public void testEncodeURLParameterPart() {
-		testEquals(
-			"100%25%20pass",
-			JenkinsResultsParserUtil.encodeURLParameterPart("100% pass"));
-		testEquals(
-			"AWS%20CI",
-			JenkinsResultsParserUtil.encodeURLParameterPart("AWS CI"));
-		testEquals(
-			"PortalSmoke%23Smoke",
-			JenkinsResultsParserUtil.encodeURLParameterPart(
-				"PortalSmoke#Smoke"));
-		testEquals(
-			"a%26b", JenkinsResultsParserUtil.encodeURLParameterPart("a&b"));
-		testEquals(
-			"a%2Bb", JenkinsResultsParserUtil.encodeURLParameterPart("a+b"));
-		testEquals(
-			"master",
-			JenkinsResultsParserUtil.encodeURLParameterPart("master"));
 	}
 
 	@Test(timeout = 30000)
@@ -246,22 +226,6 @@ public class JenkinsResultsParserUtilTest
 	}
 
 	@Test
-	public void testFixURL() {
-		testEquals("ABC%28123", _fixURLMultipleTimes("ABC(123"));
-		testEquals("ABC%29123", _fixURLMultipleTimes("ABC)123"));
-		testEquals("ABC%5B123", _fixURLMultipleTimes("ABC[123"));
-		testEquals("ABC%5D123", _fixURLMultipleTimes("ABC]123"));
-		testEquals("!master", _fixURLMultipleTimes("!master"));
-		testEquals("0%201%202", _fixURLMultipleTimes("0 1 2"));
-		testEquals(
-			"https://test-1-1.liferay.com/job(master)?" +
-				"AXIS_VARIABLE=0%201&label_exp=!master&job=test%287.2.x%29",
-			_fixURLMultipleTimes(
-				"https://test-1-1.liferay.com/job(master)?" +
-					"AXIS_VARIABLE=0 1&label_exp=!master&job=test(7.2.x)"));
-	}
-
-	@Test
 	public void testGetCohortName() {
 		Environment environment = mockEnvironment();
 
@@ -272,6 +236,19 @@ public class JenkinsResultsParserUtilTest
 		);
 
 		testEquals("test-1", JenkinsResultsParserUtil.getCohortName());
+	}
+
+	@Test
+	public void testGetGitHubApiSearchUrl() throws Exception {
+		URL url = new URL(
+			JenkinsResultsParserUtil.getGitHubApiSearchUrl(
+				Arrays.asList("head:a&b#c", "is:pr")));
+
+		Map<String, String> parameters =
+			JenkinsResultsParserUtil.getQueryParameters(url.getQuery());
+
+		testEquals("head:a&b#c is:pr", parameters.get("q"));
+		testEquals(1, parameters.size());
 	}
 
 	@Test
@@ -360,6 +337,34 @@ public class JenkinsResultsParserUtilTest
 		testEquals(
 			message,
 			JenkinsResultsParserUtil.getMessage(new IOException(message)));
+	}
+
+	@Test
+	public void testGetMostAvailableMasterURL() throws Exception {
+		Properties buildProperties = new Properties();
+
+		buildProperties.setProperty(
+			"jenkins.load.balancer.url", "http://test-1-0/load_balancer");
+
+		JenkinsResultsParserUtil.setBuildProperties(buildProperties);
+
+		mockURLReaders();
+
+		JSONObject jsonObject = new JSONObject();
+
+		jsonObject.put("mostAvailableMasterURL", "http://test-1-2");
+
+		setURLReaderOutput(
+			jsonObject.toString(),
+			JenkinsResultsParserUtil.combine(
+				"?baseInvocationURL=http%3A%2F%2Ftest-1%3Fa%3D1%26b%3D2",
+				"&blacklist=test-1-1%2Ctest-1-3&invokedJobBatchSize=2",
+				"&jobName=test%25job"));
+
+		testEquals(
+			"http://test-1-2",
+			JenkinsResultsParserUtil.getMostAvailableMasterURL(
+				"http://test-1?a=1&b=2", "test-1-1,test-1-3", 2, "test%job"));
 	}
 
 	@Test
@@ -1231,6 +1236,17 @@ public class JenkinsResultsParserUtilTest
 	}
 
 	@Test
+	public void testNormalizeURLWithEscapeSequences() {
+		testEquals(
+			JenkinsResultsParserUtil.combine(
+				"http://test-1-1/job/x?V=%250/%20%250:%20%250@%20%250G%20",
+				"%250%60%20%250g%20%09%20%0A%20%0F%20%0a%20%0f"),
+			JenkinsResultsParserUtil.normalizeURL(
+				"http://test-1-1/job/x?V=%0/ %0: %0@ %0G %0` %0g %09 %0A %0F " +
+					"%0a %0f"));
+	}
+
+	@Test
 	public void testNormalizeURLWithFragment() {
 		testEquals(
 			"http://test-1-1/job/x?a=1%202#summary",
@@ -1257,6 +1273,18 @@ public class JenkinsResultsParserUtilTest
 			"buildWithParameters?V=a%2Bb&W=AWS%20%26%20CI");
 
 		testSame(url, JenkinsResultsParserUtil.normalizeURL(url));
+	}
+
+	@Test
+	public void testNormalizeURLWithNonASCIICharacters() {
+		String normalizedURL = JenkinsResultsParserUtil.normalizeURL(
+			"http://test-1-1/job/café/x?name=é");
+
+		testEquals(
+			"http://test-1-1/job/caf%C3%A9/x?name=%C3%A9", normalizedURL);
+		testEquals(
+			normalizedURL,
+			JenkinsResultsParserUtil.normalizeURL(normalizedURL));
 	}
 
 	@Test
@@ -1330,12 +1358,6 @@ public class JenkinsResultsParserUtilTest
 
 	private ServerSocket _createServerSocket() throws Exception {
 		return new ServerSocket(0, 1, InetAddress.getByName("localhost"));
-	}
-
-	private String _fixURLMultipleTimes(String urlString) {
-		return JenkinsResultsParserUtil.fixURL(
-			JenkinsResultsParserUtil.fixURL(
-				JenkinsResultsParserUtil.fixURL(urlString)));
 	}
 
 	private Properties _getBuildAwsProperties() {

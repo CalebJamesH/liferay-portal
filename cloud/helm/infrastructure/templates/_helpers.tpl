@@ -11,12 +11,27 @@ readOnlyRootFilesystem: false
 {{- printf "%s-es-elastic-user" (include "elasticsearch.name" .) -}}
 {{- end -}}
 
+{{- define "elasticsearch.labels" -}}
+component: search
+environmentId: {{ .Values.environmentId | quote }}
+projectId: {{ .Values.projectId | quote }}
+{{- end -}}
+
 {{- define "elasticsearch.name" -}}
 {{- printf "%s-es" .Release.Name -}}
 {{- end -}}
 
 {{- define "elasticsearch.namespace" -}}
 {{- printf "%s-elasticsearch" .Release.Namespace -}}
+{{- end -}}
+
+{{- define "elasticsearch.podSecurityContext" -}}
+fsGroup: 1000
+runAsGroup: 1000
+runAsNonRoot: true
+runAsUser: 1000
+seccompProfile:
+    type: RuntimeDefault
 {{- end -}}
 
 {{- define "liferay.validateCIDR" -}}
@@ -35,6 +50,9 @@ readOnlyRootFilesystem: false
 
 {{- define "liferay.validateEndpoint" -}}
 {{- $externalSecretKeys := dig "tls" "externalSecretKeys" (list) .endpoint -}}
+{{- if not (has (int .endpoint.port) (list 80 443)) -}}
+{{- fail (printf "The %s endpoint uses port %v, but gateways only listen on ports 80 and 443" .name .endpoint.port) -}}
+{{- end -}}
 {{- if and (eq (int .endpoint.port) 80) (not .endpoint.hostname) (ne .name "http") -}}
 {{- fail (printf "The %s endpoint uses port 80 without a hostname, which collides with the implicit http listener" .name) -}}
 {{- end -}}

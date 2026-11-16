@@ -244,26 +244,6 @@ public interface CommerceShippingFixedOptionRelLocalService
 	public List<CommerceShippingFixedOptionRel>
 		getCommerceShippingFixedOptionRels(int start, int end);
 
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public List<CommerceShippingFixedOptionRel>
-		getCommerceShippingFixedOptionRels(
-			long commerceShippingFixedOptionId, int start, int end);
-
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public List<CommerceShippingFixedOptionRel>
-		getCommerceShippingFixedOptionRels(
-			long commerceShippingFixedOptionId, int start, int end,
-			OrderByComparator<CommerceShippingFixedOptionRel>
-				orderByComparator);
-
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public List<CommerceShippingFixedOptionRel>
-		getCommerceShippingFixedOptionRels(
-			long commerceShippingFixedOptionId, long commerceShippingMethodId,
-			int start, int end,
-			OrderByComparator<CommerceShippingFixedOptionRel>
-				orderByComparator);
-
 	/**
 	 * Returns the number of commerce shipping fixed option rels.
 	 *
@@ -271,30 +251,6 @@ public interface CommerceShippingFixedOptionRelLocalService
 	 */
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public int getCommerceShippingFixedOptionRelsCount();
-
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public int getCommerceShippingFixedOptionRelsCount(
-		long commerceShippingFixedOptionId);
-
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public int getCommerceShippingFixedOptionRelsCount(
-		long commerceShippingFixedOptionId, long commerceShippingMethodId);
-
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public List<CommerceShippingFixedOptionRel>
-		getCommerceShippingMethodFixedOptionRels(
-			long commerceShippingMethodId, int start, int end);
-
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public List<CommerceShippingFixedOptionRel>
-		getCommerceShippingMethodFixedOptionRels(
-			long commerceShippingMethodId, int start, int end,
-			OrderByComparator<CommerceShippingFixedOptionRel>
-				orderByComparator);
-
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public int getCommerceShippingMethodFixedOptionRelsCount(
-		long commerceShippingMethodId);
 
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public IndexableActionableDynamicQuery getIndexableActionableDynamicQuery();
@@ -337,4 +293,4 @@ public interface CommerceShippingFixedOptionRelLocalService
 		throws PortalException;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-132850649
+// LIFERAY-SERVICE-BUILDER-HASH:795817824

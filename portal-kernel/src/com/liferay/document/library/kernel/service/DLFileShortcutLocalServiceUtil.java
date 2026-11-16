@@ -446,21 +446,6 @@ public class DLFileShortcutLocalServiceUtil {
 		return getService().getFileShortcuts(groupId, folderId);
 	}
 
-	public static List<DLFileShortcut> getFileShortcuts(
-		long groupId, long folderId, boolean active, int status, int start,
-		int end) {
-
-		return getService().getFileShortcuts(
-			groupId, folderId, active, status, start, end);
-	}
-
-	public static int getFileShortcutsCount(
-		long groupId, long folderId, boolean active, int status) {
-
-		return getService().getFileShortcutsCount(
-			groupId, folderId, active, status);
-	}
-
 	public static List<DLFileShortcut> getGroupFileShortcuts(long groupId) {
 		return getService().getGroupFileShortcuts(groupId);
 	}
@@ -488,10 +473,6 @@ public class DLFileShortcutLocalServiceUtil {
 		throws PortalException {
 
 		return getService().getPersistedModel(primaryKeyObj);
-	}
-
-	public static void rebuildTree(long companyId) throws PortalException {
-		getService().rebuildTree(companyId);
 	}
 
 	public static void setTreePaths(long folderId, String treePath)
@@ -568,4 +549,4 @@ public class DLFileShortcutLocalServiceUtil {
 	private static volatile DLFileShortcutLocalService _service;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:209962351
+// LIFERAY-SERVICE-BUILDER-HASH:-112082884

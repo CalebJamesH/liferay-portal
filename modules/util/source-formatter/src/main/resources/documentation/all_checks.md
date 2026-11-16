@@ -85,7 +85,7 @@ DeprecatedClassesCheck | [Bug Prevention](bug_prevention_checks.md#bug-preventio
 DockerfileEmptyLinesCheck | [Styling](styling_checks.md#styling-checks) | Dockerfile | Finds missing and unnecessary empty lines. |
 DockerfileInstructionCheck | [Styling](styling_checks.md#styling-checks) | Dockerfile | Performs styling rules on instructions in `Dockerfile` files. |
 [EarlyLoopExitCheck](check/early_loop_exit_check.md#earlyloopexitcheck) | [Styling](styling_checks.md#styling-checks) | .java | Finds if-statements at the end of a loop body that can be inverted to use `break`, `continue`, `return`, or `throw` as early as possible. |
-EmbeddedJSONCheck | [Styling](styling_checks.md#styling-checks) | .action, .function, .jelly, .jrxml, .macro, .markdown, .md, .pom, .project, .properties, .qti, .svg, .testcase, .tf, .toggle, .tpl, .wsdl, .xlf, .xml, or .xsd | Ensures consistent formatting for embedded JSON. |
+EmbeddedJSONCheck | [Styling](styling_checks.md#styling-checks) | .action, .function, .hcl, .jelly, .jrxml, .macro, .markdown, .md, .pom, .project, .properties, .qti, .svg, .testcase, .tf, .toggle, .tpl, .wsdl, .xlf, .xml, or .xsd | Ensures consistent formatting for embedded JSON. |
 EmptyCollectionCheck | [Styling](styling_checks.md#styling-checks) | .java, .jsp, .jspf, .jspx, .tag, .tpl, or .vm | Checks that there are no calls to `Collections.EMPTY_LIST`, `Collections.EMPTY_MAP` or `Collections.EMPTY_SET`. |
 EmptyConstructorCheck | [Bug Prevention](bug_prevention_checks.md#bug-prevention-checks) | .java | Finds unnecessary empty constructors. |
 EnumConstantDividerCheck | [Styling](styling_checks.md#styling-checks) | .java | Find unnecessary empty lines between enum constants. |
@@ -96,7 +96,7 @@ EqualClauseIfStatementsCheck | [Styling](styling_checks.md#styling-checks) | .ja
 [ExceptionMessageCheck](check/message_check.md#messagecheck) | [Styling](styling_checks.md#styling-checks) | .java, .jsp, .jspf, .jspx, .tag, .tpl, or .vm | Validates messages that are passed to exceptions. |
 ExceptionPrintStackTraceCheck | [Bug Prevention](bug_prevention_checks.md#bug-prevention-checks) | .java | Avoid using printStackTrace. |
 ExceptionVariableNameCheck | [Naming Conventions](naming_conventions_checks.md#naming-conventions-checks) | .java | Validates variable names that have type `*Exception`. |
-FIPSTLSVerificationCheck | [Security](security_checks.md#security-checks) | .java | Finds outbound TLS verification bypasses that are not guarded by `PropsValues.FIPS_ENABLED`, see LPD-93649. |
+FIPSTLSVerificationCheck | [Security](security_checks.md#security-checks) | .java | Finds outbound TLS verification bypasses that are not guarded by `PropsValues.FIPS_ENABLED`. |
 FTLEmptyLinesCheck | [Styling](styling_checks.md#styling-checks) | .ftl | Finds missing and unnecessary empty lines. |
 [FTLIfStatementCheck](check/if_statement_check.md#ifstatementcheck) | [Styling](styling_checks.md#styling-checks) | .ftl | Finds incorrect use of parentheses in statement. |
 FTLImportsCheck | [Styling](styling_checks.md#styling-checks) | .ftl | Sorts and groups imports in `.ftl` files. |
@@ -322,6 +322,7 @@ JavaReturnStatementCheck | [Styling](styling_checks.md#styling-checks) | .java |
 JavaRunSQLCheck | [Styling](styling_checks.md#styling-checks) | .java | Applies rules to enforce consistency in code style. |
 JavaSQLStatementCheck | [Bug Prevention](bug_prevention_checks.md#bug-prevention-checks) | .java | Perform several checks in SQL statements. |
 [JavaSeeAnnotationCheck](check/java_see_annotation_check.md#javaseeannotationcheck) | [Bug Prevention](bug_prevention_checks.md#bug-prevention-checks) | .java | Checks for nested annotations inside `@see`. |
+JavaServiceHopCheck | [Performance](performance_checks.md#performance-checks) | .java | Flags a service method that delegates to a passthrough service method in the same bundle, so it can call persistence directly and skip the AOP proxy hop. |
 JavaServiceImplCheck | [Bug Prevention](bug_prevention_checks.md#bug-prevention-checks) | .java | Ensures that `afterPropertiesSet` and `destroy` methods in `*ServiceImpl` always call the method with the same name in the superclass. |
 JavaServiceImplErcUsageCheck | [Productivity](productivity_checks.md#productivity-checks) | .java | Automatically generates and ensures that `externalReferenceCode` is properly used in remote `*ServiceImpl` add method. |
 JavaServiceImplGetFetchCheck | [Bug Prevention](bug_prevention_checks.md#bug-prevention-checks) | .java | Flags a get-prefixed service method that returns a nullable fetch result, violating the non-null promise its name implies. |
@@ -457,6 +458,7 @@ PoshiVariableNameCheck | [Styling](styling_checks.md#styling-checks) | .function
 PoshiWhitespaceCheck | [Styling](styling_checks.md#styling-checks) | .function, .jar, .lar, .macro, .path, .testcase, .war, or .zip | Finds missing and unnecessary whitespace. |
 PrimitiveWrapperInstantiationCheck | [Bug Prevention](bug_prevention_checks.md#bug-prevention-checks) | .java, .jsp, .jspf, .jspx, .tag, .tpl, or .vm | Finds cases where `new Type` is used for primitive types (use `Type.valueOf` instead). |
 PrincipalExceptionCheck | [Bug Prevention](bug_prevention_checks.md#bug-prevention-checks) | .java, .jsp, .jspf, .jspx, .tag, .tpl, or .vm | Finds calls to `PrincipalException.class.getName()` (use `PrincipalException.getNestedClasses()` instead). |
+[PrintWriterWrapperCheck](check/print_writer_wrapper_check.md#printwriterwrappercheck) | [Performance](performance_checks.md#performance-checks) | .java | Finds a `PrintWriter` or `UnsyncPrintWriter` that only wraps another writer or stream to print to it, which should write to the wrapped writer directly instead. |
 PropertiesArchivedModulesCheck | [Bug Prevention](bug_prevention_checks.md#bug-prevention-checks) | .properties | Finds `test.batch.class.names.includes` property value pointing to archived modules in `test.properties`. |
 PropertiesBuildIncludeDirsCheck | [Bug Prevention](bug_prevention_checks.md#bug-prevention-checks) | .properties | Verifies property value of `build.include.dirs` in `build.properties`. |
 PropertiesCommentsCheck | [Styling](styling_checks.md#styling-checks) | .properties | Validates comments in `.properties` files and wraps them to the maximum line length. |
@@ -515,6 +517,7 @@ SQLStylingCheck | [Styling](styling_checks.md#styling-checks) | .sql | Applies r
 SafeCloseableMissingCloseCheck | [Bug Prevention](bug_prevention_checks.md#bug-prevention-checks) | .java | Finds missing `close()` calls for `SafeCloseable` instances. |
 SealedAndNonsealedModifierCheck | [Performance](performance_checks.md#performance-checks) | .java | Finds usage of `sealed` and `non-sealed`. |
 SecretComparisonCheck | [Security](security_checks.md#security-checks) | .java | Finds secrets compared with a method that returns at the first differing byte. |
+SecretResolverCheck | [Security](security_checks.md#security-checks) | .java | Finds configuration credentials read without resolving them through `SecretResolver` or `SecretResolverUtil`. |
 SelfReferenceCheck | [Bug Prevention](bug_prevention_checks.md#bug-prevention-checks) | .java | Finds cases of unnecessary reference to its own class. |
 SemiColonCheck | [Styling](styling_checks.md#styling-checks) | .java, .jsp, .jspf, .jspx, .tag, .tpl, or .vm | Finds cases of unnecessary semicolon. |
 [ServiceComponentRuntimeCheck](check/service_component_runtime_check.md#servicecomponentruntimecheck) | [Bug Prevention](bug_prevention_checks.md#bug-prevention-checks) | .java | Checks `ServiceComponentRuntime` usage in test classes. |
@@ -536,10 +539,10 @@ StringIndexOfCallCheck | [Styling](styling_checks.md#styling-checks) | .java | F
 [StringMethodsCheck](check/string_methods_check.md#stringmethodscheck) | [Performance](performance_checks.md#performance-checks) | .java, .jsp, .jspf, .jspx, .tag, .tpl, or .vm | Checks if performance can be improved by using different String operation methods. |
 SubstringCheck | [Performance](performance_checks.md#performance-checks) | .java, .jsp, .jspf, .jspx, .tag, .tpl, or .vm | Finds cases like `s.substring(1, s.length())` (use `s.substring(1)` instead). |
 SystemEventCheck | [Bug Prevention](bug_prevention_checks.md#bug-prevention-checks) | .java | Finds missing or redundant usage of @SystemEvent for delete events. |
-TFBlockOrderCheck | [Styling](styling_checks.md#styling-checks) | .tf | Checks the order of blocks and attributes in `.tf` files. |
-TFEmptyLinesCheck | [Styling](styling_checks.md#styling-checks) | .tf | Finds unnecessary empty lines. |
-TFIndentationCheck | [Styling](styling_checks.md#styling-checks) | .tf | Finds incorrect indentation in `.tf` files. |
-TFStylingCheck | [Styling](styling_checks.md#styling-checks) | .tf | Applies rules to enforce consistency in code style. |
+TFBlockOrderCheck | [Styling](styling_checks.md#styling-checks) | .hcl or .tf | Checks the order of blocks and attributes in `.hcl` and `.tf` files. |
+TFEmptyLinesCheck | [Styling](styling_checks.md#styling-checks) | .hcl or .tf | Finds missing and unnecessary empty lines. |
+TFIndentationCheck | [Styling](styling_checks.md#styling-checks) | .hcl or .tf | Finds incorrect indentation in `.hcl` and `.tf` files. |
+TFStylingCheck | [Styling](styling_checks.md#styling-checks) | .hcl or .tf | Applies rules to enforce consistency in code style. |
 TLDElementOrderCheck | [Styling](styling_checks.md#styling-checks) | .tld | Checks the order of attributes in `.tld` file. |
 TLDStylingCheck | [Styling](styling_checks.md#styling-checks) | .tld | Applies rules to enforce consistency in code style. |
 TLDTypeCheck | [Bug Prevention](bug_prevention_checks.md#bug-prevention-checks) | .tld | Ensures the fully qualified name is used for types in `.tld` file. |
@@ -560,9 +563,11 @@ TextBlockCheck | [Styling](styling_checks.md#styling-checks) | .java | Finds usa
 ThreadLocalUtilCheck | [Performance](performance_checks.md#performance-checks) | .java | Finds new instances of `java.lang.Thread` (use `ThreadLocalUtil.create` instead). |
 ThreadLocalVariableNameCheck | [Naming Conventions](naming_conventions_checks.md#naming-conventions-checks) | .java | Checks for consistent naming on variables of type '*ThreadLocal'. |
 ThreadNameCheck | [Naming Conventions](naming_conventions_checks.md#naming-conventions-checks) | .java | Checks that names of threads follow naming conventions. |
+[ToSQLCallCheck](check/to_sql_call_check.md#tosqlcallcheck) | [Performance](performance_checks.md#performance-checks) | .java | Finds `toSQL(ASTNodeListener)` calls whose SQL string is unused, which should pass a consumer that ignores the text to `toSQL(Consumer, ASTNodeListener)` instead. |
 TransactionalTestRuleCheck | [Bug Prevention](bug_prevention_checks.md#bug-prevention-checks) | .java | Finds usage of `TransactionalTestRule` in `*StagedModelDataHandlerTest`. |
 TryWithResourcesCheck | [Performance](performance_checks.md#performance-checks) | .java | Ensures using Try-With-Resources statement to properly close the resource. |
 [TypeNameCheck](https://checkstyle.sourceforge.io/checks/naming/typename.html) | [Naming Conventions](naming_conventions_checks.md#naming-conventions-checks) | .java | Checks that type names conform to a specified pattern. |
+[TypedPropertyKeyCheck](check/typed_property_key_check.md#typedpropertykeycheck) | [Bug Prevention](bug_prevention_checks.md#bug-prevention-checks) | .java | Checks that a typed property key such as `service.ranking:Integer` is not used outside component property strings. |
 URLInputStreamCheck | [Bug Prevention](bug_prevention_checks.md#bug-prevention-checks) | .java | Checks usages of `URL.openStream()`. |
 [UnicodePropertiesBuilderCheck](check/builder_check.md#buildercheck) | [Miscellaneous](miscellaneous_checks.md#miscellaneous-checks) | .java | Checks that `UnicodePropertiesBuilder` is used when possible. |
 [UnnecessaryAssignCheck](check/unnecessary_assign_check.md#unnecessaryassigncheck) | [Performance](performance_checks.md#performance-checks) | .java | Finds unnecessary assign statements (when it is either reassigned or returned right after). |
