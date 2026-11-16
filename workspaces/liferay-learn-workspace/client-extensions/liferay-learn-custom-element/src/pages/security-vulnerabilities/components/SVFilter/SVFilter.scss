@@ -1,7 +1,7 @@
 .sv-filter-content {
 	.sv-filter-box {
 		background-color: var(--color-neutral-1, #f7f7f8);
-		border-radius: var(--border-radius-lg);
+		border-radius: 10px;
 
 		.custom-control-input {
 			position: relative;
@@ -55,8 +55,10 @@
 	}
 
 	.sv-link {
-		color: var(--color-neutral-10, #282934);
-		font-size: var(--font-size-sm);
+		color: var(--color-action-neutral-default, #2b3a4b);
+		font-size: 13px;
+		font-weight: 400;
+		line-height: 16px;
 
 		&.disabled {
 			color: var(--color-action-neutral-disabled);

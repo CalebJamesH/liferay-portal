@@ -5,13 +5,13 @@
 
 import {JiraEnum} from './JiraEnum';
 
-export interface IFilterOptions {
+export type FilterOptions = {
 	[JiraEnum.AFFECTED_VERSIONS]?: string[];
 	[JiraEnum.CATEGORIES]?: string[];
 	[JiraEnum.FIX_VERSIONS]?: string[];
 	[JiraEnum.ISSUE_CLASSIFICATION]?: string[];
 	[JiraEnum.SEVERITY]?: string[];
-}
+};
 
 export const FILTER_MAP: {[key: string]: string} = {
 	affectedVersions: 'filterAffectedVersions',
@@ -21,7 +21,7 @@ export const FILTER_MAP: {[key: string]: string} = {
 	severity: 'filterSeverities',
 };
 
-export const FILTER_OPTIONS: IFilterOptions = {
+export const FILTER_OPTIONS: FilterOptions = {
 	[JiraEnum.AFFECTED_VERSIONS]: ['2024.Q4', '2024.Q3', '2024.Q2', '2024.Q1'],
 	[JiraEnum.CATEGORIES]: ['Docker', 'DXP', 'PaaS', 'SaaS'],
 	[JiraEnum.FIX_VERSIONS]: ['2024.Q4', '2024.Q3', '2024.Q2', '2024.Q1'],

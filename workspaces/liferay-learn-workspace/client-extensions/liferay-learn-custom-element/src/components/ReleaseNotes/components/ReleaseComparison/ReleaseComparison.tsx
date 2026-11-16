@@ -4,15 +4,12 @@
  */
 
 import {ReactNode, useMemo} from 'react';
-import {IProductVersion} from '~/services/rest/releaseNotes';
+import {ProductVersion} from '~/services/rest/releaseNotes';
 
-import ReleaseAutocomplete, {
-	ReleaseGroup,
-} from '../ReleaseAutocomplete/ReleaseAutocomplete';
+import getToReleaseGroups, {ReleaseGroup} from '~/utils/getToReleaseGroups';
+import ReleaseAutocomplete from '../ReleaseAutocomplete/ReleaseAutocomplete';
 
 import './ReleaseComparison.scss';
-
-const PRODUCT_VERSION_KEY_7_4 = '7.4';
 
 export type ReleaseRange = {
 	from: string;
@@ -23,57 +20,9 @@ export type ReleaseRange = {
 type ReleaseComparisonProps = {
 	onChange: (releaseRange: ReleaseRange) => void;
 	productIcon?: ReactNode;
-	productVersions: IProductVersion[];
+	productVersions: ProductVersion[];
 	releaseRange: ReleaseRange;
 };
-
-export function getToReleaseGroups(
-	from: string,
-	productVersions: IProductVersion[],
-	productVersionKey: string
-): ReleaseGroup[] {
-	const index = productVersions.findIndex(
-		(productVersion) => productVersion.key === productVersionKey
-	);
-
-	if (index < 0 || !from) {
-		return [];
-	}
-
-	const productVersion = productVersions[index];
-
-	const releaseIndex = productVersion.releases.findIndex(
-		(release) => release.key === from
-	);
-
-	if (releaseIndex < 0) {
-		return [];
-	}
-
-	const laterProductVersions = productVersions.slice(index + 1);
-
-	const laterProductVersion = laterProductVersions.filter(
-		(laterProductVersion) =>
-			laterProductVersion.line === productVersion.line
-	);
-
-	const laterReleaseGroups = laterProductVersion.map(
-		({key, name, releases}) => ({key, name, releases})
-	);
-
-	if (productVersion.key === PRODUCT_VERSION_KEY_7_4) {
-		return laterReleaseGroups;
-	}
-
-	return [
-		{
-			key: productVersion.key,
-			name: productVersion.name,
-			releases: productVersion.releases.slice(releaseIndex),
-		},
-		...laterReleaseGroups,
-	];
-}
 
 const ReleaseComparison = ({
 	onChange,

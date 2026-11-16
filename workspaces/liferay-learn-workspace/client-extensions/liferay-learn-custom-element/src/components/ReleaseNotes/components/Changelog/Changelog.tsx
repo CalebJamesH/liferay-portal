@@ -3,45 +3,45 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
-import {ClayPaginationBarWithBasicItems} from '@clayui/pagination-bar';
 import classNames from 'classnames';
-import {useMemo, useState} from 'react';
-import {IChangelog, IChangelogIssue} from '~/services/rest/releaseNotes';
+import {useEffect, useMemo, useState} from 'react';
+import {ChangelogIssue, ChangelogResponse} from '~/services/rest/releaseNotes';
 import i18n from '~/utils/I18n';
 import toggleArrayItem from '~/utils/toggleArrayItem';
 
 import useChangelog from '../../../../hooks/useChangelog';
 import useChangelogComponents from '../../../../hooks/useChangelogComponents';
-import {
-	paginationDeltas,
-	paginationLabels,
-} from '../../../../utils/constants/paginationOptions';
 import EmptyState from '../EmptyState/EmptyState';
 import Facet from '../Facet/Facet';
+import Pagination from '../Pagination/Pagination';
+import SearchFacet from '../SearchFacet/SearchFacet';
+import TabHeader from '../TabHeader/TabHeader';
 import TabResults from '../TabResults/TabResults';
 
 import Checkbox from '~/components/Checkbox/Checkbox';
 import Input from '~/components/Input/Input';
 import Button from '~/components/Button/Button';
 import {useReleaseNotesContext} from '~/components/ReleaseNotes/ReleaseNotesOutlet';
-import Table, {IColumn, IRow} from '~/components/Table/Table';
+import Table, {Column, Row} from '~/components/Table/Table';
 
 import './Changelog.scss';
 
 const COMPONENTS_DELTA = 10;
+const PAGE_SIZE = 10;
 
 const Changelog = () => {
 	const {from, to} = useReleaseNotesContext();
 
 	const [componentKeywords, setComponentKeywords] = useState('');
-	const [pageSize, setPageSize] = useState(paginationDeltas[0].label);
+	const [keywords, setKeywords] = useState('');
+	const [keywordsInput, setKeywordsInput] = useState('');
 	const [selectedComponents, setSelectedComponents] = useState<string[]>([]);
 	const [viewAllComponents, setViewAllComponents] = useState(false);
 
 	const search = JSON.stringify([
 		selectedComponents,
 		from.key,
-		pageSize,
+		keywords,
 		to.key,
 	]);
 
@@ -52,11 +52,20 @@ const Changelog = () => {
 	const {changelog, error, loading} = useChangelog({
 		components: selectedComponents,
 		from: from.key,
-		keywords: '',
+		keywords,
 		page,
-		pageSize,
+		pageSize: PAGE_SIZE,
 		to: to.key,
 	});
+
+	useEffect(() => {
+		const timeout = setTimeout(
+			() => setKeywords(keywordsInput.trim()),
+			500
+		);
+
+		return () => clearTimeout(timeout);
+	}, [keywordsInput]);
 
 	const {components} = useChangelogComponents();
 
@@ -95,12 +104,12 @@ const Changelog = () => {
 		setSelectedComponents([]);
 	};
 
-	const getIssueRow = (issue: IChangelogIssue): IRow => ({
+	const getIssueRow = (issue: ChangelogIssue): Row => ({
 		components: issue.components.length ? (
 			<div className="c-gap-1 d-flex flex-wrap">
 				{issue.components.map((component) => (
 					<span
-						className="border-0 changelog-tag d-block font-weight-normal h-auto label m-0 mw-100 overflow-hidden px-2 py-1 text-nowrap"
+						className="border-0 changelog-tag d-block h-auto label m-0 mw-100 px-2 py-1"
 						key={component}
 					>
 						{component}
@@ -113,7 +122,7 @@ const Changelog = () => {
 		id: issue.key,
 		key: (
 			<a
-				className="font-weight-normal"
+				className="changelog-key-link"
 				href={issue.url}
 				rel="noopener noreferrer"
 				target="_blank"
@@ -131,7 +140,7 @@ const Changelog = () => {
 		summary: issue.summary,
 	});
 
-	const renderResults = (changelog: IChangelog) => {
+	const renderResults = (changelog: ChangelogResponse) => {
 		if (!changelog.total) {
 			return (
 				<EmptyState
@@ -141,7 +150,7 @@ const Changelog = () => {
 			);
 		}
 
-		const columns: IColumn[] = [
+		const columns: Column[] = [
 			{
 				className: 'changelog-summary',
 				columnKey: 'summary',
@@ -172,15 +181,12 @@ const Changelog = () => {
 					rows={changelog.items.map(getIssueRow)}
 				/>
 
-				<ClayPaginationBarWithBasicItems
+				<Pagination
 					active={page}
-					activeDelta={pageSize}
-					deltas={paginationDeltas}
-					labels={paginationLabels}
 					onActiveChange={(value: number) =>
 						setSearchPage({page: value, search})
 					}
-					onDeltaChange={(value: number) => setPageSize(value)}
+					pageSize={PAGE_SIZE}
 					totalItems={changelog.total}
 				/>
 			</>
@@ -190,12 +196,23 @@ const Changelog = () => {
 	return (
 		<div className="align-items-start changelog d-flex release-notes-tab">
 			<div className="release-notes-tab-main">
+				<TabHeader
+					description="reference-all-the-fixes-and-improvements-included-in-your-fix-pack-range"
+					title="changelog"
+				/>
+
 				<TabResults data={changelog} error={error} loading={loading}>
 					{renderResults}
 				</TabResults>
 			</div>
 
 			<div className="c-gap-4 d-flex flex-column release-notes-tab-facets">
+				<SearchFacet
+					id="changelogSearch"
+					onChange={setKeywordsInput}
+					value={keywordsInput}
+				/>
+
 				<Facet
 					clearDisabled={
 						!selectedComponents.length && !componentKeywords
@@ -220,10 +237,11 @@ const Changelog = () => {
 							selectedComponents.includes(filteredComponent)
 						)
 					}
-					title="refine-by"
+					title="component"
 				>
 					<Input
-						placeholder="search"
+						icon="search"
+						placeholder={i18n.translate('filter')}
 						onChange={(event) =>
 							setComponentKeywords(event.target.value)
 						}

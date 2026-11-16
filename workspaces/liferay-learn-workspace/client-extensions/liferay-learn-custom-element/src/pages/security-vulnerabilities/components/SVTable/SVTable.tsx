@@ -5,7 +5,7 @@
 
 import {useMemo} from 'react';
 import {Link, useNavigate} from 'react-router-dom';
-import Table, {IColumn, IRow} from '~/components/Table/Table';
+import Table, {Column, Row} from '~/components/Table/Table';
 import i18n from '~/utils/I18n';
 
 import SVSeverity from '../SVSeverity/SVSeverity';
@@ -13,7 +13,7 @@ import SVAffectedVersions from './components/SVAffectedVersions/SVAffectedVersio
 
 import './SVTable.scss';
 
-export interface ISVRow {
+export type SVRow = {
 	affectedVersions: string[];
 	category?: string;
 	cveIds?: string;
@@ -22,23 +22,19 @@ export interface ISVRow {
 	published?: string;
 	severity?: string;
 	summary?: string;
-}
+};
 
-interface IProps {
-	rows: ISVRow[];
-}
-
-const SVTable = ({rows}: IProps) => {
+const SVTable = ({rows}: {rows: SVRow[]}) => {
 	const navigate = useNavigate();
 
-	const columns: IColumn[] = [
+	const columns: Column[] = [
 		{
 			className: 'sv-priority-summary-column',
 			columnKey: 'prioritySummary',
 			label: i18n.translate('priority-summary'),
 		},
 		{
-			className: 'text-nowrap',
+			className: 'text-center text-nowrap',
 			columnKey: 'severity',
 			label: i18n.translate('severity'),
 		},
@@ -76,14 +72,14 @@ const SVTable = ({rows}: IProps) => {
 				prioritySummary: (
 					<div>
 						<Link
-							className="font-weight-bold sv-name text-break text-wrap"
+							className="sv-name text-break text-wrap"
 							onClick={(event) => event.stopPropagation()}
 							to={row.link ?? ''}
 						>
 							{row.cveIds}
 						</Link>
 
-						<div className="sv-summary text-break text-neutral-8 text-wrap">
+						<div className="sv-summary text-break text-wrap">
 							{row.summary}
 						</div>
 					</div>
@@ -99,7 +95,7 @@ const SVTable = ({rows}: IProps) => {
 		[rows]
 	);
 
-	const handleRowClick = (row: IRow) => {
+	const handleRowClick = (row: Row) => {
 		if (row.link && !window.getSelection()?.toString()) {
 			navigate(row.link);
 		}

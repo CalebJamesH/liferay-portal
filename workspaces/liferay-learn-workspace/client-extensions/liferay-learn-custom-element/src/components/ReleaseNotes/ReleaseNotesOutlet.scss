@@ -1,4 +1,6 @@
 .release-notes-body {
+	font-weight: 400;
+
 	.page-item {
 		margin: 0;
 
@@ -71,8 +73,9 @@
 	}
 
 	.pagination-results {
-		color: #54555f;
+		color: #282934;
 		font-size: 13px;
+		font-weight: 400;
 		line-height: 16px;
 		margin: 0;
 	}
@@ -94,12 +97,12 @@
 .release-notes-hero {
 	background: linear-gradient(
 		180deg,
-		#00256c 5.72%,
-		#0038a3 26.08%,
-		#0b5fff 44.48%,
-		#00a4fa 64.33%,
-		rgba(46, 183, 255, 0.8) 77.33%,
-		rgba(255, 255, 255, 0.5) 96.94%
+		#00256c 5%,
+		#0038a3 25%,
+		#0b5fff 45%,
+		#00a4fa 65%,
+		rgba(46, 183, 255, 0.8) 75%,
+		rgba(255, 255, 255, 0.5) 97%
 	);
 	padding: 72px 0;
 
@@ -157,6 +160,7 @@
 
 	td {
 		font-size: 16px;
+		font-weight: 400;
 		line-height: 24px;
 		padding: 16px 12px;
 		vertical-align: top;

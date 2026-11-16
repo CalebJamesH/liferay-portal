@@ -18,7 +18,7 @@ const TabHeader = ({description, title}: TabHeaderProps) => (
 			{i18n.translate(title)}
 		</h2>
 
-		<p className="mb-0 release-notes-tab-header-description text-4 text-secondary">
+		<p className="mb-0 release-notes-tab-header-description">
 			{i18n.translate(description)}
 		</p>
 	</div>

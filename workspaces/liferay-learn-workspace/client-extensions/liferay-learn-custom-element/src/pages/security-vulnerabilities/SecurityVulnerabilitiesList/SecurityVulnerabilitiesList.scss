@@ -13,18 +13,12 @@
 	.sv-list-header {
 		background: linear-gradient(
 			180deg,
-			var(--color-brand-primary-darken-5, #00256c) 5.72%,
-			var(--color-brand-primary-darken-3, #003eb3) 26.08%,
-			var(--color-brand-primary, #0b5fff) 44.48%,
-			var(--color-brand-primary-lighten-2, #00a4fa) 64.33%,
-			color-mix(
-					in srgb,
-					var(--color-brand-primary-lighten-2, #2eb7ff) 80%,
-					transparent
-				)
-				77.33%,
-			color-mix(in srgb, var(--color-neutral-0, #fff) 50%, transparent)
-				96.94%
+			#00256c 5.72%,
+			#0038a3 26.08%,
+			#0b5fff 44.48%,
+			#00a4fa 64.33%,
+			rgba(46, 183, 255, 0.8) 77.33%,
+			rgba(255, 255, 255, 0.5) 96.94%
 		);
 		min-height: 440px;
 
@@ -34,6 +28,46 @@
 
 		.sv-search-container {
 			max-width: 1600px;
+		}
+	}
+}
+
+.sv-list .pagination-bar {
+	color: var(--color-neutral-10, #282934);
+	font-size: 13px;
+	font-weight: 400;
+	line-height: 16px;
+
+	.pagination-results,
+	.pagination-items-per-page {
+		color: var(--color-neutral-10, #282934);
+		font-size: 13px;
+		font-weight: 400;
+		line-height: 16px;
+	}
+
+	.page-item.active .page-link {
+		color: var(--color-brand-primary, #0b5fff);
+		font-size: 14px;
+		font-weight: 600;
+		line-height: 16px;
+	}
+}
+
+@media (min-width: 992px) {
+	.sv-table-content {
+		flex-wrap: nowrap;
+
+		> .sv-filter-column {
+			flex: 0 0 328px;
+			max-width: 328px;
+		}
+
+		> .sv-results-column {
+			flex: 1 1 0;
+			max-width: none;
+			min-width: 0;
+			padding-left: 28px;
 		}
 	}
 }

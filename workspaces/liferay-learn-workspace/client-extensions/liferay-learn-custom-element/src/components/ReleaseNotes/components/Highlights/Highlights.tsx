@@ -3,20 +3,18 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
-import {ClayPaginationBarWithBasicItems} from '@clayui/pagination-bar';
+import ClayIcon from '@clayui/icon';
 import {useEffect, useMemo, useState} from 'react';
-import {IHighlight, IHighlights} from '~/services/rest/releaseNotes';
+import {Highlight, HighlightsResponse} from '~/services/rest/releaseNotes';
 import i18n from '~/utils/I18n';
 import {getFormattedDate} from '~/utils/getFormattedDate';
 import toggleArrayItem from '~/utils/toggleArrayItem';
 
 import useHighlights from '../../../../hooks/useHighlights';
-import {
-	paginationDeltas,
-	paginationLabels,
-} from '../../../../utils/constants/paginationOptions';
 import EmptyState from '../EmptyState/EmptyState';
 import Facet from '../Facet/Facet';
+import Pagination from '../Pagination/Pagination';
+import SearchFacet from '../SearchFacet/SearchFacet';
 import TabHeader from '../TabHeader/TabHeader';
 import TabResults from '../TabResults/TabResults';
 
@@ -38,6 +36,8 @@ const HIGHLIGHTS: {label: string; value: HighlightType}[] = [
 	{label: 'security', value: 'security'},
 ];
 
+const PAGE_SIZE = 10;
+
 const QUARTERLY_RELEASE_HIGHLIGHTS_URL =
 	'/release-notes/liferay-dxp/highlights';
 
@@ -47,8 +47,9 @@ const Highlights = () => {
 	const [selectedHighlights, setSelectedHighlights] = useState<
 		HighlightType[]
 	>([]);
+	const [dateAscending, setDateAscending] = useState(false);
+	const [keywords, setKeywords] = useState('');
 	const [page, setPage] = useState(1);
-	const [pageSize, setPageSize] = useState(paginationDeltas[0].label);
 
 	const {error, highlights, loading} = useHighlights({
 		from: from.key,
@@ -57,79 +58,100 @@ const Highlights = () => {
 
 	useEffect(() => {
 		setPage(1);
-	}, [from.key, selectedHighlights, to.key]);
+	}, [dateAscending, from.key, keywords, selectedHighlights, to.key]);
 
-	const filteredHighlights = useMemo<IHighlight[]>(() => {
-		const items = highlights?.items ?? [];
+	const filteredHighlights = useMemo<Highlight[]>(() => {
+		const normalizedKeywords = keywords.trim().toLowerCase();
 
-		if (!selectedHighlights.length) {
-			return items;
-		}
+		const items = (highlights?.items ?? [])
+			.filter(
+				(item) =>
+					!selectedHighlights.length ||
+					selectedHighlights.some(
+						(selectedHighlight) => item[selectedHighlight]
+					)
+			)
+			.filter(
+				(item) =>
+					!normalizedKeywords ||
+					[
+						item.title,
+						...HIGHLIGHTS.map(({value}) =>
+							(item[value] ?? '').replace(/<[^>]*>/g, ' ')
+						),
+					]
+						.join(' ')
+						.toLowerCase()
+						.includes(normalizedKeywords)
+			);
 
-		return items.filter((item) =>
-			selectedHighlights.some((selectedHilight) => item[selectedHilight])
-		);
-	}, [highlights, selectedHighlights]);
+		return [...items].sort((a, b) => {
+			const order = (a.releaseDate ?? '').localeCompare(
+				b.releaseDate ?? ''
+			);
+
+			return dateAscending ? order : -order;
+		});
+	}, [dateAscending, highlights, keywords, selectedHighlights]);
 
 	const pageHighlights = filteredHighlights.slice(
-		(page - 1) * pageSize,
-		page * pageSize
+		(page - 1) * PAGE_SIZE,
+		page * PAGE_SIZE
 	);
 
 	const visibleHighlightTypes = selectedHighlights.length
 		? HIGHLIGHTS.filter(({value}) => selectedHighlights.includes(value))
 		: HIGHLIGHTS;
 
-	const renderHighlight = (highlight: IHighlight) => {
+	const renderHighlight = (highlight: Highlight) => {
 		const sections = visibleHighlightTypes.filter(
 			({value}) => highlight[value]
 		);
 
 		return (
-			<article
-				className="c-gap-3 d-flex flex-column highlights-item"
-				key={highlight.releaseKey}
-			>
-				<div className="align-items-start c-gap-2 d-flex flex-column">
-					{highlight.releaseDate && (
-						<span className="d-inline-block px-2 py-1 release-notes-tag rounded">
-							{getFormattedDate(
-								`${highlight.releaseDate}T00:00:00`,
-								'day2DMonthSYearN'
-							)}
-						</span>
+			<tr className="highlights-item" key={highlight.releaseKey}>
+				<td className="highlights-date text-nowrap">
+					{getFormattedDate(
+						highlight.releaseDate
+							? `${highlight.releaseDate}T00:00:00`
+							: undefined,
+						'monthSDayNYearN'
 					)}
+				</td>
 
-					<h3 className="font-weight-bold highlights-title m-0 text-8">
-						{highlight.title}
-					</h3>
-				</div>
+				<td>
+					<div className="c-gap-3 d-flex flex-column">
+						<h3 className="font-weight-bold highlights-title m-0 text-6">
+							{highlight.title}
+						</h3>
 
-				{sections.length ? (
-					sections.map(({label, value}) => (
-						<div className="highlights-section" key={value}>
-							<h4 className="font-weight-semi-bold highlights-section-title m-0 mb-1 text-5">
-								{i18n.translate(label)}
-							</h4>
+						{sections.length ? (
+							sections.map(({label, value}) => (
+								<div className="highlights-section" key={value}>
+									<h4 className="font-weight-semi-bold highlights-section-title m-0 mb-1 text-4">
+										{i18n.translate(label)}
+									</h4>
 
-							<div
-								className="highlights-section-body text-4"
-								dangerouslySetInnerHTML={{
-									__html: highlight[value] as string,
-								}}
-							/>
-						</div>
-					))
-				) : (
-					<p className="font-italic highlights-none m-0 text-4">
-						{i18n.translate('no-highlights-for-this-release')}
-					</p>
-				)}
-			</article>
+									<div
+										className="highlights-section-body text-3"
+										dangerouslySetInnerHTML={{
+											__html: highlight[value] as string,
+										}}
+									/>
+								</div>
+							))
+						) : (
+							<p className="font-italic highlights-none m-0 text-3">
+								{i18n.translate('no-highlights-for-this-release')}
+							</p>
+						)}
+					</div>
+				</td>
+			</tr>
 		);
 	};
 
-	const renderResults = (highlights: IHighlights) => (
+	const renderResults = (highlights: HighlightsResponse) => (
 		<>
 			{highlights.hasQuarterlyReleases && (
 				<div className="alert alert-info">
@@ -144,20 +166,34 @@ const Highlights = () => {
 
 			{!!filteredHighlights.length && (
 				<>
-					<div className="pt-2">
-						{pageHighlights.map(renderHighlight)}
-					</div>
+					<table className="highlights-table release-notes-table">
+						<thead>
+							<tr>
+								<th className="highlights-date">
+									<button
+										className="align-items-center btn btn-unstyled c-gap-1 d-inline-flex highlights-sort p-0"
+										onClick={() =>
+											setDateAscending(!dateAscending)
+										}
+										type="button"
+									>
+										{i18n.translate('date')}
 
-					<ClayPaginationBarWithBasicItems
+										<ClayIcon symbol="order-arrow" />
+									</button>
+								</th>
+
+								<th>{i18n.translate('release')}</th>
+							</tr>
+						</thead>
+
+						<tbody>{pageHighlights.map(renderHighlight)}</tbody>
+					</table>
+
+					<Pagination
 						active={page}
-						activeDelta={pageSize}
-						deltas={paginationDeltas}
-						labels={paginationLabels}
-						onActiveChange={(value: number) => setPage(value)}
-						onDeltaChange={(value: number) => {
-							setPage(1);
-							setPageSize(value);
-						}}
+						onActiveChange={setPage}
+						pageSize={PAGE_SIZE}
 						totalItems={filteredHighlights.length}
 					/>
 				</>
@@ -165,7 +201,8 @@ const Highlights = () => {
 
 			{!filteredHighlights.length &&
 				(!highlights.hasQuarterlyReleases ||
-					!!selectedHighlights.length) && (
+					!!selectedHighlights.length ||
+					!!keywords.trim()) && (
 					<EmptyState
 						description="try-modifying-your-criteria"
 						title="no-results-found-to-match-your-selection"
@@ -188,6 +225,12 @@ const Highlights = () => {
 			</div>
 
 			<div className="c-gap-4 d-flex flex-column release-notes-tab-facets">
+				<SearchFacet
+					id="highlightsSearch"
+					onChange={setKeywords}
+					value={keywords}
+				/>
+
 				<Facet
 					clearDisabled={!selectedHighlights.length}
 					collapsible
@@ -201,7 +244,7 @@ const Highlights = () => {
 					selectAllDisabled={
 						selectedHighlights.length === HIGHLIGHTS.length
 					}
-					title="refine-by"
+					title="type"
 				>
 					{HIGHLIGHTS.map(({label, value}) => (
 						<Checkbox

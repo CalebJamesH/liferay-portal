@@ -1,9 +1,15 @@
+.highlights-date {
+	color: #282934;
+	font-size: 14px;
+	line-height: 24px;
+	width: 140px;
+}
+
 .highlights-item {
 	border-bottom: 1px solid #e2e2e4;
-	padding: 32px 0;
 
-	&:first-child {
-		padding-top: 0;
+	> td {
+		padding: 24px 12px;
 	}
 }
 
@@ -37,7 +43,28 @@
 	line-height: 24px;
 }
 
+.highlights-sort {
+	color: inherit;
+	font-size: inherit;
+	font-weight: inherit;
+
+	.lexicon-icon {
+		height: 12px;
+		width: 12px;
+	}
+}
+
+.highlights-table {
+	thead th {
+		text-align: left;
+	}
+
+	tbody tr:hover > td {
+		background-color: transparent;
+	}
+}
+
 .highlights-title {
 	color: #282934;
-	line-height: 32px;
+	line-height: 28px;
 }

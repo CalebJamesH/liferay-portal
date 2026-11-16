@@ -6,28 +6,28 @@
 import ClayTable from '@clayui/table';
 import {ReactNode} from 'react';
 
-export interface IColumn {
+export type Column = {
 	className?: string;
 	columnKey: string;
 	label: string;
-}
+};
 
-export interface IRow {
+export type Row = {
 	className?: string;
 	id?: string;
 	link?: string;
 	[key: string]: ReactNode;
-}
+};
 
-interface IProps {
+type TableProps = {
 	className?: string;
-	columns: IColumn[];
+	columns: Column[];
 	noWrap?: boolean;
-	onRowClick?: (row: IRow) => void;
-	rows: IRow[];
-}
+	onRowClick?: (row: Row) => void;
+	rows: Row[];
+};
 
-const Table = ({className, columns, noWrap, onRowClick, rows}: IProps) => {
+const Table = ({className, columns, noWrap, onRowClick, rows}: TableProps) => {
 	return (
 		<ClayTable
 			borderless

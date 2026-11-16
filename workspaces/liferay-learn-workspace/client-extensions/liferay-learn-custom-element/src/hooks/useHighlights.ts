@@ -5,14 +5,14 @@
 
 import {useEffect, useState} from 'react';
 import {
-	IHighlights,
-	IHighlightsParams,
+	HighlightsResponse,
+	HighlightsParams,
 	getHighlights,
 } from '~/services/rest/releaseNotes';
 
-const useHighlights = ({from, to}: IHighlightsParams) => {
+const useHighlights = ({from, to}: HighlightsParams) => {
 	const [error, setError] = useState<Error | undefined>(undefined);
-	const [highlights, setHighlights] = useState<IHighlights | undefined>(
+	const [highlights, setHighlights] = useState<HighlightsResponse | undefined>(
 		undefined
 	);
 	const [loading, setLoading] = useState(true);

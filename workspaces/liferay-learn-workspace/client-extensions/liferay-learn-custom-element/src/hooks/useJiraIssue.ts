@@ -8,7 +8,7 @@ import {getIssue} from '~/services/rest/jira';
 
 import {JiraEnum} from '../utils/constants/JiraEnum';
 
-export interface IJiraFields {
+export type JiraFields = {
 	[JiraEnum.AFFECTED_VERSIONS]?: string[];
 	[JiraEnum.AFFECTS]?: string;
 	[JiraEnum.CATEGORIES]?: string[];
@@ -19,14 +19,14 @@ export interface IJiraFields {
 	[JiraEnum.PUBLISHED_DATE]?: string;
 	[JiraEnum.SEVERITY]?: string;
 	[JiraEnum.SUMMARY]?: string;
-}
-export interface IJiraIssue {
-	[JiraEnum.FIELDS]?: IJiraFields;
+};
+export type JiraIssue = {
+	[JiraEnum.FIELDS]?: JiraFields;
 	[JiraEnum.KEY]?: string;
-}
+};
 
 const useJiraIssue = (issueKey?: string) => {
-	const [jiraIssue, setJiraIssue] = useState<IJiraIssue | undefined>(
+	const [jiraIssue, setJiraIssue] = useState<JiraIssue | undefined>(
 		undefined
 	);
 	const [error, setError] = useState(false);
@@ -47,7 +47,7 @@ const useJiraIssue = (issueKey?: string) => {
 			setLoading(true);
 
 			let failed = false;
-			let response: IJiraIssue | undefined;
+			let response: JiraIssue | undefined;
 
 			try {
 				response = await getIssue(issueKey);

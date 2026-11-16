@@ -1,0 +1,350 @@
+[
+	{
+		"fileTypes": [
+			{
+				"key": "product",
+				"legacyAssetCategoryId": 118191001,
+				"name": "Product"
+			}
+		],
+		"key": "commerce",
+		"legacyAssetCategoryId": 118190997,
+		"name": "Commerce"
+	},
+	{
+		"fileTypes": [
+			{
+				"key": "productUpdates",
+				"legacyAssetCategoryId": 121096186,
+				"name": "Product/Updates"
+			},
+			{
+				"key": "securityUpdates",
+				"legacyAssetCategoryId": 121096188,
+				"name": "Security Updates"
+			}
+		],
+		"key": "dxp74",
+		"legacyAssetCategoryId": 121096180,
+		"name": "DXP 7.4"
+	},
+	{
+		"fileTypes": [
+			{
+				"key": "productUpdates",
+				"legacyAssetCategoryId": 120352763,
+				"name": "Product/Updates"
+			},
+			{
+				"key": "securityFixPacks",
+				"legacyAssetCategoryId": 120352767,
+				"name": "Security Fix Packs"
+			}
+		],
+		"key": "dxp73",
+		"legacyAssetCategoryId": 120352759,
+		"name": "DXP 7.3"
+	},
+	{
+		"fileTypes": [
+			{
+				"key": "fixPacks",
+				"legacyAssetCategoryId": 118681166,
+				"name": "Fix Packs"
+			},
+			{
+				"key": "productServicePacks",
+				"legacyAssetCategoryId": 118681163,
+				"name": "Product/Service Packs"
+			},
+			{
+				"key": "securityFixPacks",
+				"legacyAssetCategoryId": 118681168,
+				"name": "Security Fix Packs"
+			}
+		],
+		"key": "dxp72",
+		"legacyAssetCategoryId": 118681159,
+		"name": "DXP 7.2"
+	},
+	{
+		"fileTypes": [
+			{
+				"key": "fixPacks",
+				"legacyAssetCategoryId": 118191054,
+				"name": "Fix Packs"
+			},
+			{
+				"key": "productServicePacks",
+				"legacyAssetCategoryId": 118191052,
+				"name": "Product/Service Packs"
+			},
+			{
+				"key": "securityFixPacks",
+				"legacyAssetCategoryId": 118191056,
+				"name": "Security Fix Packs"
+			}
+		],
+		"key": "dxp71",
+		"legacyAssetCategoryId": 118191011,
+		"name": "DXP 7.1"
+	},
+	{
+		"fileTypes": [
+			{
+				"key": "fixPacks",
+				"legacyAssetCategoryId": 118191046,
+				"name": "Fix Packs"
+			},
+			{
+				"key": "productServicePacks",
+				"legacyAssetCategoryId": 118191044,
+				"name": "Product/Service Packs"
+			},
+			{
+				"key": "securityFixPacks",
+				"legacyAssetCategoryId": 118191048,
+				"name": "Security Fix Packs"
+			}
+		],
+		"key": "dxp70",
+		"legacyAssetCategoryId": 118191009,
+		"name": "DXP 7.0"
+	},
+	{
+		"fileTypes": [
+			{
+				"key": "patchRelease",
+				"legacyAssetCategoryId": 122589696,
+				"name": "Patch Release"
+			},
+			{
+				"key": "quarterlyReleases",
+				"legacyAssetCategoryId": 122235708,
+				"name": "Quarterly Releases"
+			}
+		],
+		"key": "dxpQuarterlyReleases",
+		"legacyAssetCategoryId": 122235468,
+		"name": "DXP Quarterly Releases"
+	},
+	{
+		"fileTypes": [
+			{
+				"key": "developerStudio",
+				"legacyAssetCategoryId": 118191038,
+				"name": "Developer Studio"
+			},
+			{
+				"key": "faces",
+				"legacyAssetCategoryId": 118191040,
+				"name": "Faces"
+			},
+			{
+				"key": "pluginsSDK",
+				"legacyAssetCategoryId": 118191042,
+				"name": "Plugins SDK"
+			},
+			{
+				"key": "projectSDK",
+				"legacyAssetCategoryId": 118204722,
+				"name": "Project SDK"
+			}
+		],
+		"key": "developerTools",
+		"legacyAssetCategoryId": 118191007,
+		"name": "Developer Tools"
+	},
+	{
+		"fileTypes": [
+			{
+				"key": "product",
+				"legacyAssetCategoryId": 118191060,
+				"name": "Product"
+			}
+		],
+		"key": "enterpriseSearch",
+		"legacyAssetCategoryId": 118191013,
+		"name": "Enterprise Search"
+	},
+	{
+		"fileTypes": [
+			{
+				"key": "liferayCMS2026Q4",
+				"legacyAssetCategoryId": 123416820,
+				"name": "Liferay CMS 2026.Q4"
+			}
+		],
+		"key": "liferayCMS",
+		"legacyAssetCategoryId": 123416816,
+		"name": "Liferay CMS"
+	},
+	{
+		"fileTypes": [
+			{
+				"key": "product",
+				"legacyAssetCategoryId": 120134604,
+				"name": "Product"
+			}
+		],
+		"key": "liferayConnectorToPunchOut2Go",
+		"legacyAssetCategoryId": 120134602,
+		"name": "Liferay Connector to PunchOut2Go"
+	},
+	{
+		"fileTypes": [
+			{
+				"key": "product",
+				"legacyAssetCategoryId": 118191032,
+				"name": "Product"
+			}
+		],
+		"key": "liferayConnectorToSalesforce",
+		"legacyAssetCategoryId": 118191003,
+		"name": "Liferay Connector to Salesforce"
+	},
+	{
+		"fileTypes": [
+			{
+				"key": "product",
+				"legacyAssetCategoryId": 118191064,
+				"name": "Product"
+			}
+		],
+		"key": "mobileExperiencePlatform",
+		"legacyAssetCategoryId": 118191017,
+		"name": "Mobile Experience Platform"
+	},
+	{
+		"fileTypes": [
+			{
+				"key": "product",
+				"legacyAssetCategoryId": 118191066,
+				"name": "Product"
+			}
+		],
+		"key": "patchingTool",
+		"legacyAssetCategoryId": 118191019,
+		"name": "Patching Tool"
+	},
+	{
+		"fileTypes": [
+			{
+				"key": "fixPacks",
+				"legacyAssetCategoryId": 118191072,
+				"name": "Fix Packs"
+			},
+			{
+				"key": "plugins",
+				"legacyAssetCategoryId": 118191074,
+				"name": "Plugins"
+			},
+			{
+				"key": "productServicePacks",
+				"legacyAssetCategoryId": 118191070,
+				"name": "Product/Service Packs"
+			},
+			{
+				"key": "securityFixPacks",
+				"legacyAssetCategoryId": 118191076,
+				"name": "Security Fix Packs"
+			}
+		],
+		"key": "portal52",
+		"legacyAssetCategoryId": 118191021,
+		"name": "Portal 5.2"
+	},
+	{
+		"fileTypes": [
+			{
+				"key": "fixPacks",
+				"legacyAssetCategoryId": 118191080,
+				"name": "Fix Packs"
+			},
+			{
+				"key": "plugins",
+				"legacyAssetCategoryId": 118191082,
+				"name": "Plugins"
+			},
+			{
+				"key": "productServicePacks",
+				"legacyAssetCategoryId": 118191078,
+				"name": "Product/Service Packs"
+			},
+			{
+				"key": "securityFixPacks",
+				"legacyAssetCategoryId": 118191084,
+				"name": "Security Fix Packs"
+			}
+		],
+		"key": "portal60",
+		"legacyAssetCategoryId": 118191023,
+		"name": "Portal 6.0"
+	},
+	{
+		"fileTypes": [
+			{
+				"key": "fixPacks",
+				"legacyAssetCategoryId": 118191088,
+				"name": "Fix Packs"
+			},
+			{
+				"key": "plugins",
+				"legacyAssetCategoryId": 118191091,
+				"name": "Plugins"
+			},
+			{
+				"key": "productServicePacks",
+				"legacyAssetCategoryId": 118191086,
+				"name": "Product/Service Packs"
+			},
+			{
+				"key": "securityFixPacks",
+				"legacyAssetCategoryId": 118191093,
+				"name": "Security Fix Packs"
+			}
+		],
+		"key": "portal61",
+		"legacyAssetCategoryId": 118191025,
+		"name": "Portal 6.1"
+	},
+	{
+		"fileTypes": [
+			{
+				"key": "fixPacks",
+				"legacyAssetCategoryId": 118191097,
+				"name": "Fix Packs"
+			},
+			{
+				"key": "plugins",
+				"legacyAssetCategoryId": 118191099,
+				"name": "Plugins"
+			},
+			{
+				"key": "productServicePacks",
+				"legacyAssetCategoryId": 118191095,
+				"name": "Product/Service Packs"
+			},
+			{
+				"key": "securityFixPacks",
+				"legacyAssetCategoryId": 118191101,
+				"name": "Security Fix Packs"
+			}
+		],
+		"key": "portal62",
+		"legacyAssetCategoryId": 118191027,
+		"name": "Portal 6.2"
+	},
+	{
+		"fileTypes": [
+			{
+				"key": "product",
+				"legacyAssetCategoryId": 118191068,
+				"name": "Product"
+			}
+		],
+		"key": "sync",
+		"legacyAssetCategoryId": 118191029,
+		"name": "Sync"
+	}
+]

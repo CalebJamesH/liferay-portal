@@ -51,3 +51,26 @@
 		text-decoration: underline;
 	}
 }
+
+.release-notes-facet {
+	.custom-control-label,
+	.custom-control-label span {
+		color: #282934;
+		font-size: 13px;
+		font-weight: 400;
+		line-height: 16px;
+	}
+
+	.form-control {
+		color: #282934;
+		font-size: 13px;
+		font-weight: 400;
+		line-height: 16px;
+
+		&::placeholder {
+			color: #6c6c75;
+			font-weight: 400;
+			opacity: 1;
+		}
+	}
+}

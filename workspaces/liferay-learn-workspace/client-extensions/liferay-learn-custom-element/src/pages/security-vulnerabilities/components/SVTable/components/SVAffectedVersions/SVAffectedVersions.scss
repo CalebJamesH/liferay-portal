@@ -1,7 +1,9 @@
 .sv-affected-version {
-	background-color: var(--color-neutral-2, #e2e2e4);
+	background-color: var(--color-state-neutral-lighten-2, #e1e1e4);
+	border-radius: 4px;
 	color: var(--color-neutral-8, #54555f);
-	font-size: var(--font-size-sm);
+	font-size: 13px;
+	line-height: 16px;
 	min-width: var(--spacer-6);
 }
 

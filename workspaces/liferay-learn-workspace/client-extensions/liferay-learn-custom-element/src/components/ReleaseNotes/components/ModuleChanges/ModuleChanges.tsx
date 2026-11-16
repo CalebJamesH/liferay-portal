@@ -4,32 +4,31 @@
  */
 
 import {ClayToggle} from '@clayui/form';
-import {ClayPaginationBarWithBasicItems} from '@clayui/pagination-bar';
+import ClayIcon from '@clayui/icon';
 import {useEffect, useMemo, useState} from 'react';
-import {IModuleChange, IModuleChanges} from '~/services/rest/releaseNotes';
+import {ModuleChange, ModuleChangesResponse} from '~/services/rest/releaseNotes';
 import i18n from '~/utils/I18n';
 import toggleArrayItem from '~/utils/toggleArrayItem';
 
 import useModuleChanges from '~/hooks/useModuleChanges';
-import {
-	paginationDeltas,
-	paginationLabels,
-} from '~/utils/constants/paginationOptions';
 import EmptyState from '../EmptyState/EmptyState';
 import Facet from '../Facet/Facet';
+import Pagination from '../Pagination/Pagination';
+import SearchFacet from '../SearchFacet/SearchFacet';
 import TabHeader from '../TabHeader/TabHeader';
 import TabResults from '../TabResults/TabResults';
 
 import Checkbox from '~/components/Checkbox/Checkbox';
-import Input from '~/components/Input/Input';
 import {useReleaseNotesContext} from '~/components/ReleaseNotes/ReleaseNotesOutlet';
-import Table, {IColumn, IRow} from '~/components/Table/Table';
+import Table, {Column, Row} from '~/components/Table/Table';
 
 import './ModuleChanges.scss';
 
 type ModuleChangesProps = {
 	owners: {label: string; value: string}[];
 };
+
+const PAGE_SIZE = 10;
 
 const ModuleDownloadLink = ({
 	url,
@@ -43,8 +42,15 @@ const ModuleDownloadLink = ({
 	}
 
 	return (
-		<a href={url} rel="noopener noreferrer" target="_blank">
+		<a
+			className="align-items-center c-gap-1 d-inline-flex"
+			href={url}
+			rel="noopener noreferrer"
+			target="_blank"
+		>
 			{version}
+
+			<ClayIcon symbol="download" />
 		</a>
 	);
 };
@@ -57,7 +63,6 @@ const ModuleChanges = ({owners}: ModuleChangesProps) => {
 	const [keywordsInput, setKeywordsInput] = useState('');
 	const [selectedOwners, setSelectedOwners] = useState<string[]>([]);
 	const [page, setPage] = useState(1);
-	const [pageSize, setPageSize] = useState(paginationDeltas[0].label);
 
 	const {error, loading, moduleChanges} = useModuleChanges({
 		changesOnly,
@@ -82,16 +87,16 @@ const ModuleChanges = ({owners}: ModuleChangesProps) => {
 		setPage(1);
 	}, [changesOnly, from.key, keywords, selectedOwners, to.key]);
 
-	const pageItems = useMemo<IModuleChange[]>(
+	const pageItems = useMemo<ModuleChange[]>(
 		() =>
 			moduleChanges?.items.slice(
-				(page - 1) * pageSize,
-				page * pageSize
+				(page - 1) * PAGE_SIZE,
+				page * PAGE_SIZE
 			) ?? [],
-		[moduleChanges, page, pageSize]
+		[moduleChanges, page]
 	);
 
-	const renderResults = (moduleChanges: IModuleChanges) => {
+	const renderResults = (moduleChanges: ModuleChangesResponse) => {
 		if (!moduleChanges.total) {
 			return (
 				<EmptyState
@@ -101,10 +106,15 @@ const ModuleChanges = ({owners}: ModuleChangesProps) => {
 			);
 		}
 
-		const columns: IColumn[] = [
+		const columns: Column[] = [
 			{
 				columnKey: 'name',
-				label: i18n.translate('name'),
+				label: i18n.translate('module'),
+			},
+			{
+				className: 'module-changes-status',
+				columnKey: 'status',
+				label: '',
 			},
 			{
 				columnKey: 'group',
@@ -122,11 +132,7 @@ const ModuleChanges = ({owners}: ModuleChangesProps) => {
 			},
 		];
 
-		const rows: IRow[] = pageItems.map((moduleChange) => ({
-			className:
-				moduleChange.fromVersion !== moduleChange.toVersion
-					? 'module-changes-changed'
-					: undefined,
+		const rows: Row[] = pageItems.map((moduleChange) => ({
 			fromVersion: (
 				<ModuleDownloadLink
 					url={moduleChange.fromURL}
@@ -136,6 +142,14 @@ const ModuleChanges = ({owners}: ModuleChangesProps) => {
 			group: moduleChange.group,
 			id: `${moduleChange.group}:${moduleChange.name}`,
 			name: moduleChange.name,
+			status:
+				moduleChange.fromVersion !== moduleChange.toVersion ? (
+					<span className="border-0 d-inline-block label m-0 module-changes-tag px-2 py-1">
+						{i18n.translate('changed')}
+					</span>
+				) : (
+					'-'
+				),
 			toVersion: (
 				<ModuleDownloadLink
 					url={moduleChange.toURL}
@@ -152,16 +166,10 @@ const ModuleChanges = ({owners}: ModuleChangesProps) => {
 					rows={rows}
 				/>
 
-				<ClayPaginationBarWithBasicItems
+				<Pagination
 					active={page}
-					activeDelta={pageSize}
-					deltas={paginationDeltas}
-					labels={paginationLabels}
-					onActiveChange={(value: number) => setPage(value)}
-					onDeltaChange={(value: number) => {
-						setPage(1);
-						setPageSize(value);
-					}}
+					onActiveChange={setPage}
+					pageSize={PAGE_SIZE}
 					totalItems={moduleChanges.total}
 				/>
 			</>
@@ -173,7 +181,7 @@ const ModuleChanges = ({owners}: ModuleChangesProps) => {
 			<div className="release-notes-tab-main">
 				<TabHeader
 					description="reference-the-bundle-or-module-version-you-should-compile-against"
-					title="module-version-changes"
+					title="modules-version-changes"
 				/>
 
 				<TabResults
@@ -187,17 +195,34 @@ const ModuleChanges = ({owners}: ModuleChangesProps) => {
 			</div>
 
 			<div className="c-gap-4 d-flex flex-column release-notes-tab-facets">
-				<Facet id="moduleChangesSearch" title="search">
-					<Input
-						placeholder={i18n.translate('name')}
-						onChange={(event) =>
-							setKeywordsInput(event.target.value)
-						}
-						value={keywordsInput}
-					/>
-				</Facet>
+				<SearchFacet
+					id="moduleChangesSearch"
+					onChange={setKeywordsInput}
+					value={keywordsInput}
+				/>
 
-				<Facet collapsible id="moduleChangesFilters" title="refine-by">
+				<section className="bg-neutral-1 p-3 release-notes-facet">
+					<ClayToggle
+						containerProps={{
+							className: 'm-0 module-changes-toggle',
+						}}
+						label={i18n.translate('only-show-changes')}
+						onToggle={setChangesOnly}
+						toggled={changesOnly}
+					/>
+				</section>
+
+				<Facet
+					clearDisabled={!selectedOwners.length}
+					collapsible
+					id="moduleChangesFilters"
+					onClear={() => setSelectedOwners([])}
+					onSelectAll={() =>
+						setSelectedOwners(owners.map((owner) => owner.value))
+					}
+					selectAllDisabled={selectedOwners.length === owners.length}
+					title="group"
+				>
 					{owners.map((owner) => (
 						<Checkbox
 							checked={selectedOwners.includes(owner.value)}
@@ -213,19 +238,6 @@ const ModuleChanges = ({owners}: ModuleChangesProps) => {
 							}
 						/>
 					))}
-
-					<h4 className="font-weight-semi-bold m-0 mt-1 release-notes-facet-section-title">
-						{i18n.translate('only-show')}
-					</h4>
-
-					<ClayToggle
-						containerProps={{
-							className: 'm-0 module-changes-toggle',
-						}}
-						label={i18n.translate('changes')}
-						onToggle={setChangesOnly}
-						toggled={changesOnly}
-					/>
 				</Facet>
 			</div>
 		</div>

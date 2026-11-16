@@ -7,28 +7,28 @@ import {useCallback, useEffect, useState} from 'react';
 import {useSearchParams} from 'react-router-dom';
 import {searchSecurityVulnerabilities} from '~/services/rest/jira';
 import {JiraEnum} from '~/utils/constants/JiraEnum';
-import {FILTER_MAP, IFilterOptions} from '~/utils/constants/filterOptions';
+import {FILTER_MAP, FilterOptions} from '~/utils/constants/filterOptions';
 
-import {IJiraIssue} from './useJiraIssue';
+import {JiraIssue} from './useJiraIssue';
 
-export interface IJiraResponse {
-	[JiraEnum.ISSUES]?: IJiraIssue[];
+export type JiraResponse = {
+	[JiraEnum.ISSUES]?: JiraIssue[];
 	[JiraEnum.KEYWORDS]?: string;
 	[JiraEnum.PAGE]?: number;
 	[JiraEnum.PAGE_SIZE]?: number;
 	[JiraEnum.SORT_BY]?: string;
 	[JiraEnum.SORT_ORDER]?: string;
 	[JiraEnum.TOTAL]?: number;
-}
+};
 
-export interface IJiraSearchParams {
-	[JiraEnum.FILTERS]?: IFilterOptions;
+export type JiraSearchParams = {
+	[JiraEnum.FILTERS]?: FilterOptions;
 	[JiraEnum.KEYWORDS]?: string;
 	[JiraEnum.PAGE]?: number;
 	[JiraEnum.PAGE_SIZE]?: number;
 	[JiraEnum.SORT_BY]?: string;
 	[JiraEnum.SORT_ORDER]?: string;
-}
+};
 
 const NUMBER_KEYS = [JiraEnum.PAGE, JiraEnum.PAGE_SIZE] as const;
 
@@ -62,8 +62,8 @@ const setOrDelete = (
 };
 
 const mergeIntoURL = (
-	defaultParams: IJiraSearchParams,
-	params: IJiraSearchParams,
+	defaultParams: JiraSearchParams,
+	params: JiraSearchParams,
 	urlSearchParams: URLSearchParams
 ): URLSearchParams => {
 	const newURLSearchParams = new URLSearchParams(urlSearchParams);
@@ -93,7 +93,7 @@ const mergeIntoURL = (
 
 const toAPIQueryString = (
 	urlSearchParams: URLSearchParams,
-	defaultParams: IJiraSearchParams
+	defaultParams: JiraSearchParams
 ): string => {
 	const apiSearchParams = new URLSearchParams();
 
@@ -123,9 +123,9 @@ const toAPIQueryString = (
 	return apiSearchParams.toString();
 };
 
-const useJiraSearch = (defaultParams: IJiraSearchParams) => {
+const useJiraSearch = (defaultParams: JiraSearchParams) => {
 	const [error, setError] = useState(false);
-	const [jiraSearch, setJiraSearch] = useState<IJiraResponse>();
+	const [jiraSearch, setJiraSearch] = useState<JiraResponse>();
 	const [loading, setLoading] = useState(true);
 	const [searchParams, setSearchParams] = useSearchParams();
 
@@ -137,7 +137,7 @@ const useJiraSearch = (defaultParams: IJiraSearchParams) => {
 			setLoading(true);
 
 			try {
-				const response: IJiraResponse =
+				const response: JiraResponse =
 					await searchSecurityVulnerabilities(
 						toAPIQueryString(searchParams, defaultParams)
 					);
@@ -169,7 +169,7 @@ const useJiraSearch = (defaultParams: IJiraSearchParams) => {
 	}, [defaultParams, searchParams]);
 
 	const updateSearchParams = useCallback(
-		(params: IJiraSearchParams) => {
+		(params: JiraSearchParams) => {
 			setSearchParams((urlSearchParams) => {
 				return mergeIntoURL(defaultParams, params, urlSearchParams);
 			});

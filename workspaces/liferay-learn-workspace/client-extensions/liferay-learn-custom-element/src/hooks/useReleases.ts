@@ -4,29 +4,20 @@
  */
 
 import {useCallback, useEffect, useState} from 'react';
-import {Liferay} from '~/services/liferay';
 import {
-	IProductVersion,
-	ReleaseNotesError,
+	ProductVersion,
 	getReleases,
 } from '~/services/rest/releaseNotes';
 
 const useReleases = () => {
 	const [error, setError] = useState<Error | undefined>(undefined);
 	const [loading, setLoading] = useState(true);
-	const [productVersions, setProductVersions] = useState<IProductVersion[]>(
+	const [productVersions, setProductVersions] = useState<ProductVersion[]>(
 		[]
 	);
 
 	const fetchReleases = useCallback(async () => {
 		setLoading(true);
-
-		if (Liferay.ThemeDisplay.isSignedIn?.() === false) {
-			setError(new ReleaseNotesError(401, 'Unauthorized'));
-			setLoading(false);
-
-			return;
-		}
 
 		try {
 			const response = await getReleases();

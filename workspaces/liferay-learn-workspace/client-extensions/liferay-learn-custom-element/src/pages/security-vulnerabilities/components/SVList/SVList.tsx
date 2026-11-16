@@ -7,7 +7,7 @@ import {Link, useNavigate} from 'react-router-dom';
 import i18n from '~/utils/I18n';
 
 import SVSeverity from '../SVSeverity/SVSeverity';
-import {ISVRow} from '../SVTable/SVTable';
+import {SVRow} from '../SVTable/SVTable';
 
 import './SVList.scss';
 
@@ -25,7 +25,7 @@ const getAffectedVersionsLabel = (affectedVersions: string[] = []) => {
 	return affectedVersions.join(', ');
 };
 
-const SVListItemContent = ({row}: {row: ISVRow}) => {
+const SVListItemContent = ({row}: {row: SVRow}) => {
 	const affectedVersionsLabel = getAffectedVersionsLabel(
 		row.affectedVersions
 	);
@@ -85,11 +85,7 @@ const SVListItemContent = ({row}: {row: ISVRow}) => {
 	);
 };
 
-interface IProps {
-	rows: ISVRow[];
-}
-
-const SVList = ({rows}: IProps) => {
+const SVList = ({rows}: {rows: SVRow[]}) => {
 	const navigate = useNavigate();
 
 	const handleItemClick = (link?: string) => {

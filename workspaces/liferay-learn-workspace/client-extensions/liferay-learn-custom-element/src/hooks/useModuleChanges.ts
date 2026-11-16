@@ -5,8 +5,8 @@
 
 import {useEffect, useState} from 'react';
 import {
-	IModuleChanges,
-	IModuleChangesParams,
+	ModuleChangesResponse,
+	ModuleChangesParams,
 	getModuleChanges,
 } from '~/services/rest/releaseNotes';
 
@@ -16,11 +16,11 @@ const useModuleChanges = ({
 	keywords,
 	owners,
 	to,
-}: IModuleChangesParams) => {
+}: ModuleChangesParams) => {
 	const [error, setError] = useState<Error | undefined>(undefined);
 	const [loading, setLoading] = useState(true);
 	const [moduleChanges, setModuleChanges] = useState<
-		IModuleChanges | undefined
+		ModuleChangesResponse | undefined
 	>(undefined);
 
 	const ownersKey = owners.join(',');

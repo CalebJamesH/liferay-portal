@@ -48,9 +48,7 @@ const SVSearch = ({keywords = '', onChange}: SVSearchProps) => {
 				)}
 				className="border border-brand-primary-lighten-4 font-weight-semi-bold px-5 py-3 rounded-pill shadow-lg sv-search-input w-100"
 				onChange={(event) => handleChange(event.target.value)}
-				placeholder={i18n.translate(
-					'search-for-a-security-vulnerability-by-keyword-or-cve-id'
-				)}
+				placeholder={i18n.translate('search-security-advisories')}
 				type="text"
 				value={value}
 			/>

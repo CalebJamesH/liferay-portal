@@ -5,8 +5,8 @@
 
 import {useEffect, useState} from 'react';
 import {
-	IChangelog,
-	IChangelogParams,
+	ChangelogResponse,
+	ChangelogParams,
 	getChangelog,
 } from '~/services/rest/releaseNotes';
 
@@ -17,8 +17,8 @@ const useChangelog = ({
 	page,
 	pageSize,
 	to,
-}: IChangelogParams) => {
-	const [changelog, setChangelog] = useState<IChangelog | undefined>(
+}: ChangelogParams) => {
+	const [changelog, setChangelog] = useState<ChangelogResponse | undefined>(
 		undefined
 	);
 	const [error, setError] = useState<Error | undefined>(undefined);

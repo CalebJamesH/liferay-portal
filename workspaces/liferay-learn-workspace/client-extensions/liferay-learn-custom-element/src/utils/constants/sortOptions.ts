@@ -5,17 +5,17 @@
 
 import {JiraEnum} from './JiraEnum';
 
-export interface ISortOption {
+export type SortOption = {
 	[JiraEnum.SORT_BY]: string;
 	[JiraEnum.SORT_ORDER]: 'asc' | 'desc';
 	key: string;
-}
+};
 
-export interface IProps {
-	sorts: ISortOption[];
-}
+export type SortOptions = {
+	sorts: SortOption[];
+};
 
-export const SORT_OPTIONS: IProps = {
+export const SORT_OPTIONS: SortOptions = {
 	sorts: [
 		{
 			[JiraEnum.SORT_BY]: JiraEnum.PUBLISHED_DATE,

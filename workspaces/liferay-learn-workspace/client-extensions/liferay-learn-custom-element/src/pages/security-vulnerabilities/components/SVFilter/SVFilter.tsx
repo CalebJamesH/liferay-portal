@@ -7,22 +7,22 @@ import {ClayCheckbox, ClayRadio} from '@clayui/form';
 import ClayIcon from '@clayui/icon';
 import classNames from 'classnames';
 import {useEffect, useState} from 'react';
-import {IJiraSearchParams} from '~/hooks/useJiraSearch';
+import {JiraSearchParams} from '~/hooks/useJiraSearch';
 import i18n from '~/utils/I18n';
 import {JiraEnum} from '~/utils/constants/JiraEnum';
-import {IFilterOptions} from '~/utils/constants/filterOptions';
-import {IProps as ISortOptions} from '~/utils/constants/sortOptions';
+import {FilterOptions} from '~/utils/constants/filterOptions';
+import {SortOptions} from '~/utils/constants/sortOptions';
 import Button from '~/components/Button/Button';
 
 import './SVFilter.scss';
 
-interface IProps {
-	defaultParams: IJiraSearchParams;
-	filterOptions: IFilterOptions;
-	onChange: (params: IJiraSearchParams) => void;
+type SVFilterProps = {
+	defaultParams: JiraSearchParams;
+	filterOptions: FilterOptions;
+	onChange: (params: JiraSearchParams) => void;
 	params: URLSearchParams;
-	sortOptions: ISortOptions;
-}
+	sortOptions: SortOptions;
+};
 
 const MOBILE_MEDIA_QUERY = '(max-width: 991.98px)';
 
@@ -32,13 +32,13 @@ const SVFilter = ({
 	onChange,
 	params,
 	sortOptions,
-}: IProps) => {
+}: SVFilterProps) => {
 	const [expandedFilters, setExpandedFilters] = useState<{
-		[key in keyof IFilterOptions]?: boolean;
+		[key in keyof FilterOptions]?: boolean;
 	}>({});
 
 	const [viewAllFilters, setViewAllFilters] = useState<{
-		[key in keyof IFilterOptions]?: boolean;
+		[key in keyof FilterOptions]?: boolean;
 	}>({});
 
 	const [mobile, setMobile] = useState(
@@ -59,11 +59,11 @@ const SVFilter = ({
 		};
 	}, []);
 
-	const getSelectedValues = (param: keyof IFilterOptions) => {
+	const getSelectedValues = (param: keyof FilterOptions) => {
 		return params.get(param)?.split(',').filter(Boolean) ?? [];
 	};
 
-	const setFilterValues = (param: keyof IFilterOptions, values: string[]) => {
+	const setFilterValues = (param: keyof FilterOptions, values: string[]) => {
 		onChange({
 			[JiraEnum.FILTERS]: {
 				[param]: values,
@@ -71,7 +71,7 @@ const SVFilter = ({
 		});
 	};
 
-	const toggleFilterValue = (param: keyof IFilterOptions, value: string) => {
+	const toggleFilterValue = (param: keyof FilterOptions, value: string) => {
 		const selectedValues = getSelectedValues(param);
 
 		setFilterValues(
@@ -83,7 +83,7 @@ const SVFilter = ({
 	};
 
 	const handleSectionToggle = (
-		filterKey: keyof IFilterOptions,
+		filterKey: keyof FilterOptions,
 		expanded: boolean
 	) => {
 		setExpandedFilters((prevExpanded) => ({
@@ -92,7 +92,7 @@ const SVFilter = ({
 		}));
 	};
 
-	const handleViewAll = (filterKey: keyof IFilterOptions) => {
+	const handleViewAll = (filterKey: keyof FilterOptions) => {
 		setViewAllFilters((prevViewAll) => ({
 			...prevViewAll,
 			[filterKey]: !prevViewAll[filterKey],
@@ -100,7 +100,7 @@ const SVFilter = ({
 	};
 
 	const renderFilterSection = (
-		filterKey: keyof IFilterOptions,
+		filterKey: keyof FilterOptions,
 		languageKey: string
 	) => {
 		const isExpanded = expandedFilters[filterKey] ?? !mobile;
@@ -191,7 +191,7 @@ const SVFilter = ({
 	return (
 		<div className="sv-filter-content">
 			<div className="mb-3 p-3 sv-filter-box">
-				<h5 className="pb-2">{i18n.translate('sort-by')}</h5>
+				<h5 className="pb-2">{i18n.translate('sort')}</h5>
 
 				<div className="align-items-center justify-content-center">
 					{sortOptions.sorts.map((sortOption) => (

@@ -6,16 +6,12 @@
 import ClayAutocomplete from '@clayui/autocomplete';
 import ClayIcon from '@clayui/icon';
 import {ReactNode, useEffect, useMemo, useState} from 'react';
-import {IRelease} from '~/services/rest/releaseNotes';
 import i18n from '~/utils/I18n';
+import {ReleaseGroup} from '~/utils/getToReleaseGroups';
 
 import Input from '~/components/Input/Input';
 
-export type ReleaseGroup = {
-	key: string;
-	name: string;
-	releases: IRelease[];
-};
+import './ReleaseAutocomplete.scss';
 
 type ReleaseItem = {
 	key: string;
@@ -109,7 +105,7 @@ const ReleaseAutocomplete = ({
 
 	if (!releaseItems.length) {
 		return (
-			<div className="d-flex flex-column form-group m-0 p-3 position-relative release-comparison-field">
+			<div className="d-flex flex-column form-group m-0 p-3 position-relative release-autocomplete">
 				<label
 					className="font-weight-bold m-0 text-3 text-uppercase"
 					htmlFor={id}
@@ -117,7 +113,7 @@ const ReleaseAutocomplete = ({
 					{i18n.translate(label)}
 				</label>
 
-				<div className="align-items-center c-gap-2 d-flex position-relative release-comparison-field-control">
+				<div className="align-items-center c-gap-2 d-flex position-relative release-autocomplete-control">
 					{icon}
 
 					<Input
@@ -129,7 +125,7 @@ const ReleaseAutocomplete = ({
 					/>
 
 					<ClayIcon
-						className="release-comparison-field-caret"
+						className="release-autocomplete-caret"
 						symbol="caret-bottom"
 					/>
 				</div>
@@ -138,7 +134,7 @@ const ReleaseAutocomplete = ({
 	}
 
 	return (
-		<div className="d-flex flex-column form-group m-0 p-3 position-relative release-comparison-field">
+		<div className="d-flex flex-column form-group m-0 p-3 position-relative release-autocomplete">
 			<label
 				className="font-weight-bold m-0 text-3 text-uppercase"
 				htmlFor={id}
@@ -146,7 +142,7 @@ const ReleaseAutocomplete = ({
 				{i18n.translate(label)}
 			</label>
 
-			<div className="align-items-center c-gap-2 d-flex position-relative release-comparison-field-control">
+			<div className="align-items-center c-gap-2 d-flex position-relative release-autocomplete-control">
 				{icon}
 
 				<ClayAutocomplete
@@ -194,7 +190,7 @@ const ReleaseAutocomplete = ({
 				</ClayAutocomplete>
 
 				<ClayIcon
-					className="release-comparison-field-caret"
+					className="release-autocomplete-caret"
 					symbol="caret-bottom"
 				/>
 			</div>

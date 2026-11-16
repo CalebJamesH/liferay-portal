@@ -10,6 +10,8 @@
 	}
 
 	.sv-search-input {
+		border-color: var(--color-action-primary-hover, #0053f0);
 		color: var(--color-neutral-8, #54555f);
+		padding: 16px 48px 16px 24px;
 	}
 }

@@ -151,7 +151,7 @@ public class ReleaseHighlightsService extends BaseService {
 		StructuredContentFolder structuredContentFolder =
 			structuredContentFolderResource.
 				getSiteStructuredContentFolderByExternalReferenceCode(
-					_getSiteId(), "RELEASE_HIGHLIGHTS");
+					_getSiteId(), "LEGACY_RELEASE_HIGHLIGHTS");
 
 		return structuredContentFolder.getId();
 	}

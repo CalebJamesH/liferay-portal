@@ -8,30 +8,30 @@ import {Liferay} from '~/services/liferay';
 const OAUTH2_APP = 'liferay-learn-etc-spring-boot-oaua';
 const BASE_PATH = '/release-notes';
 
-export interface IChangelog {
-	items: IChangelogIssue[];
+export type ChangelogResponse = {
+	items: ChangelogIssue[];
 	total: number;
-}
+};
 
-export interface IChangelogIssue {
+export type ChangelogIssue = {
 	components: string[];
 	description: string;
 	key: string;
 	releases: string[];
 	summary: string;
 	url: string;
-}
+};
 
-export interface IChangelogParams {
+export type ChangelogParams = {
 	components: string[];
 	from: string;
 	keywords: string;
 	page: number;
 	pageSize: number;
 	to: string;
-}
+};
 
-export interface IHighlight {
+export type Highlight = {
 	importantChanges?: string;
 	keyHighlights?: string;
 	knownIssues?: string;
@@ -39,20 +39,20 @@ export interface IHighlight {
 	releaseKey: string;
 	security?: string;
 	title: string;
-}
+};
 
-export interface IHighlights {
+export type HighlightsResponse = {
 	hasQuarterlyReleases: boolean;
-	items: IHighlight[];
+	items: Highlight[];
 	total: number;
-}
+};
 
-export interface IHighlightsParams {
+export type HighlightsParams = {
 	from: string;
 	to: string;
-}
+};
 
-export interface IModuleChange {
+export type ModuleChange = {
 	fromURL?: string;
 	fromVersion?: string;
 	group: string;
@@ -60,32 +60,32 @@ export interface IModuleChange {
 	owner: string;
 	toURL?: string;
 	toVersion?: string;
-}
+};
 
-export interface IModuleChanges {
-	items: IModuleChange[];
+export type ModuleChangesResponse = {
+	items: ModuleChange[];
 	total: number;
-}
+};
 
-export interface IModuleChangesParams {
+export type ModuleChangesParams = {
 	changesOnly: boolean;
 	from: string;
 	keywords: string;
 	owners: string[];
 	to: string;
-}
+};
 
-export interface IRelease {
+export type Release = {
 	key: string;
 	name: string;
-}
+};
 
-export interface IProductVersion {
+export type ProductVersion = {
 	key: string;
 	line: string;
 	name: string;
-	releases: IRelease[];
-}
+	releases: Release[];
+};
 
 export class ReleaseNotesError extends Error {
 	status: number;
@@ -120,7 +120,7 @@ export async function getChangelog({
 	page,
 	pageSize,
 	to,
-}: IChangelogParams): Promise<IChangelog> {
+}: ChangelogParams): Promise<ChangelogResponse> {
 	const searchParams = new URLSearchParams({
 		from,
 		keywords,
@@ -143,7 +143,7 @@ export async function getChangelogComponents(): Promise<string[]> {
 export async function getHighlights({
 	from,
 	to,
-}: IHighlightsParams): Promise<IHighlights> {
+}: HighlightsParams): Promise<HighlightsResponse> {
 	const searchParams = new URLSearchParams({from, to});
 
 	return fetch(`/highlights?${searchParams.toString()}`);
@@ -155,7 +155,7 @@ export async function getModuleChanges({
 	keywords,
 	owners,
 	to,
-}: IModuleChangesParams): Promise<IModuleChanges> {
+}: ModuleChangesParams): Promise<ModuleChangesResponse> {
 	const searchParams = new URLSearchParams({
 		changesOnly: String(changesOnly),
 		from,
@@ -168,6 +168,6 @@ export async function getModuleChanges({
 	return fetch(`/module-changes?${searchParams.toString()}`);
 }
 
-export async function getReleases(): Promise<IProductVersion[]> {
+export async function getReleases(): Promise<ProductVersion[]> {
 	return fetch('/releases');
 }

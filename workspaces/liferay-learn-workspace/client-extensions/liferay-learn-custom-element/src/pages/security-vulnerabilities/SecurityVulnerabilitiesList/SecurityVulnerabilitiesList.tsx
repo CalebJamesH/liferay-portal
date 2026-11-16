@@ -8,7 +8,7 @@ import {useMemo} from 'react';
 import CloudLockIcon from '~/assets/CloudLock';
 import {SVWaves} from '~/assets/SVWaves';
 import Loading from '~/components/Loading/Loading';
-import useJiraSearch, {IJiraSearchParams} from '~/hooks/useJiraSearch';
+import useJiraSearch, {JiraSearchParams} from '~/hooks/useJiraSearch';
 import useJiraVersions from '~/hooks/useJiraVersions';
 import i18n from '~/utils/I18n';
 import {JiraEnum} from '~/utils/constants/JiraEnum';
@@ -24,11 +24,11 @@ import SVFilter from '../components/SVFilter/SVFilter';
 import SVHeader from '../components/SVHeader/SVHeader';
 import SVList from '../components/SVList/SVList';
 import SVSearch from '../components/SVSearch/SVSearch';
-import SVTable, {ISVRow} from '../components/SVTable/SVTable';
+import SVTable, {SVRow} from '../components/SVTable/SVTable';
 
 import './SecurityVulnerabilitiesList.scss';
 
-const DEFAULT_PARAMS: IJiraSearchParams = {
+const DEFAULT_PARAMS: JiraSearchParams = {
 	[JiraEnum.PAGE]: 1,
 	[JiraEnum.PAGE_SIZE]: 15,
 	[JiraEnum.SORT_BY]: JiraEnum.PUBLISHED_DATE,
@@ -41,7 +41,7 @@ const SecurityVulnerabilitiesList = () => {
 
 	const {jiraVersions} = useJiraVersions();
 
-	const rows = useMemo<ISVRow[] | undefined>(() => {
+	const rows = useMemo<SVRow[] | undefined>(() => {
 		const issues = jiraSearch?.[JiraEnum.ISSUES];
 
 		if (!issues) {

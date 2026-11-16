@@ -12,8 +12,13 @@ liferay-learn-etc-spring-boot-oahs:
         -   Liferay.Object.Admin.REST.everything.read
         -   c_article.everything
         -   c_attachment.everything
+        -   c_p2s3agreementacceptance.everything
         -   c_p2s3badge.everything.read
         -   c_p2s3course.everything
+        -   c_p2s3download.everything
+        -   c_p2s3downloadfile.everything
+        -   c_p2s3downloadlink.everything
+        -   c_p2s3downloadssynchronization.everything
         -   c_p2s3enrollment.everything
         -   c_p2s3externalmedia.everything
         -   c_p2s3learningpath.everything
@@ -36,6 +41,7 @@ liferay-learn-etc-spring-boot-oaua:
     scopes:
         -   Liferay.Headless.Admin.User.everything.read
         -   c_p2s3course.everything
+        -   c_p2s3downloadssynchronization.everything
         -   c_p2s3lesson.everything
         -   c_p2s3module.everything
         -   c_p2s3examresult.everything
@@ -46,6 +52,11 @@ liferay-learn-etc-spring-boot-object-action-course:
     name: Liferay Learn Etc Spring Boot Object Action Course
     oAuth2ApplicationExternalReferenceCode: liferay-learn-etc-spring-boot-oaua
     resourcePath: /object/action/course
+    type: objectAction
+liferay-learn-etc-spring-boot-object-action-downloads-synchronization:
+    name: Liferay Learn Etc Spring Boot Object Action Downloads Synchronization
+    oAuth2ApplicationExternalReferenceCode: liferay-learn-etc-spring-boot-oaua
+    resourcePath: /object/action/downloads/synchronization
     type: objectAction
 liferay-learn-etc-spring-boot-object-action-exam-results-synchronization:
     name: Liferay Learn Etc Spring Boot Object Action Exam Result Synchronization

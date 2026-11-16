@@ -14,14 +14,14 @@ import {
 } from 'react-router-dom';
 import FormsWorkflowsIcon from '~/assets/FormsWorkflowsIcon';
 import {SVWaves} from '~/assets/SVWaves';
-import {IRelease, ReleaseNotesError} from '~/services/rest/releaseNotes';
+import {Release, ReleaseNotesError} from '~/services/rest/releaseNotes';
 import i18n from '~/utils/I18n';
+import getToReleaseGroups from '~/utils/getToReleaseGroups';
 
 import useReleases from '~/hooks/useReleases';
 import EmptyState from './components/EmptyState/EmptyState';
 import ReleaseComparison, {
 	ReleaseRange,
-	getToReleaseGroups,
 } from './components/ReleaseComparison/ReleaseComparison';
 import Button from '../Button/Button';
 import Loading from '../Loading/Loading';
@@ -29,8 +29,8 @@ import Loading from '../Loading/Loading';
 import './ReleaseNotesOutlet.scss';
 
 type ReleaseNotesOutletContext = {
-	from: IRelease;
-	to: IRelease;
+	from: Release;
+	to: Release;
 };
 
 type ReleaseNotesOutletProps = {
