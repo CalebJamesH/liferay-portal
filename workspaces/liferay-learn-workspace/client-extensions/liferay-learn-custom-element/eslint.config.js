@@ -7,10 +7,11 @@ import js from '@eslint/js';
 import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
 import globals from 'globals';
+import tseslint from 'typescript-eslint';
 
 export default [
 	{
-		ignores: ['build', 'dist'],
+		ignores: ['@vite', 'build', 'dist'],
 	},
 	{
 		files: ['**/*.{js,jsx}'],
@@ -41,8 +42,34 @@ export default [
 			],
 		},
 	},
+	...tseslint.configs.recommended.map((config) => ({
+		...config,
+		files: ['**/*.{ts,tsx}'],
+	})),
 	{
-		files: ['*.config.js'],
+		files: ['**/*.{ts,tsx}'],
+		languageOptions: {
+			globals: globals.browser,
+		},
+		plugins: {
+			'react-hooks': reactHooks,
+			'react-refresh': reactRefresh,
+		},
+		rules: {
+			...reactHooks.configs.recommended.rules,
+			'@typescript-eslint/no-explicit-any': 'warn',
+			'@typescript-eslint/no-unused-vars': [
+				'error',
+				{argsIgnorePattern: '^_'},
+			],
+			'react-refresh/only-export-components': [
+				'warn',
+				{allowConstantExport: true},
+			],
+		},
+	},
+	{
+		files: ['*.config.{js,ts}'],
 		languageOptions: {
 			globals: globals.node,
 		},

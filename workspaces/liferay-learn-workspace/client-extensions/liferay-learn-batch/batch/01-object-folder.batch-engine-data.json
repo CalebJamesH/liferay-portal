@@ -11,6 +11,13 @@
 	},
 	"items": [
 		{
+			"externalReferenceCode": "P2S3_DOWNLOADS",
+			"label": {
+				"en_US": "P2S3 Downloads"
+			},
+			"name": "P2S3Downloads"
+		},
+		{
 			"externalReferenceCode": "P2S3_ENABLEMENT_HUB",
 			"label": {
 				"en_US": "P2S3 Enablement Hub"

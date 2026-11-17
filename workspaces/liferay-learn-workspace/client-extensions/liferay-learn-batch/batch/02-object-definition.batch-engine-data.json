@@ -26,6 +26,17 @@
 			"objectRelationships": [
 				{
 					"deletionType": "disassociate",
+					"externalReferenceCode": "L_USER_TO_P2S3_AGREEMENT_ACCEPTANCES",
+					"label": {
+						"en_US": "L User to P2S3 Agreement Acceptances"
+					},
+					"name": "lUserToP2S3AgreementAcceptances",
+					"objectDefinitionExternalReferenceCode1": "L_USER",
+					"objectDefinitionExternalReferenceCode2": "P2S3_AGREEMENT_ACCEPTANCE",
+					"type": "oneToMany"
+				},
+				{
+					"deletionType": "disassociate",
 					"externalReferenceCode": "L_USER_TO_P2S3_ENROLLMENTS",
 					"label": {
 						"en_US": "L User to P2S3 Enrollment"
@@ -72,6 +83,88 @@
 			},
 			"system": true,
 			"titleObjectFieldName": "id"
+		},
+		{
+			"active": true,
+			"externalReferenceCode": "P2S3_AGREEMENT_ACCEPTANCE",
+			"label": {
+				"en_US": "P2S3 Agreement Acceptance"
+			},
+			"name": "P2S3AgreementAcceptance",
+			"objectFields": [
+				{
+					"DBType": "DateTime",
+					"businessType": "DateTime",
+					"externalReferenceCode": "ACCEPTED_DATE",
+					"indexed": true,
+					"indexedAsKeyword": false,
+					"label": {
+						"en_US": "Accepted Date"
+					},
+					"localized": false,
+					"name": "acceptedDate",
+					"objectFieldSettings": [
+						{
+							"name": "timeStorage",
+							"value": "convertToUTC"
+						}
+					],
+					"readOnly": "false",
+					"required": true,
+					"state": false,
+					"type": "DateTime",
+					"unique": false
+				},
+				{
+					"DBType": "String",
+					"businessType": "Picklist",
+					"externalReferenceCode": "AGREEMENT_TYPE",
+					"indexed": true,
+					"indexedAsKeyword": false,
+					"indexedLanguageId": "en_US",
+					"label": {
+						"en_US": "Agreement Type"
+					},
+					"listTypeDefinitionExternalReferenceCode": "P2S3_DOWNLOAD_AGREEMENT_TYPES",
+					"localized": false,
+					"name": "agreementType",
+					"readOnly": "false",
+					"required": true,
+					"state": false,
+					"type": "String",
+					"unique": false
+				},
+				{
+					"DBType": "String",
+					"businessType": "Text",
+					"externalReferenceCode": "VERSION",
+					"indexed": true,
+					"indexedAsKeyword": false,
+					"indexedLanguageId": "en_US",
+					"label": {
+						"en_US": "Version"
+					},
+					"localized": false,
+					"name": "version",
+					"readOnly": "false",
+					"required": true,
+					"state": false,
+					"type": "String",
+					"unique": false
+				}
+			],
+			"objectFolderExternalReferenceCode": "P2S3_DOWNLOADS",
+			"panelCategoryKey": "control_panel.object",
+			"pluralLabel": {
+				"en_US": "P2S3 Agreement Acceptances"
+			},
+			"portlet": true,
+			"scope": "company",
+			"status": {
+				"code": 0,
+				"label": "approved",
+				"label_i18n": "Approved"
+			}
 		},
 		{
 			"active": true,
@@ -1465,6 +1558,616 @@
 		},
 		{
 			"active": true,
+			"externalReferenceCode": "P2S3_DOWNLOAD",
+			"friendlyURLSeparator": "download",
+			"label": {
+				"en_US": "P2S3 Download"
+			},
+			"name": "P2S3Download",
+			"objectFields": [
+				{
+					"DBType": "Clob",
+					"businessType": "RichText",
+					"externalReferenceCode": "ADDITIONAL_NOTES",
+					"indexed": true,
+					"indexedAsKeyword": false,
+					"indexedLanguageId": "en_US",
+					"label": {
+						"en_US": "Additional Notes"
+					},
+					"localized": false,
+					"name": "additionalNotes",
+					"readOnly": "false",
+					"required": false,
+					"state": false,
+					"type": "Clob",
+					"unique": false
+				},
+				{
+					"DBType": "Clob",
+					"businessType": "RichText",
+					"externalReferenceCode": "ALERT_MESSAGE",
+					"indexed": true,
+					"indexedAsKeyword": false,
+					"indexedLanguageId": "en_US",
+					"label": {
+						"en_US": "Alert Message"
+					},
+					"localized": false,
+					"name": "alertMessage",
+					"readOnly": "false",
+					"required": false,
+					"state": false,
+					"type": "Clob",
+					"unique": false
+				},
+				{
+					"DBType": "Long",
+					"businessType": "LongInteger",
+					"externalReferenceCode": "DOWNLOAD_NUMBER",
+					"indexed": true,
+					"indexedAsKeyword": false,
+					"label": {
+						"en_US": "Download Number"
+					},
+					"localized": false,
+					"name": "downloadNumber",
+					"readOnly": "false",
+					"required": false,
+					"state": false,
+					"type": "Long",
+					"unique": false
+				},
+				{
+					"DBType": "String",
+					"businessType": "MultiselectPicklist",
+					"externalReferenceCode": "FILE_TYPES",
+					"indexed": true,
+					"indexedAsKeyword": false,
+					"indexedLanguageId": "en_US",
+					"label": {
+						"en_US": "File Types"
+					},
+					"listTypeDefinitionExternalReferenceCode": "P2S3_DOWNLOAD_FILE_TYPES",
+					"localized": false,
+					"name": "fileTypes",
+					"readOnly": "false",
+					"required": false,
+					"state": false,
+					"type": "String",
+					"unique": false
+				},
+				{
+					"DBType": "Long",
+					"businessType": "LongInteger",
+					"externalReferenceCode": "LEGACY_RESOURCE_PRIM_KEY",
+					"indexed": true,
+					"indexedAsKeyword": false,
+					"label": {
+						"en_US": "Legacy Resource Primary Key"
+					},
+					"localized": false,
+					"name": "legacyResourcePrimKey",
+					"readOnly": "false",
+					"required": false,
+					"state": false,
+					"type": "Long",
+					"unique": false
+				},
+				{
+					"DBType": "String",
+					"businessType": "Picklist",
+					"externalReferenceCode": "PRODUCT",
+					"indexed": true,
+					"indexedAsKeyword": false,
+					"indexedLanguageId": "en_US",
+					"label": {
+						"en_US": "Product"
+					},
+					"listTypeDefinitionExternalReferenceCode": "P2S3_DOWNLOAD_PRODUCTS",
+					"localized": false,
+					"name": "product",
+					"readOnly": "false",
+					"required": false,
+					"state": false,
+					"type": "String",
+					"unique": false
+				},
+				{
+					"DBType": "Date",
+					"businessType": "Date",
+					"externalReferenceCode": "RELEASE_DATE",
+					"indexed": true,
+					"indexedAsKeyword": false,
+					"label": {
+						"en_US": "Release Date"
+					},
+					"localized": false,
+					"name": "releaseDate",
+					"readOnly": "false",
+					"required": true,
+					"state": false,
+					"type": "Date",
+					"unique": false
+				},
+				{
+					"DBType": "String",
+					"businessType": "Text",
+					"externalReferenceCode": "RELEASE_KEY",
+					"indexed": true,
+					"indexedAsKeyword": false,
+					"indexedLanguageId": "en_US",
+					"label": {
+						"en_US": "Release Key"
+					},
+					"localized": false,
+					"name": "releaseKey",
+					"readOnly": "false",
+					"required": false,
+					"state": false,
+					"type": "String",
+					"unique": false
+				},
+				{
+					"DBType": "String",
+					"businessType": "Picklist",
+					"externalReferenceCode": "REQUIRED_AGREEMENT",
+					"indexed": true,
+					"indexedAsKeyword": false,
+					"indexedLanguageId": "en_US",
+					"label": {
+						"en_US": "Required Agreement"
+					},
+					"listTypeDefinitionExternalReferenceCode": "P2S3_DOWNLOAD_AGREEMENT_TYPES",
+					"localized": false,
+					"name": "requiredAgreement",
+					"readOnly": "false",
+					"required": false,
+					"state": false,
+					"type": "String",
+					"unique": false
+				},
+				{
+					"DBType": "String",
+					"businessType": "Text",
+					"externalReferenceCode": "TITLE",
+					"indexed": true,
+					"indexedAsKeyword": false,
+					"indexedLanguageId": "en_US",
+					"label": {
+						"en_US": "Title"
+					},
+					"localized": false,
+					"name": "title",
+					"readOnly": "false",
+					"required": true,
+					"state": false,
+					"type": "String",
+					"unique": false
+				},
+				{
+					"DBType": "String",
+					"businessType": "Text",
+					"externalReferenceCode": "URL_TITLE",
+					"indexed": true,
+					"indexedAsKeyword": false,
+					"indexedLanguageId": "en_US",
+					"label": {
+						"en_US": "URL Title"
+					},
+					"localized": false,
+					"name": "urlTitle",
+					"readOnly": "false",
+					"required": true,
+					"state": false,
+					"type": "String",
+					"unique": true
+				}
+			],
+			"objectFolderExternalReferenceCode": "P2S3_DOWNLOADS",
+			"objectRelationships": [
+				{
+					"deletionType": "cascade",
+					"externalReferenceCode": "P2S3_DOWNLOAD_TO_P2S3_DOWNLOAD_FILES",
+					"label": {
+						"en_US": "P2S3 Download to P2S3 Download Files"
+					},
+					"name": "p2s3DownloadToP2S3DownloadFiles",
+					"objectDefinitionExternalReferenceCode1": "P2S3_DOWNLOAD",
+					"objectDefinitionExternalReferenceCode2": "P2S3_DOWNLOAD_FILE",
+					"type": "oneToMany"
+				},
+				{
+					"deletionType": "cascade",
+					"externalReferenceCode": "P2S3_DOWNLOAD_TO_P2S3_DOWNLOAD_LINKS",
+					"label": {
+						"en_US": "P2S3 Download to P2S3 Download Links"
+					},
+					"name": "p2s3DownloadToP2S3DownloadLinks",
+					"objectDefinitionExternalReferenceCode1": "P2S3_DOWNLOAD",
+					"objectDefinitionExternalReferenceCode2": "P2S3_DOWNLOAD_LINK",
+					"type": "oneToMany"
+				}
+			],
+			"panelCategoryKey": "control_panel.object",
+			"pluralLabel": {
+				"en_US": "P2S3 Downloads"
+			},
+			"portlet": true,
+			"scope": "company",
+			"status": {
+				"code": 0,
+				"label": "approved",
+				"label_i18n": "Approved"
+			},
+			"titleObjectFieldName": "title"
+		},
+		{
+			"active": true,
+			"enableCategorization": false,
+			"externalReferenceCode": "P2S3_DOWNLOADS_SYNCHRONIZATION",
+			"label": {
+				"en_US": "P2S3 Downloads Synchronization"
+			},
+			"name": "P2S3DownloadsSynchronization",
+			"objectActions": [
+				{
+					"active": true,
+					"label": {
+						"en_US": "Synchronize"
+					},
+					"name": "synchronize",
+					"objectActionExecutorKey": "function#liferay-learn-etc-spring-boot-object-action-downloads-synchronization",
+					"objectActionTriggerKey": "onAfterAdd",
+					"parameters": {
+					}
+				}
+			],
+			"objectFields": [
+				{
+					"DBType": "Integer",
+					"businessType": "Integer",
+					"externalReferenceCode": "DOWNLOAD_AMOUNT",
+					"indexed": true,
+					"indexedAsKeyword": false,
+					"label": {
+						"en_US": "Download Amount"
+					},
+					"localized": false,
+					"name": "downloadAmount",
+					"readOnly": "false",
+					"required": false,
+					"state": false,
+					"type": "Integer",
+					"unique": false
+				},
+				{
+					"DBType": "Long",
+					"businessType": "LongInteger",
+					"externalReferenceCode": "EXECUTION_TIME",
+					"indexed": true,
+					"indexedAsKeyword": false,
+					"label": {
+						"en_US": "Execution Time"
+					},
+					"localized": false,
+					"name": "executionTime",
+					"readOnly": "false",
+					"required": false,
+					"state": false,
+					"type": "Long",
+					"unique": false
+				},
+				{
+					"DBType": "String",
+					"businessType": "Picklist",
+					"externalReferenceCode": "SYNCHRONIZATION_STATUS",
+					"indexed": true,
+					"indexedAsKeyword": false,
+					"indexedLanguageId": "en_US",
+					"label": {
+						"en_US": "Synchronization Status"
+					},
+					"listTypeDefinitionExternalReferenceCode": "P2S3_SYNCHRONIZATION_STATUS",
+					"localized": false,
+					"name": "synchronizationStatus",
+					"readOnly": "false",
+					"required": true,
+					"state": false,
+					"type": "String",
+					"unique": false
+				}
+			],
+			"objectFolderExternalReferenceCode": "P2S3_DOWNLOADS",
+			"pluralLabel": {
+				"en_US": "P2S3 Downloads Synchronizations"
+			},
+			"portlet": true,
+			"scope": "company",
+			"status": {
+				"code": 0,
+				"label": "approved",
+				"label_i18n": "Approved"
+			}
+		},
+		{
+			"active": true,
+			"externalReferenceCode": "P2S3_DOWNLOAD_FILE",
+			"label": {
+				"en_US": "P2S3 Download File"
+			},
+			"name": "P2S3DownloadFile",
+			"objectFields": [
+				{
+					"DBType": "String",
+					"businessType": "Text",
+					"externalReferenceCode": "GROUP_NAME",
+					"indexed": true,
+					"indexedAsKeyword": false,
+					"indexedLanguageId": "en_US",
+					"label": {
+						"en_US": "Group Name"
+					},
+					"localized": false,
+					"name": "groupName",
+					"readOnly": "false",
+					"required": false,
+					"state": false,
+					"type": "String",
+					"unique": false
+				},
+				{
+					"DBType": "String",
+					"businessType": "Text",
+					"externalReferenceCode": "MD5",
+					"indexed": true,
+					"indexedAsKeyword": false,
+					"indexedLanguageId": "en_US",
+					"label": {
+						"en_US": "MD5"
+					},
+					"localized": false,
+					"name": "md5",
+					"readOnly": "false",
+					"required": false,
+					"state": false,
+					"type": "String",
+					"unique": false
+				},
+				{
+					"DBType": "String",
+					"businessType": "Text",
+					"externalReferenceCode": "NAME",
+					"indexed": true,
+					"indexedAsKeyword": false,
+					"indexedLanguageId": "en_US",
+					"label": {
+						"en_US": "Name"
+					},
+					"localized": false,
+					"name": "name",
+					"readOnly": "false",
+					"required": true,
+					"state": false,
+					"type": "String",
+					"unique": false
+				},
+				{
+					"DBType": "Clob",
+					"businessType": "LongText",
+					"externalReferenceCode": "OTHER_DETAILS",
+					"indexed": true,
+					"indexedAsKeyword": false,
+					"indexedLanguageId": "en_US",
+					"label": {
+						"en_US": "Other Details"
+					},
+					"localized": false,
+					"name": "otherDetails",
+					"objectFieldSettings": [
+						{
+							"name": "showCounter",
+							"value": false
+						}
+					],
+					"readOnly": "false",
+					"required": false,
+					"state": false,
+					"type": "Clob",
+					"unique": false
+				},
+				{
+					"DBType": "Integer",
+					"businessType": "Integer",
+					"externalReferenceCode": "PRIORITY",
+					"indexed": true,
+					"indexedAsKeyword": false,
+					"label": {
+						"en_US": "Priority"
+					},
+					"localized": false,
+					"name": "priority",
+					"readOnly": "false",
+					"required": false,
+					"state": false,
+					"type": "Integer",
+					"unique": false
+				},
+				{
+					"DBType": "String",
+					"businessType": "Text",
+					"externalReferenceCode": "SHA1",
+					"indexed": true,
+					"indexedAsKeyword": false,
+					"indexedLanguageId": "en_US",
+					"label": {
+						"en_US": "SHA-1"
+					},
+					"localized": false,
+					"name": "sha1",
+					"readOnly": "false",
+					"required": false,
+					"state": false,
+					"type": "String",
+					"unique": false
+				},
+				{
+					"DBType": "String",
+					"businessType": "Text",
+					"externalReferenceCode": "SHA512",
+					"indexed": true,
+					"indexedAsKeyword": false,
+					"indexedLanguageId": "en_US",
+					"label": {
+						"en_US": "SHA-512"
+					},
+					"localized": false,
+					"name": "sha512",
+					"readOnly": "false",
+					"required": false,
+					"state": false,
+					"type": "String",
+					"unique": false
+				},
+				{
+					"DBType": "String",
+					"businessType": "Text",
+					"externalReferenceCode": "SIZE",
+					"indexed": true,
+					"indexedAsKeyword": false,
+					"indexedLanguageId": "en_US",
+					"label": {
+						"en_US": "Size"
+					},
+					"localized": false,
+					"name": "size",
+					"readOnly": "false",
+					"required": false,
+					"state": false,
+					"type": "String",
+					"unique": false
+				},
+				{
+					"DBType": "Clob",
+					"businessType": "LongText",
+					"externalReferenceCode": "URL",
+					"indexed": true,
+					"indexedAsKeyword": false,
+					"indexedLanguageId": "en_US",
+					"label": {
+						"en_US": "URL"
+					},
+					"localized": false,
+					"name": "url",
+					"objectFieldSettings": [
+						{
+							"name": "showCounter",
+							"value": false
+						}
+					],
+					"readOnly": "false",
+					"required": true,
+					"state": false,
+					"type": "Clob",
+					"unique": false
+				}
+			],
+			"objectFolderExternalReferenceCode": "P2S3_DOWNLOADS",
+			"pluralLabel": {
+				"en_US": "P2S3 Download Files"
+			},
+			"portlet": true,
+			"scope": "company",
+			"status": {
+				"code": 0,
+				"label": "approved",
+				"label_i18n": "Approved"
+			},
+			"titleObjectFieldName": "name"
+		},
+		{
+			"active": true,
+			"externalReferenceCode": "P2S3_DOWNLOAD_LINK",
+			"label": {
+				"en_US": "P2S3 Download Link"
+			},
+			"name": "P2S3DownloadLink",
+			"objectFields": [
+				{
+					"DBType": "String",
+					"businessType": "Text",
+					"externalReferenceCode": "LABEL",
+					"indexed": true,
+					"indexedAsKeyword": false,
+					"indexedLanguageId": "en_US",
+					"label": {
+						"en_US": "Label"
+					},
+					"localized": false,
+					"name": "label",
+					"readOnly": "false",
+					"required": true,
+					"state": false,
+					"type": "String",
+					"unique": false
+				},
+				{
+					"DBType": "Integer",
+					"businessType": "Integer",
+					"externalReferenceCode": "PRIORITY",
+					"indexed": true,
+					"indexedAsKeyword": false,
+					"label": {
+						"en_US": "Priority"
+					},
+					"localized": false,
+					"name": "priority",
+					"readOnly": "false",
+					"required": false,
+					"state": false,
+					"type": "Integer",
+					"unique": false
+				},
+				{
+					"DBType": "Clob",
+					"businessType": "LongText",
+					"externalReferenceCode": "URL",
+					"indexed": true,
+					"indexedAsKeyword": false,
+					"indexedLanguageId": "en_US",
+					"label": {
+						"en_US": "URL"
+					},
+					"localized": false,
+					"name": "url",
+					"objectFieldSettings": [
+						{
+							"name": "showCounter",
+							"value": false
+						}
+					],
+					"readOnly": "false",
+					"required": true,
+					"state": false,
+					"type": "Clob",
+					"unique": false
+				}
+			],
+			"objectFolderExternalReferenceCode": "P2S3_DOWNLOADS",
+			"pluralLabel": {
+				"en_US": "P2S3 Download Links"
+			},
+			"portlet": true,
+			"scope": "company",
+			"status": {
+				"code": 0,
+				"label": "approved",
+				"label_i18n": "Approved"
+			},
+			"titleObjectFieldName": "label"
+		},
+		{
+			"active": true,
 			"enableCategorization": true,
 			"externalReferenceCode": "P2S3_ENROLLMENT",
 			"label": {
@@ -1655,6 +2358,23 @@
 					"unique": false
 				},
 				{
+					"DBType": "Boolean",
+					"businessType": "Boolean",
+					"externalReferenceCode": "MISSED_PREREQUISITE",
+					"indexed": true,
+					"indexedAsKeyword": false,
+					"label": {
+						"en_US": "Missed Prerequisite"
+					},
+					"localized": false,
+					"name": "missedPrerequisite",
+					"readOnly": "false",
+					"required": false,
+					"state": false,
+					"type": "Boolean",
+					"unique": false
+				},
+				{
 					"DBType": "String",
 					"businessType": "Picklist",
 					"externalReferenceCode": "RESULT",
@@ -1689,6 +2409,25 @@
 					"required": true,
 					"state": false,
 					"type": "Double",
+					"unique": false
+				},
+				{
+					"DBType": "String",
+					"businessType": "Picklist",
+					"externalReferenceCode": "SOURCE",
+					"indexed": true,
+					"indexedAsKeyword": false,
+					"indexedLanguageId": "en_US",
+					"label": {
+						"en_US": "Source"
+					},
+					"listTypeDefinitionExternalReferenceCode": "P2S3_EXAM_RESULT_SOURCES",
+					"localized": false,
+					"name": "source",
+					"readOnly": "false",
+					"required": false,
+					"state": false,
+					"type": "String",
 					"unique": false
 				},
 				{
@@ -1776,6 +2515,25 @@
 					"required": false,
 					"state": false,
 					"type": "Long",
+					"unique": false
+				},
+				{
+					"DBType": "String",
+					"businessType": "Picklist",
+					"externalReferenceCode": "SOURCE",
+					"indexed": true,
+					"indexedAsKeyword": false,
+					"indexedLanguageId": "en_US",
+					"label": {
+						"en_US": "Source"
+					},
+					"listTypeDefinitionExternalReferenceCode": "P2S3_EXAM_RESULT_SOURCES",
+					"localized": false,
+					"name": "source",
+					"readOnly": "false",
+					"required": false,
+					"state": false,
+					"type": "String",
 					"unique": false
 				},
 				{
@@ -2295,6 +3053,19 @@
 				"en_US": "P2S3 Knowledge Article"
 			},
 			"name": "P2S3KnowledgeArticle",
+			"objectActions": [
+				{
+					"active": true,
+					"label": {
+						"en_US": "Update Guest View Permission"
+					},
+					"name": "updateGuestViewPermission",
+					"objectActionExecutorKey": "function#liferay-learn-etc-spring-boot-object-action-knowledge-article-guest-view",
+					"objectActionTriggerKey": "onAfterUpdate",
+					"parameters": {
+					}
+				}
+			],
 			"objectFields": [
 				{
 					"DBType": "String",
