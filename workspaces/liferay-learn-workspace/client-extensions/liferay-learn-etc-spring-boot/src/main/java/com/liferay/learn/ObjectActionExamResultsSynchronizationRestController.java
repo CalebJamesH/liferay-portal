@@ -7,25 +7,18 @@ package com.liferay.learn;
 
 import com.liferay.client.extension.util.spring.boot3.BaseRestController;
 import com.liferay.client.extension.util.spring.boot3.client.LiferayOAuth2AccessTokenManager;
+import com.liferay.learn.service.CertmanagerService;
+import com.liferay.learn.service.WebassessorService;
+import com.liferay.petra.function.UnsafeBiFunction;
 import com.liferay.petra.string.StringBundler;
-import com.liferay.portal.kernel.util.GetterUtil;
-import com.liferay.portal.kernel.util.StringUtil;
-import com.liferay.portal.kernel.util.URLCodec;
 import com.liferay.portal.kernel.util.Validator;
-
-import java.nio.charset.StandardCharsets;
-
-import java.security.MessageDigest;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 
 import java.util.HashSet;
-import java.util.HexFormat;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
@@ -37,10 +30,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -66,7 +56,7 @@ public class ObjectActionExamResultsSynchronizationRestController
 			"objectEntry"
 		).getJSONObject(
 			"values"
-		).optString(
+		).getString(
 			"source"
 		);
 
@@ -88,37 +78,20 @@ public class ObjectActionExamResultsSynchronizationRestController
 		String status = "Failed";
 
 		try {
-			OffsetDateTime offsetDateTime = _getStartOffsetDateTime(source);
+			OffsetDateTime startOffsetDateTime = _getStartOffsetDateTime(
+				source);
 
 			if (Objects.equals(source, "certmanager")) {
 				examResultAmount += _reimportMissedPrerequisiteExamResults();
 
-				while (offsetDateTime.isBefore(
-							OffsetDateTime.now(ZoneOffset.UTC))) {
-
-					JSONArray examResultsJSONArray =
-						_getCertmanagerExamResultsJSONArray(offsetDateTime);
-
-					_putExamResults(examResultsJSONArray);
-
-					examResultAmount += examResultsJSONArray.length();
-
-					offsetDateTime = offsetDateTime.plusDays(14);
-				}
+				examResultAmount += _synchronizeExamResults(
+					_CERTMANAGER_DAYS, startOffsetDateTime,
+					_certmanagerService::getCertmanagerExamResultsJSONArray);
 			}
 			else {
-				while (offsetDateTime.isBefore(
-							OffsetDateTime.now(ZoneOffset.UTC))) {
-
-					JSONArray examResultsJSONArray =
-						_getWebassessorExamResultsJSONArray(offsetDateTime);
-
-					_putExamResults(examResultsJSONArray);
-
-					examResultAmount += examResultsJSONArray.length();
-
-					offsetDateTime = offsetDateTime.plusDays(7);
-				}
+				examResultAmount += _synchronizeExamResults(
+					7, startOffsetDateTime,
+					_webassessorService::getWebassessorExamResultsJSONArray);
 			}
 
 			status = "Successful";
@@ -133,9 +106,20 @@ public class ObjectActionExamResultsSynchronizationRestController
 			_log.error("Unable to synchronize exam results", exception);
 		}
 
-		_updateExamResultsSynchronization(
-			classPK, examResultAmount, System.currentTimeMillis() - startTime,
-			status);
+		patch(
+			_getAuthorization(),
+			new JSONObject(
+			).put(
+				"examResultAmount", examResultAmount
+			).put(
+				"executionTime", System.currentTimeMillis() - startTime
+			).put(
+				"synchronizationStatus", status
+			).toString(),
+			UriComponentsBuilder.fromPath(
+				"/o/c/p2s3examresultssynchronizations/" + classPK
+			).build(
+			).toUri());
 
 		if (_log.isInfoEnabled()) {
 			_log.info(
@@ -150,177 +134,6 @@ public class ObjectActionExamResultsSynchronizationRestController
 	private String _getAuthorization() {
 		return _liferayOAuth2AccessTokenManager.getAuthorization(
 			"liferay-learn-etc-spring-boot-oahs");
-	}
-
-	private String _getCertmanagerAuthorization() throws Exception {
-		if ((_certmanagerAuthorization != null) &&
-			(System.currentTimeMillis() <
-				_certmanagerAuthorizationExpirationTime)) {
-
-			return _certmanagerAuthorization;
-		}
-
-		JSONObject jsonObject = new JSONObject(
-			post(
-				StringBundler.concat(
-					"client_id=", URLCodec.encodeURL(_certmanagerClientId),
-					"&client_secret=",
-					URLCodec.encodeURL(_certmanagerClientSecret),
-					"&grant_type=client_credentials"),
-				Map.of(
-					HttpHeaders.CONTENT_TYPE,
-					MediaType.APPLICATION_FORM_URLENCODED_VALUE),
-				UriComponentsBuilder.fromPath(
-					"/o/oauth2/token"
-				).host(
-					"certmanager.liferay.com"
-				).scheme(
-					"https"
-				).build(
-				).toUri()));
-
-		String accessToken = jsonObject.optString("access_token");
-
-		if (Validator.isNull(accessToken)) {
-			throw new Exception("Unable to get access token");
-		}
-
-		_certmanagerAuthorization = "Bearer " + accessToken;
-
-		_certmanagerAuthorizationExpirationTime =
-			System.currentTimeMillis() +
-				((jsonObject.getLong("expires_in") - 60) * 1000);
-
-		return _certmanagerAuthorization;
-	}
-
-	private JSONObject _getCertmanagerExamResultJSONObject(
-			JSONObject jsonObject)
-		throws Exception {
-
-		String emailAddress = StringUtil.trim(
-			jsonObject.getString("emailAddress"));
-
-		Map<String, String> examNames = Map.of(
-			"Building Enterprise Websites with Liferay",
-			"Building Enterprise Websites with Liferay Certification Exam");
-
-		String examName = StringUtil.trim(jsonObject.getString("examName"));
-
-		examName = examNames.getOrDefault(examName, examName);
-
-		OffsetDateTime offsetDateTime = OffsetDateTime.parse(
-			jsonObject.getString("date"));
-
-		offsetDateTime = offsetDateTime.withOffsetSameInstant(ZoneOffset.UTC);
-
-		return new JSONObject(
-		).put(
-			"date", offsetDateTime.format(DateTimeFormatter.ISO_INSTANT)
-		).put(
-			"emailAddress", emailAddress
-		).put(
-			"examName", examName
-		).put(
-			"externalReferenceCode",
-			_getExternalReferenceCode(
-				emailAddress, examName, offsetDateTime.toLocalDate())
-		).put(
-			"firstName", jsonObject.getString("firstName")
-		).put(
-			"lastName", jsonObject.getString("lastName")
-		).put(
-			"missedPrerequisite",
-			StringUtil.equalsIgnoreCase(
-				jsonObject.optString("passedPrerequisite"), "false")
-		).put(
-			"result", StringUtil.toLowerCase(jsonObject.getString("result"))
-		).put(
-			"score", jsonObject.getDouble("score")
-		).put(
-			"source", "certmanager"
-		).put(
-			"testName", examName
-		);
-	}
-
-	private JSONArray _getCertmanagerExamResultsJSONArray(
-			OffsetDateTime offsetDateTime)
-		throws Exception {
-
-		JSONArray jsonArray = new JSONArray();
-
-		OffsetDateTime endOffsetDateTime = offsetDateTime.plusDays(13);
-		int lastPage = 1;
-
-		for (int page = 1; page <= lastPage; page++) {
-			JSONObject jsonObject = new JSONObject(
-				get(
-					_getCertmanagerAuthorization(),
-					UriComponentsBuilder.fromPath(
-						"/o/certification-exam/report"
-					).host(
-						"certmanager.liferay.com"
-					).queryParam(
-						"endDate",
-						endOffsetDateTime.format(
-							DateTimeFormatter.ISO_LOCAL_DATE)
-					).queryParam(
-						"examCode", "all"
-					).queryParam(
-						"page", page
-					).queryParam(
-						"pageSize", 100
-					).queryParam(
-						"startDate",
-						offsetDateTime.format(DateTimeFormatter.ISO_LOCAL_DATE)
-					).scheme(
-						"https"
-					).build(
-					).toUri()));
-
-			JSONArray examResultsJSONArray = jsonObject.getJSONArray(
-				"examResults");
-
-			for (int i = 0; i < examResultsJSONArray.length(); i++) {
-				jsonArray.put(
-					_getCertmanagerExamResultJSONObject(
-						examResultsJSONArray.getJSONObject(i)));
-			}
-
-			int pageSize = jsonObject.getInt("pageSize");
-
-			lastPage = (jsonObject.getInt("total") + pageSize - 1) / pageSize;
-		}
-
-		return jsonArray;
-	}
-
-	private String _getExternalReferenceCode(
-			String emailAddress, String examName, LocalDate localDate)
-		throws Exception {
-
-		String keyString = StringBundler.concat(
-			StringUtil.toLowerCase(emailAddress), "|", examName, "|",
-			localDate);
-
-		HexFormat hexFormat = HexFormat.of();
-		MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
-
-		return hexFormat.formatHex(
-			messageDigest.digest(keyString.getBytes(StandardCharsets.UTF_8)));
-	}
-
-	private String _getSource(JSONObject jsonObject) {
-		JSONObject sourceJSONObject = jsonObject.optJSONObject("source");
-
-		if ((sourceJSONObject == null) ||
-			Validator.isNull(sourceJSONObject.optString("key"))) {
-
-			return "webassessor";
-		}
-
-		return sourceJSONObject.getString("key");
 	}
 
 	private OffsetDateTime _getStartOffsetDateTime(String source) {
@@ -345,7 +158,16 @@ public class ObjectActionExamResultsSynchronizationRestController
 		for (int i = 0; i < itemsJSONArray.length(); i++) {
 			JSONObject itemJSONObject = itemsJSONArray.getJSONObject(i);
 
-			if (!Objects.equals(_getSource(itemJSONObject), source)) {
+			JSONObject sourceJSONObject = itemJSONObject.getJSONObject(
+				"source");
+
+			String sourceKey = sourceJSONObject.getString("key");
+
+			if (Validator.isNull(sourceKey)) {
+				sourceKey = "webassessor";
+			}
+
+			if (!Objects.equals(sourceKey, source)) {
 				continue;
 			}
 
@@ -355,107 +177,7 @@ public class ObjectActionExamResultsSynchronizationRestController
 			return offsetDateTime.minusDays(1);
 		}
 
-		return OffsetDateTime.of(
-			_examResultsSynchronizationStartYear, 1, 1, 0, 0, 0, 0,
-			ZoneOffset.UTC);
-	}
-
-	private JSONObject _getWebassessorExamResultJSONObject(
-		JSONObject jsonObject) {
-
-		JSONObject simpleRegistrationJSONObject = jsonObject.getJSONObject(
-			"simpleRegistration");
-
-		JSONObject candidateJSONObject =
-			simpleRegistrationJSONObject.getJSONObject("candidate");
-
-		return new JSONObject(
-		).put(
-			"date",
-			OffsetDateTime.parse(
-				jsonObject.getString("date")
-			).atZoneSameInstant(
-				ZoneOffset.UTC
-			).format(
-				DateTimeFormatter.ofPattern("uuuu-MM-dd'T'HH:mm:ssX")
-			)
-		).put(
-			"emailAddress", candidateJSONObject.getString("email")
-		).put(
-			"examName", jsonObject.getString("examName")
-		).put(
-			"externalReferenceCode",
-			GetterUtil.getString(jsonObject.getLong("id"))
-		).put(
-			"firstName", candidateJSONObject.getString("firstName")
-		).put(
-			"lastName", candidateJSONObject.getString("lastName")
-		).put(
-			"result", jsonObject.getString("passFail")
-		).put(
-			"score", jsonObject.getDouble("score")
-		).put(
-			"source", "webassessor"
-		).put(
-			"testName", simpleRegistrationJSONObject.getString("testName")
-		);
-	}
-
-	private JSONArray _getWebassessorExamResultsJSONArray(
-		OffsetDateTime offsetDateTime) {
-
-		JSONArray jsonArray = new JSONArray(
-			post(
-				null,
-				new JSONObject(
-				).put(
-					"endDate",
-					offsetDateTime.plusDays(
-						7
-					).format(
-						DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss")
-					)
-				).put(
-					"requestType", "GET TRANSCRIPTS BY DATE RANGE"
-				).put(
-					"returnFormat", "JSON"
-				).put(
-					"securityToken", _webassessorSecurityToken
-				).put(
-					"startDate",
-					offsetDateTime.format(
-						DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss"))
-				).toString(),
-				UriComponentsBuilder.fromPath(
-					"/WebAssessorWebServices/jaxrs/wawebservices/processRequest"
-				).host(
-					"webassessor.com"
-				).scheme(
-					"https"
-				).build(
-				).toUri()));
-
-		if (jsonArray.isEmpty()) {
-			return new JSONArray();
-		}
-
-		if (jsonArray.get(0) instanceof String) {
-			if (_log.isWarnEnabled()) {
-				_log.warn("Webassessor returned " + jsonArray);
-			}
-
-			return new JSONArray();
-		}
-
-		JSONArray examResultsJSONArray = new JSONArray();
-
-		for (int i = 0; i < jsonArray.length(); i++) {
-			examResultsJSONArray.put(
-				_getWebassessorExamResultJSONObject(
-					jsonArray.getJSONObject(i)));
-		}
-
-		return examResultsJSONArray;
+		return OffsetDateTime.of(2026, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC);
 	}
 
 	private void _putExamResults(JSONArray jsonArray) throws Exception {
@@ -545,18 +267,22 @@ public class ObjectActionExamResultsSynchronizationRestController
 		}
 
 		LocalDate endLocalDate = LocalDate.MIN;
-		JSONArray jsonArray = new JSONArray();
+		JSONArray missedExamResultsJSONArray = new JSONArray();
 
 		for (LocalDate localDate : localDates) {
 			if (localDate.isBefore(endLocalDate)) {
 				continue;
 			}
 
+			OffsetDateTime startOffsetDateTime = OffsetDateTime.of(
+				localDate.minusDays(1), LocalTime.MIDNIGHT, ZoneOffset.UTC);
+
+			OffsetDateTime endOffsetDateTime = startOffsetDateTime.plusDays(
+				_CERTMANAGER_DAYS);
+
 			JSONArray examResultsJSONArray =
-				_getCertmanagerExamResultsJSONArray(
-					OffsetDateTime.of(
-						localDate.minusDays(1), LocalTime.MIDNIGHT,
-						ZoneOffset.UTC));
+				_certmanagerService.getCertmanagerExamResultsJSONArray(
+					startOffsetDateTime, endOffsetDateTime);
 
 			for (int i = 0; i < examResultsJSONArray.length(); i++) {
 				JSONObject examResultJSONObject =
@@ -570,56 +296,56 @@ public class ObjectActionExamResultsSynchronizationRestController
 					continue;
 				}
 
-				jsonArray.put(examResultJSONObject);
+				missedExamResultsJSONArray.put(examResultJSONObject);
 			}
 
-			endLocalDate = localDate.plusDays(12);
+			OffsetDateTime lastOffsetDateTime = endOffsetDateTime.minusDays(1);
+
+			endLocalDate = lastOffsetDateTime.toLocalDate();
 		}
 
-		_putExamResults(jsonArray);
+		_putExamResults(missedExamResultsJSONArray);
 
-		return jsonArray.length();
+		return missedExamResultsJSONArray.length();
 	}
 
-	private void _updateExamResultsSynchronization(
-		long classPK, int examResultAmount, long executionTime,
-		String synchronizationStatus) {
+	private int _synchronizeExamResults(
+			int days, OffsetDateTime offsetDateTime,
+			UnsafeBiFunction
+				<OffsetDateTime, OffsetDateTime, JSONArray, Exception>
+					unsafeBiFunction)
+		throws Exception {
 
-		patch(
-			_getAuthorization(),
-			new JSONObject(
-			).put(
-				"examResultAmount", examResultAmount
-			).put(
-				"executionTime", executionTime
-			).put(
-				"synchronizationStatus", synchronizationStatus
-			).toString(),
-			UriComponentsBuilder.fromPath(
-				"/o/c/p2s3examresultssynchronizations/" + classPK
-			).build(
-			).toUri());
+		int examResultAmount = 0;
+
+		while (offsetDateTime.isBefore(OffsetDateTime.now(ZoneOffset.UTC))) {
+			OffsetDateTime endOffsetDateTime = offsetDateTime.plusDays(days);
+
+			JSONArray jsonArray = unsafeBiFunction.apply(
+				offsetDateTime, endOffsetDateTime);
+
+			_putExamResults(jsonArray);
+
+			examResultAmount += jsonArray.length();
+
+			offsetDateTime = endOffsetDateTime;
+		}
+
+		return examResultAmount;
 	}
+
+	private static final int _CERTMANAGER_DAYS = 14;
 
 	private static final Log _log = LogFactory.getLog(
 		ObjectActionExamResultsSynchronizationRestController.class);
 
-	private String _certmanagerAuthorization;
-	private long _certmanagerAuthorizationExpirationTime;
-
-	@Value("${liferay.learn.certmanager.client.id}")
-	private String _certmanagerClientId;
-
-	@Value("${liferay.learn.certmanager.client.secret}")
-	private String _certmanagerClientSecret;
-
-	@Value("${liferay.learn.exam.results.synchronization.start.year}")
-	private int _examResultsSynchronizationStartYear;
+	@Autowired
+	private CertmanagerService _certmanagerService;
 
 	@Autowired
 	private LiferayOAuth2AccessTokenManager _liferayOAuth2AccessTokenManager;
 
-	@Value("${liferay.learn.webassessor.security.token}")
-	private String _webassessorSecurityToken;
+	@Autowired
+	private WebassessorService _webassessorService;
 
 }
