@@ -50,15 +50,15 @@ public class ObjectActionFriendlyURLRestController extends BaseRestController {
 				"Unsupported Object", HttpStatus.BAD_REQUEST);
 		}
 
-		JSONObject objectEntryJSONObject = jsonObject.getJSONObject(
-			"objectEntry");
-
-		JSONObject valuesJSONObject = objectEntryJSONObject.getJSONObject(
-			"values");
-
-		ObjectInfo objectInfo = _objectInfoMap.get(objectName);
-
 		try {
+			JSONObject objectEntryJSONObject = jsonObject.getJSONObject(
+				"objectEntry");
+
+			JSONObject valuesJSONObject = objectEntryJSONObject.getJSONObject(
+				"values");
+
+			ObjectInfo objectInfo = _objectInfoMap.get(objectName);
+
 			String friendlyURLPath = _buildFriendlyURLPath(
 				objectInfo, valuesJSONObject);
 
@@ -79,7 +79,7 @@ public class ObjectActionFriendlyURLRestController extends BaseRestController {
 			_patchFriendlyURL(
 				friendlyURLPath, objectEntryId, objectInfo.getRESTPath());
 
-			_propagateFriendlyURL(objectName, friendlyURLPath, objectEntryId);
+			_propagateFriendlyURL(friendlyURLPath, objectEntryId, objectName);
 		}
 		catch (Exception exception) {
 			_log.error("Unable to update friendly URL", exception);
@@ -143,7 +143,6 @@ public class ObjectActionFriendlyURLRestController extends BaseRestController {
 
 		slug = slug.replaceAll("\\p{M}", "");
 		slug = StringUtil.toLowerCase(slug);
-
 		slug = slug.replaceAll("[^a-z0-9_]+", "-");
 
 		return slug.replaceAll("^-|-$", "");
@@ -173,12 +172,10 @@ public class ObjectActionFriendlyURLRestController extends BaseRestController {
 	}
 
 	private void _propagateFriendlyURL(
-		String objectName, String friendlyURLPath, long objectEntryId) {
+		String friendlyURLPath, long objectEntryId, String objectName) {
 
-		for (Map.Entry<String, ObjectInfo> objectInfoEntry :
-				_objectInfoMap.entrySet()) {
-
-			ObjectInfo childObjectInfo = objectInfoEntry.getValue();
+		for (Map.Entry<String, ObjectInfo> entry : _objectInfoMap.entrySet()) {
+			ObjectInfo childObjectInfo = entry.getValue();
 
 			if (!Objects.equals(
 					objectName, childObjectInfo.getParentObjectName())) {
@@ -214,16 +211,15 @@ public class ObjectActionFriendlyURLRestController extends BaseRestController {
 					continue;
 				}
 
-				long childObjectEntryId = childJSONObject.getLong("id");
 				String childFriendlyURLPath = friendlyURLPath + "/" + childSlug;
+				long childObjectEntryId = childJSONObject.getLong("id");
 
 				_patchFriendlyURL(
 					childFriendlyURLPath, childObjectEntryId,
 					childObjectInfo.getRESTPath());
 
 				_propagateFriendlyURL(
-					objectInfoEntry.getKey(), childFriendlyURLPath,
-					childObjectEntryId);
+					childFriendlyURLPath, childObjectEntryId, entry.getKey());
 			}
 		}
 	}
