@@ -1,0 +1,128 @@
+.release-notes-empty-state {
+	border: 1px solid #e2e2e4;
+	border-radius: 8px;
+	padding: 40px;
+}
+
+.release-notes-empty-state-description {
+	color: #282934;
+	font-size: 21px;
+	line-height: 32px;
+}
+
+.release-notes-empty-state-title {
+	color: #282934;
+	line-height: 28px;
+}
+
+.release-notes-illustration {
+	--illustration-primary: #0b5fff;
+	--illustration-primary-d1: #0053f0;
+	--illustration-primary-d2: #004ad7;
+	--illustration-primary-l0: #5791ff;
+	--illustration-primary-l1: #80acff;
+	--illustration-primary-l2: #b3cdff;
+	--illustration-primary-l3: #f0f5ff;
+
+	.f-p {
+		fill: var(--illustration-primary);
+	}
+
+	.f-p-blob {
+		fill: color-mix(
+			in srgb,
+			var(--illustration-primary-l2),
+			var(--illustration-primary-l3)
+		);
+	}
+
+	.f-p-d1 {
+		fill: var(--illustration-primary-d1);
+	}
+
+	.f-p-d2 {
+		fill: var(--illustration-primary-d2);
+	}
+
+	.f-p-l0 {
+		fill: var(--illustration-primary-l0);
+	}
+
+	.f-p-l1 {
+		fill: var(--illustration-primary-l1);
+	}
+
+	.f-p-l2 {
+		fill: var(--illustration-primary-l2);
+	}
+
+	.il-blob {
+		animation: release-notes-illustration-breathe 3s
+			cubic-bezier(0.45, 0, 0.55, 1) infinite alternate;
+		transform-box: fill-box;
+		transform-origin: center;
+	}
+
+	.il-moon {
+		animation: release-notes-illustration-breathe 2.6s
+			cubic-bezier(0.45, 0, 0.55, 1) -1.1s infinite alternate;
+		transform-box: fill-box;
+		transform-origin: center;
+	}
+
+	.il-star {
+		animation: release-notes-illustration-twinkle 2.2s
+			cubic-bezier(0.45, 0, 0.55, 1) -0.7s infinite alternate;
+		transform-box: fill-box;
+		transform-origin: center;
+	}
+
+	.il-tube {
+		animation: release-notes-illustration-sway 2.6s
+			cubic-bezier(0.45, 0, 0.55, 1) infinite alternate;
+		transform-box: view-box;
+		transform-origin: 126px 138px;
+	}
+
+	.s-p-d2 {
+		stroke: var(--illustration-primary-d2);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		* {
+			animation: none !important;
+		}
+	}
+}
+
+@keyframes release-notes-illustration-breathe {
+	from {
+		transform: scale(1);
+	}
+
+	to {
+		transform: scale(1.025);
+	}
+}
+
+@keyframes release-notes-illustration-sway {
+	from {
+		transform: rotate(-4deg);
+	}
+
+	to {
+		transform: rotate(4deg);
+	}
+}
+
+@keyframes release-notes-illustration-twinkle {
+	from {
+		opacity: 1;
+		transform: scale(1);
+	}
+
+	to {
+		opacity: 0.65;
+		transform: scale(0.97);
+	}
+}

@@ -1,0 +1,8 @@
+.release-comparison {
+	border: 1px solid #e2e2e4;
+	border-radius: 16px;
+
+	@media (max-width: 767.98px) {
+		flex-direction: column;
+	}
+}

@@ -1,0 +1,9 @@
+.release-notes-tab-results {
+	transition: opacity 0.15s ease-in-out;
+
+	&.release-notes-tab-results-refreshing {
+		opacity: 0.5;
+		pointer-events: none;
+		transition-delay: 0.2s;
+	}
+}

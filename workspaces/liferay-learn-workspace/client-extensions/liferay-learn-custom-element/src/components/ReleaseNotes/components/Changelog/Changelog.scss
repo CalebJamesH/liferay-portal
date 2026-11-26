@@ -1,0 +1,109 @@
+.changelog-components-empty {
+	color: #6c6c75;
+	font-size: 13px;
+	line-height: 16px;
+}
+
+.changelog-components-list {
+	gap: 12px;
+}
+
+.changelog-components-list-all {
+	max-height: 400px;
+	overflow-y: auto;
+}
+
+.changelog-tag.label {
+	background-color: #e6ebf5;
+	color: #1c3667;
+	font-size: 13px;
+	font-weight: 400;
+	line-height: 16px;
+	min-width: 0;
+	text-align: left;
+	text-transform: none;
+	white-space: normal;
+}
+
+.changelog-table {
+	.changelog-components {
+		width: 200px;
+	}
+
+	.changelog-key {
+		width: 150px;
+
+		a {
+			color: #0b5fff;
+			font-weight: 400;
+			text-decoration: none;
+
+			&:hover {
+				color: #004ad7;
+				text-decoration: underline;
+			}
+		}
+	}
+
+	.changelog-releases {
+		width: 140px;
+	}
+
+	&.release-notes-table {
+		table-layout: fixed;
+
+		thead {
+			border-bottom: 1px solid #e2e2e4;
+		}
+
+		th {
+			border-bottom: 0;
+			color: #6c6c75;
+			font-size: 14px;
+			font-weight: 600;
+			height: auto;
+			line-height: 16px;
+			padding: 16px;
+		}
+
+		td,
+		th {
+			white-space: normal;
+		}
+
+		td {
+			border-width: 0;
+			color: #54555f;
+			overflow-wrap: anywhere;
+			padding: 16px;
+			vertical-align: middle;
+		}
+
+		td.changelog-releases,
+		td.changelog-summary {
+			color: #282934;
+		}
+
+		td:first-child {
+			border-radius: 4px 0 0 4px;
+		}
+
+		td:first-child,
+		th:first-child {
+			padding-left: 16px;
+		}
+
+		td:last-child {
+			border-radius: 0 4px 4px 0;
+		}
+
+		td:last-child,
+		th:last-child {
+			padding-right: 32px;
+		}
+
+		tbody tr:hover > td {
+			background-color: #edf3fe;
+		}
+	}
+}

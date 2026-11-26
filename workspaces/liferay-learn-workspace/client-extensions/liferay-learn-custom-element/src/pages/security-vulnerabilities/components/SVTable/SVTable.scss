@@ -1,0 +1,58 @@
+.sv-table {
+	td,
+	th {
+		white-space: normal;
+	}
+
+	&.sv-structured-data td {
+		color: var(--color-neutral-9, #3f404b);
+		font-size: 16px;
+		font-weight: 400;
+		line-height: 24px;
+
+		&:last-child {
+			color: var(--color-neutral-8, #54555f);
+		}
+	}
+
+	th {
+		line-height: 16px;
+	}
+
+	.be-header-label {
+		color: var(--color-neutral-8, #54555f);
+	}
+
+	.sv-name {
+		color: var(--color-action-primary-default, #0b5fff);
+		font-size: 13px;
+		font-weight: 600;
+		line-height: 16px;
+	}
+
+	.sv-priority-summary-column {
+		min-width: 280px;
+	}
+
+	.sv-row {
+		cursor: pointer;
+
+		td {
+			border-bottom: 1px solid var(--color-neutral-2, #e2e2e4);
+		}
+	}
+
+	.sv-severity {
+		border-radius: 4px !important;
+		display: inline-block;
+		font-size: 13px;
+		line-height: 16px;
+		min-width: 0;
+		padding: 4px 8px !important;
+	}
+
+	.sv-summary {
+		color: var(--color-neutral-9, #3f404b);
+		font-weight: 400;
+	}
+}

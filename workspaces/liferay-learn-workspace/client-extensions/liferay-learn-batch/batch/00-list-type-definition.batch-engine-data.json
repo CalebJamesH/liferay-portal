@@ -11,6 +11,220 @@
 	},
 	"items": [
 		{
+			"externalReferenceCode": "P2S3_DOWNLOAD_AGREEMENT_TYPES",
+			"listTypeEntries": [
+				{
+					"externalReferenceCode": "ESA",
+					"key": "esa",
+					"name": "Enterprise Services Agreement"
+				},
+				{
+					"externalReferenceCode": "EVALUATION_EULA",
+					"key": "evaluationEula",
+					"name": "Evaluation EULA"
+				},
+				{
+					"externalReferenceCode": "STUDIO_EULA",
+					"key": "studioEula",
+					"name": "Developer Studio EULA"
+				}
+			],
+			"name": "P2S3 Download Agreement Types"
+		},
+		{
+			"externalReferenceCode": "P2S3_DOWNLOAD_FILE_TYPES",
+			"listTypeEntries": [
+				{
+					"externalReferenceCode": "DEVELOPER_STUDIO",
+					"key": "developerStudio",
+					"name": "Developer Studio"
+				},
+				{
+					"externalReferenceCode": "FACES",
+					"key": "faces",
+					"name": "Faces"
+				},
+				{
+					"externalReferenceCode": "FIX_PACKS",
+					"key": "fixPacks",
+					"name": "Fix Packs"
+				},
+				{
+					"externalReferenceCode": "LIFERAY_CMS_2026_Q4",
+					"key": "liferayCMS2026Q4",
+					"name": "Liferay CMS 2026.Q4"
+				},
+				{
+					"externalReferenceCode": "PATCH_RELEASE",
+					"key": "patchRelease",
+					"name": "Patch Release"
+				},
+				{
+					"externalReferenceCode": "PLUGINS",
+					"key": "plugins",
+					"name": "Plugins"
+				},
+				{
+					"externalReferenceCode": "PLUGINS_SDK",
+					"key": "pluginsSDK",
+					"name": "Plugins SDK"
+				},
+				{
+					"externalReferenceCode": "PRODUCT",
+					"key": "product",
+					"name": "Product"
+				},
+				{
+					"externalReferenceCode": "PRODUCT_SERVICE_PACKS",
+					"key": "productServicePacks",
+					"name": "Product/Service Packs"
+				},
+				{
+					"externalReferenceCode": "PRODUCT_UPDATES",
+					"key": "productUpdates",
+					"name": "Product/Updates"
+				},
+				{
+					"externalReferenceCode": "PROJECT_SDK",
+					"key": "projectSDK",
+					"name": "Project SDK"
+				},
+				{
+					"externalReferenceCode": "QUARTERLY_RELEASES",
+					"key": "quarterlyReleases",
+					"name": "Quarterly Releases"
+				},
+				{
+					"externalReferenceCode": "SECURITY_FIX_PACKS",
+					"key": "securityFixPacks",
+					"name": "Security Fix Packs"
+				},
+				{
+					"externalReferenceCode": "SECURITY_UPDATES",
+					"key": "securityUpdates",
+					"name": "Security Updates"
+				}
+			],
+			"name": "P2S3 Download File Types"
+		},
+		{
+			"externalReferenceCode": "P2S3_DOWNLOAD_PRODUCTS",
+			"listTypeEntries": [
+				{
+					"externalReferenceCode": "COMMERCE",
+					"key": "commerce",
+					"name": "Commerce"
+				},
+				{
+					"externalReferenceCode": "DEVELOPER_TOOLS",
+					"key": "developerTools",
+					"name": "Developer Tools"
+				},
+				{
+					"externalReferenceCode": "DXP70",
+					"key": "dxp70",
+					"name": "DXP 7.0"
+				},
+				{
+					"externalReferenceCode": "DXP71",
+					"key": "dxp71",
+					"name": "DXP 7.1"
+				},
+				{
+					"externalReferenceCode": "DXP72",
+					"key": "dxp72",
+					"name": "DXP 7.2"
+				},
+				{
+					"externalReferenceCode": "DXP73",
+					"key": "dxp73",
+					"name": "DXP 7.3"
+				},
+				{
+					"externalReferenceCode": "DXP74",
+					"key": "dxp74",
+					"name": "DXP 7.4"
+				},
+				{
+					"externalReferenceCode": "DXP_QUARTERLY_RELEASES",
+					"key": "dxpQuarterlyReleases",
+					"name": "DXP Quarterly Releases"
+				},
+				{
+					"externalReferenceCode": "ENTERPRISE_SEARCH",
+					"key": "enterpriseSearch",
+					"name": "Enterprise Search"
+				},
+				{
+					"externalReferenceCode": "LIFERAY_CMS",
+					"key": "liferayCMS",
+					"name": "Liferay CMS"
+				},
+				{
+					"externalReferenceCode": "LIFERAY_CONNECTOR_TO_PUNCH_OUT2_GO",
+					"key": "liferayConnectorToPunchOut2Go",
+					"name": "Liferay Connector to PunchOut2Go"
+				},
+				{
+					"externalReferenceCode": "LIFERAY_CONNECTOR_TO_SALESFORCE",
+					"key": "liferayConnectorToSalesforce",
+					"name": "Liferay Connector to Salesforce"
+				},
+				{
+					"externalReferenceCode": "MOBILE_EXPERIENCE_PLATFORM",
+					"key": "mobileExperiencePlatform",
+					"name": "Mobile Experience Platform"
+				},
+				{
+					"externalReferenceCode": "PATCHING_TOOL",
+					"key": "patchingTool",
+					"name": "Patching Tool"
+				},
+				{
+					"externalReferenceCode": "PORTAL52",
+					"key": "portal52",
+					"name": "Portal 5.2"
+				},
+				{
+					"externalReferenceCode": "PORTAL60",
+					"key": "portal60",
+					"name": "Portal 6.0"
+				},
+				{
+					"externalReferenceCode": "PORTAL61",
+					"key": "portal61",
+					"name": "Portal 6.1"
+				},
+				{
+					"externalReferenceCode": "PORTAL62",
+					"key": "portal62",
+					"name": "Portal 6.2"
+				},
+				{
+					"externalReferenceCode": "SYNC",
+					"key": "sync",
+					"name": "Sync"
+				}
+			],
+			"name": "P2S3 Download Products"
+		},
+		{
+			"externalReferenceCode": "P2S3_EXAM_RESULT_SOURCES",
+			"listTypeEntries": [
+				{
+					"externalReferenceCode": "CERTMANAGER",
+					"key": "certmanager",
+					"name": "Certmanager"
+				},
+				{
+					"externalReferenceCode": "WEBASSESSOR",
+					"key": "webassessor",
+					"name": "WebAssessor"
+				}
+			],
+			"name": "P2S3 Exam Result Sources"
+		},
+		{
 			"externalReferenceCode": "P2S3_EXPERTISE_LEVELS",
 			"listTypeEntries": [
 				{
@@ -200,6 +414,11 @@
 		{
 			"externalReferenceCode": "P2S3_SYNCHRONIZATION_STATUS",
 			"listTypeEntries": [
+				{
+					"externalReferenceCode": "DISCARDED",
+					"key": "discarded",
+					"name": "Discarded"
+				},
 				{
 					"externalReferenceCode": "FAILED",
 					"key": "failed",
