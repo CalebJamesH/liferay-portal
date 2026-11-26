@@ -91,10 +91,11 @@ public class ObjectActionFriendlyURLRestController extends BaseRestController {
 	private String _buildFriendlyURLPath(
 		ObjectInfo objectInfo, JSONObject valuesJSONObject) {
 
-		String slug = _normalizeSlug(valuesJSONObject.getString("title"));
+		String normalizedTitle = _normalizeTitle(
+			valuesJSONObject.getString("title"));
 
-		if (slug.isEmpty() || !objectInfo.hasParent()) {
-			return slug;
+		if (normalizedTitle.isEmpty() || !objectInfo.hasParent()) {
+			return normalizedTitle;
 		}
 
 		ObjectInfo parentObjectInfo = _objectInfoMap.get(
@@ -120,7 +121,7 @@ public class ObjectActionFriendlyURLRestController extends BaseRestController {
 			return parentFriendlyURLPath;
 		}
 
-		return parentFriendlyURLPath + "/" + slug;
+		return parentFriendlyURLPath + "/" + normalizedTitle;
 	}
 
 	private String _getAuthorization() {
@@ -138,14 +139,14 @@ public class ObjectActionFriendlyURLRestController extends BaseRestController {
 		return null;
 	}
 
-	private String _normalizeSlug(String title) {
-		String slug = Normalizer.normalize(title, Normalizer.Form.NFD);
+	private String _normalizeTitle(String title) {
+		title = Normalizer.normalize(title, Normalizer.Form.NFD);
 
-		slug = slug.replaceAll("\\p{M}", "");
-		slug = StringUtil.toLowerCase(slug);
-		slug = slug.replaceAll("[^a-z0-9_]+", "-");
+		title = title.replaceAll("\\p{M}", "");
+		title = StringUtil.toLowerCase(title);
+		title = title.replaceAll("[^a-z0-9_]+", "-");
 
-		return slug.replaceAll("^-|-$", "");
+		return title.replaceAll("^-|-$", "");
 	}
 
 	private void _patchFriendlyURL(
@@ -175,11 +176,9 @@ public class ObjectActionFriendlyURLRestController extends BaseRestController {
 		String friendlyURLPath, long objectEntryId, String objectName) {
 
 		for (Map.Entry<String, ObjectInfo> entry : _objectInfoMap.entrySet()) {
-			ObjectInfo childObjectInfo = entry.getValue();
+			ObjectInfo value = entry.getValue();
 
-			if (!Objects.equals(
-					objectName, childObjectInfo.getParentObjectName())) {
-
+			if (!Objects.equals(objectName, value.getParentObjectName())) {
 				continue;
 			}
 
@@ -187,12 +186,12 @@ public class ObjectActionFriendlyURLRestController extends BaseRestController {
 				get(
 					_getAuthorization(),
 					UriComponentsBuilder.fromPath(
-						childObjectInfo.getRESTPath()
+						value.getRESTPath()
 					).queryParam(
 						"filter",
 						StringBundler.concat(
-							childObjectInfo.getParentRelationshipFieldName(),
-							" eq '", objectEntryId, "'")
+							value.getParentRelationshipFieldName(), " eq '",
+							objectEntryId, "'")
 					).queryParam(
 						"pageSize", -1
 					).build(
@@ -204,19 +203,20 @@ public class ObjectActionFriendlyURLRestController extends BaseRestController {
 			for (int i = 0; i < childJSONArray.length(); i++) {
 				JSONObject childJSONObject = childJSONArray.getJSONObject(i);
 
-				String childSlug = _normalizeSlug(
+				String normalizedChildTitle = _normalizeTitle(
 					childJSONObject.getString("title"));
 
-				if (childSlug.isEmpty()) {
+				if (normalizedChildTitle.isEmpty()) {
 					continue;
 				}
 
-				String childFriendlyURLPath = friendlyURLPath + "/" + childSlug;
+				String childFriendlyURLPath =
+					friendlyURLPath + "/" + normalizedChildTitle;
 				long childObjectEntryId = childJSONObject.getLong("id");
 
 				_patchFriendlyURL(
 					childFriendlyURLPath, childObjectEntryId,
-					childObjectInfo.getRESTPath());
+					value.getRESTPath());
 
 				_propagateFriendlyURL(
 					childFriendlyURLPath, childObjectEntryId, entry.getKey());
