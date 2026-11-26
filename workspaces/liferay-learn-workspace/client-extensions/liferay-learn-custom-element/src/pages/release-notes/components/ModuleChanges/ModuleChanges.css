@@ -1,0 +1,25 @@
+.module-changes {
+	padding-top: 24px;
+}
+
+.module-changes-changed td {
+	background-color: #edf3fe;
+}
+
+.module-changes-empty {
+	border: 1px solid #e7e7ed;
+	border-radius: 4px;
+	padding: 48px 24px;
+}
+
+.module-changes-filter {
+	margin-top: 24px;
+}
+
+.module-changes-keywords {
+	margin-top: 16px;
+}
+
+.module-changes-sidebar {
+	margin-bottom: 24px;
+}

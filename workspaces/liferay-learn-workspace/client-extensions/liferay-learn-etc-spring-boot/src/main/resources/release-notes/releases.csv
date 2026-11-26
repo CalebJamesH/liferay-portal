@@ -1,0 +1,476 @@
+productVersion,key,name
+7.0,7010-base,GA
+7.0,7010-de-1,Fix Pack 1
+7.0,7010-de-2,Fix Pack 2
+7.0,7010-de-3,Fix Pack 3
+7.0,7010-de-4,Fix Pack 4
+7.0,7010-de-5,Fix Pack 5
+7.0,7010-de-6,Fix Pack 6
+7.0,7010-de-7,Fix Pack 7 (SP 1)
+7.0,7010-de-8,Fix Pack 8
+7.0,7010-de-9,Fix Pack 9
+7.0,7010-de-10,Fix Pack 10
+7.0,7010-de-11,Fix Pack 11
+7.0,7010-de-12,Fix Pack 12 (SP 2)
+7.0,7010-de-13,Fix Pack 13
+7.0,7010-de-14,Fix Pack 14 (SP 3)
+7.0,7010-de-15,Fix Pack 15
+7.0,7010-de-16,Fix Pack 16
+7.0,7010-de-17,Fix Pack 17
+7.0,7010-de-18,Fix Pack 18
+7.0,7010-de-19,Fix Pack 19
+7.0,7010-de-20,Fix Pack 20
+7.0,7010-de-21,Fix Pack 21
+7.0,7010-de-22,Fix Pack 22 (SP 4)
+7.0,7010-de-23,Fix Pack 23
+7.0,7010-de-24,Fix Pack 24
+7.0,7010-de-25,Fix Pack 25
+7.0,7010-de-26,Fix Pack 26
+7.0,7010-de-27,Fix Pack 27
+7.0,7010-de-28,Fix Pack 28
+7.0,7010-de-29,Fix Pack 29
+7.0,7010-de-30,Fix Pack 30 (SP 5)
+7.0,7010-de-31,Fix Pack 31
+7.0,7010-de-32,Fix Pack 32 (SP 6)
+7.0,7010-de-33,Fix Pack 33
+7.0,7010-de-34,Fix Pack 34
+7.0,7010-de-35,Fix Pack 35
+7.0,7010-de-36,Fix Pack 36
+7.0,7010-de-37,Fix Pack 37
+7.0,7010-de-38,Fix Pack 38
+7.0,7010-de-39,Fix Pack 39
+7.0,7010-de-40,Fix Pack 40 (SP 7)
+7.0,7010-de-41,Fix Pack 41
+7.0,7010-de-42,Fix Pack 42
+7.0,7010-de-43,Fix Pack 43
+7.0,7010-de-44,Fix Pack 44
+7.0,7010-de-45,Fix Pack 45
+7.0,7010-de-46,Fix Pack 46
+7.0,7010-de-47,Fix Pack 47
+7.0,7010-de-48,Fix Pack 48
+7.0,7010-de-49,Fix Pack 49
+7.0,7010-de-50,Fix Pack 50 (SP 8)
+7.0,7010-de-51,Fix Pack 51
+7.0,7010-de-52,Fix Pack 52
+7.0,7010-de-53,Fix Pack 53
+7.0,7010-de-54,Fix Pack 54
+7.0,7010-de-55,Fix Pack 55
+7.0,7010-de-56,Fix Pack 56
+7.0,7010-de-57,Fix Pack 57
+7.0,7010-de-58,Fix Pack 58
+7.0,7010-de-59,Fix Pack 59
+7.0,7010-de-60,Fix Pack 60 (SP 9)
+7.0,7010-de-61,Fix Pack 61
+7.0,7010-de-62,Fix Pack 62
+7.0,7010-de-63,Fix Pack 63
+7.0,7010-de-64,Fix Pack 64
+7.0,7010-de-65,Fix Pack 65
+7.0,7010-de-66,Fix Pack 66
+7.0,7010-de-67,Fix Pack 67
+7.0,7010-de-68,Fix Pack 68
+7.0,7010-de-69,Fix Pack 69
+7.0,7010-de-70,Fix Pack 70 (SP 10)
+7.0,7010-de-71,Fix Pack 71
+7.0,7010-de-72,Fix Pack 72
+7.0,7010-de-73,Fix Pack 73
+7.0,7010-de-74,Fix Pack 74
+7.0,7010-de-75,Fix Pack 75
+7.0,7010-de-76,Fix Pack 76
+7.0,7010-de-77,Fix Pack 77
+7.0,7010-de-78,Fix Pack 78
+7.0,7010-de-79,Fix Pack 79
+7.0,7010-de-80,Fix Pack 80 (SP 11)
+7.0,7010-de-81,Fix Pack 81
+7.0,7010-de-82,Fix Pack 82
+7.0,7010-de-83,Fix Pack 83
+7.0,7010-de-84,Fix Pack 84
+7.0,7010-de-85,Fix Pack 85
+7.0,7010-de-86,Fix Pack 86
+7.0,7010-de-87,Fix Pack 87 (SP12)
+7.0,7010-de-88,Fix Pack 88
+7.0,7010-de-89,Fix Pack 89
+7.0,7010-de-90,Fix Pack 90 (SP13)
+7.0,7010-de-91,Fix Pack 91
+7.0,7010-de-92,Fix Pack 92
+7.0,7010-de-93,Fix Pack 93 (SP14)
+7.0,7010-de-94,Fix Pack 94
+7.0,7010-de-95,Fix Pack 95
+7.0,7010-de-96,Fix Pack 96 (SP 15)
+7.0,7010-de-97,Fix Pack 97
+7.0,7010-de-98,Fix Pack 98
+7.0,7010-de-99,Fix Pack 99 (SP16)
+7.0,7010-de-100,Fix Pack 100
+7.0,7010-de-101,Fix Pack 101
+7.0,7010-de-102,Fix Pack 102 (SP 17)
+7.1,7110-base,GA
+7.1,7110-dxp-1,Fix Pack 1
+7.1,7110-dxp-2,Fix Pack 2
+7.1,7110-dxp-3,Fix Pack 3
+7.1,7110-dxp-4,Fix Pack 4
+7.1,7110-dxp-5,Fix Pack 5 (SP1)
+7.1,7110-dxp-6,Fix Pack 6
+7.1,7110-dxp-7,Fix Pack 7
+7.1,7110-dxp-8,Fix Pack 8
+7.1,7110-dxp-9,Fix Pack 9
+7.1,7110-dxp-10,Fix Pack 10 (SP2)
+7.1,7110-dxp-11,Fix Pack 11
+7.1,7110-dxp-12,Fix Pack 12
+7.1,7110-dxp-13,Fix Pack 13
+7.1,7110-dxp-14,Fix Pack 14
+7.1,7110-dxp-15,Fix Pack 15 (SP3)
+7.1,7110-dxp-16,Fix Pack 16
+7.1,7110-dxp-17,Fix Pack 17 (SP4)
+7.1,7110-dxp-18,Fix Pack 18
+7.1,7110-dxp-19,Fix Pack 19
+7.1,7110-dxp-20,Fix Pack 20 (SP5)
+7.1,7110-dxp-21,Fix Pack 21
+7.1,7110-dxp-22,Fix Pack 22
+7.1,7110-dxp-23,Fix Pack 23 (SP6)
+7.1,7110-dxp-24,Fix Pack 24
+7.1,7110-dxp-25,Fix Pack 25
+7.1,7110-dxp-26,Fix Pack 26 (SP7)
+7.1,7110-dxp-27,Fix Pack 27
+7.1,7110-dxp-28,Fix Pack 28 (SP8)
+7.2,7210-base,GA
+7.2,7210-dxp-1,Fix Pack 1
+7.2,7210-dxp-2,Fix Pack 2 (SP1)
+7.2,7210-dxp-3,Fix Pack 3
+7.2,7210-dxp-4,Fix Pack 4
+7.2,7210-dxp-5,Fix Pack 5 (SP2)
+7.2,7210-dxp-6,Fix Pack 6
+7.2,7210-dxp-7,Fix Pack 7
+7.2,7210-dxp-8,Fix Pack 8 (SP3)
+7.2,7210-dxp-9,Fix Pack 9
+7.2,7210-dxp-10,Fix Pack 10
+7.2,7210-dxp-11,Fix Pack 11 (SP4)
+7.2,7210-dxp-12,Fix Pack 12
+7.2,7210-dxp-13,Fix Pack 13
+7.2,7210-dxp-14,Fix Pack 14 (SP5)
+7.2,7210-dxp-15,Fix Pack 15
+7.2,7210-dxp-16,Fix Pack 16
+7.2,7210-dxp-17,Fix Pack 17 (SP6)
+7.2,7210-dxp-18,Fix Pack 18
+7.2,7210-dxp-19,Fix Pack 19 (SP7)
+7.2,7210-dxp-20,Fix Pack 20 (SP8)
+7.3,7310-base,GA
+7.3,7310-dxp-1,Fix Pack 1 (SP1)
+7.3,7310-dxp-2,Fix Pack 2
+7.3,7310-dxp-3,Service Pack 3
+7.3,7310-u4,Update 4
+7.3,7310-u5,Update 5
+7.3,7310-u6,Update 6
+7.3,7310-u7,Update 7
+7.3,7310-u8,Update 8
+7.3,7310-u9,Update 9
+7.3,7310-u10,Update 10
+7.3,7310-u11,Update 11
+7.3,7310-u12,Update 12
+7.3,7310-u13,Update 13
+7.3,7310-u14,Update 14
+7.3,7310-u15,Update 15
+7.3,7310-u16,Update 16
+7.3,7310-u17,Update 17
+7.3,7310-u18,Update 18
+7.3,7310-u19,Update 19
+7.3,7310-u20,Update 20
+7.3,7310-u21,Update 21
+7.3,7310-u22,Update 22
+7.3,7310-u23,Update 23
+7.3,7310-u24,Update 24
+7.3,7310-u25,Update 25
+7.3,7310-u26,Update 26
+7.3,7310-u27,Update 27
+7.3,7310-u28,Update 28
+7.3,7310-u29,Update 29
+7.3,7310-u30,Update 30
+7.3,7310-u31,Update 31
+7.3,7310-u32,Update 32
+7.3,7310-u33,Update 33
+7.3,7310-u34,Update 34
+7.3,7310-u35,Update 35
+7.3,7310-u36,Update 36
+7.4,7413-base,GA
+7.4,7413-u1,Update 1
+7.4,7413-u2,Update 2
+7.4,7413-u3,Update 3
+7.4,7413-u4,Update 4
+7.4,7413-u5,Update 5
+7.4,7413-u6,Update 6
+7.4,7413-u7,Update 7
+7.4,7413-u8,Update 8
+7.4,7413-u9,Update 9
+7.4,7413-u10,Update 10
+7.4,7413-u11,Update 11
+7.4,7413-u12,Update 12
+7.4,7413-u13,Update 13
+7.4,7413-u14,Update 14
+7.4,7413-u15,Update 15
+7.4,7413-u16,Update 16
+7.4,7413-u17,Update 17
+7.4,7413-u18,Update 18
+7.4,7413-u19,Update 19
+7.4,7413-u20,Update 20
+7.4,7413-u21,Update 21
+7.4,7413-u22,Update 22
+7.4,7413-u23,Update 23
+7.4,7413-u24,Update 24
+7.4,7413-u25,Update 25
+7.4,7413-u26,Update 26
+7.4,7413-u27,Update 27
+7.4,7413-u28,Update 28
+7.4,7413-u29,Update 29
+7.4,7413-u30,Update 30
+7.4,7413-u31,Update 31
+7.4,7413-u32,Update 32
+7.4,7413-u33,Update 33
+7.4,7413-u34,Update 34
+7.4,7413-u35,Update 35
+7.4,7413-u36,Update 36
+7.4,7413-u37,Update 37
+7.4,7413-u38,Update 38
+7.4,7413-u39,Update 39
+7.4,7413-u40,Update 40
+7.4,7413-u41,Update 41
+7.4,7413-u42,Update 42
+7.4,7413-u43,Update 43
+7.4,7413-u44,Update 44
+7.4,7413-u45,Update 45
+7.4,7413-u46,Update 46
+7.4,7413-u47,Update 47
+7.4,7413-u48,Update 48
+7.4,7413-u49,Update 49
+7.4,7413-u50,Update 50
+7.4,7413-u51,Update 51
+7.4,7413-u52,Update 52
+7.4,7413-u53,Update 53
+7.4,7413-u54,Update 54
+7.4,7413-u55,Update 55
+7.4,7413-u56,Update 56
+7.4,7413-u57,Update 57
+7.4,7413-u58,Update 58
+7.4,7413-u59,Update 59
+7.4,7413-u60,Update 60
+7.4,7413-u61,Update 61
+7.4,7413-u62,Update 62
+7.4,7413-u63,Update 63
+7.4,7413-u64,Update 64
+7.4,7413-u65,Update 65
+7.4,7413-u66,Update 66
+7.4,7413-u67,Update 67
+7.4,7413-u68,Update 68
+7.4,7413-u69,Update 69
+7.4,7413-u70,Update 70
+7.4,7413-u71,Update 71
+7.4,7413-u72,Update 72
+7.4,7413-u73,Update 73
+7.4,7413-u74,Update 74
+7.4,7413-u75,Update 75
+7.4,7413-u76,Update 76
+7.4,7413-u77,Update 77
+7.4,7413-u78,Update 78
+7.4,7413-u79,Update 79
+7.4,7413-u80,Update 80
+7.4,7413-u81,Update 81
+7.4,7413-u82,Update 82
+7.4,7413-u83,Update 83
+7.4,7413-u84,Update 84
+7.4,7413-u85,Update 85
+7.4,7413-u86,Update 86
+7.4,7413-u87,Update 87
+7.4,7413-u88,Update 88
+7.4,7413-u89,Update 89
+7.4,7413-u90,Update 90
+7.4,7413-u91,Update 91
+7.4,7413-u92,Update 92
+7.4,7413-2023.q3.0,2023.Q3.0 Quarterly Release
+7.4,7413-2023.q3.1,2023.Q3.1 Quarterly Release
+7.4,7413-2023.q3.2,2023.Q3.2 Quarterly Release
+7.4,7413-2023.q3.3,2023.Q3.3 Quarterly Release
+7.4,7413-2023.q3.4,2023.Q3.4 Quarterly Release
+7.4,7413-2023.q3.5,2023.Q3.5 Quarterly Release
+7.4,7413-2023.q3.6,2023.Q3.6 Quarterly Release
+7.4,7413-2023.q3.7,2023.Q3.7 Quarterly Release
+7.4,7413-2023.q3.8,2023.Q3.8 Quarterly Release
+7.4,7413-2023.q3.9,2023.Q3.9 Quarterly Release
+7.4,7413-2023.q3.10,2023.Q3.10 Quarterly Release
+7.4,7413-2023.q4.0,2023.Q4.0 Quarterly Release
+7.4,7413-2023.q4.1,2023.Q4.1 Quarterly Release
+7.4,7413-2023.q4.2,2023.Q4.2 Quarterly Release
+7.4,7413-2023.q4.3,2023.Q4.3 Quarterly Release
+7.4,7413-2023.q4.4,2023.Q4.4 Quarterly Release
+7.4,7413-2023.q4.5,2023.Q4.5 Quarterly Release
+7.4,7413-2023.q4.6,2023.Q4.6 Quarterly Release
+7.4,7413-2023.q4.7,2023.Q4.7 Quarterly Release
+7.4,7413-2023.q4.8,2023.Q4.8 Quarterly Release
+7.4,7413-2023.q4.9,2023.Q4.9 Quarterly Release
+7.4,7413-2023.q4.10,2023.Q4.10 Quarterly Release
+7.4,7413-2024.q1.1,2024.Q1.1 Quarterly Release (LTS)
+7.4,7413-2024.q1.2,2024.Q1.2 Quarterly Release (LTS)
+7.4,7413-2024.q1.3,2024.Q1.3 Quarterly Release (LTS)
+7.4,7413-2024.q1.4,2024.Q1.4 Quarterly Release (LTS)
+7.4,7413-2024.q1.5,2024.Q1.5 Quarterly Release (LTS)
+7.4,7413-2024.q1.6,2024.Q1.6 Quarterly Release (LTS)
+7.4,7413-2024.q1.7,2024.Q1.7 Quarterly Release (LTS)
+7.4,7413-2024.q1.8,2024.Q1.8 Quarterly Release (LTS)
+7.4,7413-2024.q1.9,2024.Q1.9 Quarterly Release (LTS)
+7.4,7413-2024.q1.10,2024.Q1.10 Quarterly Release (LTS)
+7.4,7413-2024.q1.11,2024.Q1.11 Quarterly Release (LTS)
+7.4,7413-2024.q1.12,2024.Q1.12 Quarterly Release (LTS)
+7.4,7413-2024.q1.13,2024.Q1.13 Quarterly Release (LTS)
+7.4,7413-2024.q1.14,2024.Q1.14 Quarterly Release (LTS)
+7.4,7413-2024.q1.15,2024.Q1.15 Quarterly Release (LTS)
+7.4,7413-2024.q1.16,2024.Q1.16 Quarterly Release (LTS)
+7.4,7413-2024.q1.17,2024.Q1.17 Quarterly Release (LTS)
+7.4,7413-2024.q1.18,2024.Q1.18 Quarterly Release (LTS)
+7.4,7413-2024.q1.19,2024.Q1.19 Quarterly Release (LTS)
+7.4,7413-2024.q1.20,2024.Q1.20 Quarterly Release (LTS)
+7.4,7413-2024.q1.21,2024.Q1.21 Quarterly Release (LTS)
+7.4,7413-2024.q1.22,2024.Q1.22 Quarterly Release (LTS)
+7.4,7413-2024.q1.23,2024.Q1.23 Quarterly Release (LTS)
+7.4,7413-2024.q1.24,2024.Q1.24 Quarterly Release (LTS)
+7.4,7413-2024.q1.25,2024.Q1.25 Quarterly Release (LTS)
+7.4,7413-2024.q1.26,2024.Q1.26 Quarterly Release (LTS)
+7.4,7413-2024.q1.27,2024.Q1.27 Quarterly Release (LTS)
+7.4,7413-2024.q1.28,2024.Q1.28 Quarterly Release (LTS)
+7.4,7413-2024.q1.29,2024.Q1.29 Quarterly Release (LTS)
+7.4,7413-2024.q1.30,2024.Q1.30 Quarterly Release (LTS)
+7.4,7413-2024.q1.31,2024.Q1.31 Quarterly Release (LTS)
+7.4,7413-2024.q2.0,2024.Q2.0 Quarterly Release
+7.4,7413-2024.q2.1,2024.Q2.1 Quarterly Release
+7.4,7413-2024.q2.2,2024.Q2.2 Quarterly Release
+7.4,7413-2024.q2.3,2024.Q2.3 Quarterly Release
+7.4,7413-2024.q2.4,2024.Q2.4 Quarterly Release
+7.4,7413-2024.q2.5,2024.Q2.5 Quarterly Release
+7.4,7413-2024.q2.6,2024.Q2.6 Quarterly Release
+7.4,7413-2024.q2.7,2024.Q2.7 Quarterly Release
+7.4,7413-2024.q2.8,2024.Q2.8 Quarterly Release
+7.4,7413-2024.q2.9,2024.Q2.9 Quarterly Release
+7.4,7413-2024.q2.10,2024.Q2.10 Quarterly Release
+7.4,7413-2024.q2.11,2024.Q2.11 Quarterly Release
+7.4,7413-2024.q2.12,2024.Q2.12 Quarterly Release
+7.4,7413-2024.q2.13,2024.Q2.13 Quarterly Release
+7.4,7413-2024.q3.0,2024.Q3.0 Quarterly Release
+7.4,7413-2024.q3.1,2024.Q3.1 Quarterly Release
+7.4,7413-2024.q3.2,2024.Q3.2 Quarterly Release
+7.4,7413-2024.q3.3,2024.Q3.3 Quarterly Release
+7.4,7413-2024.q3.4,2024.Q3.4 Quarterly Release
+7.4,7413-2024.q3.5,2024.Q3.5 Quarterly Release
+7.4,7413-2024.q3.6,2024.Q3.6 Quarterly Release
+7.4,7413-2024.q3.7,2024.Q3.7 Quarterly Release
+7.4,7413-2024.q3.8,2024.Q3.8 Quarterly Release
+7.4,7413-2024.q3.9,2024.Q3.9 Quarterly Release
+7.4,7413-2024.q3.10,2024.Q3.10 Quarterly Release
+7.4,7413-2024.q3.11,2024.Q3.11 Quarterly Release
+7.4,7413-2024.q3.12,2024.Q3.12 Quarterly Release
+7.4,7413-2024.q3.13,2024.Q3.13 Quarterly Release
+7.4,7413-2024.q4.0,2024.Q4.0 Quarterly Release
+7.4,7413-2024.q4.1,2024.Q4.1 Quarterly Release
+7.4,7413-2024.q4.2,2024.Q4.2 Quarterly Release
+7.4,7413-2024.q4.3,2024.Q4.3 Quarterly Release
+7.4,7413-2024.q4.4,2024.Q4.4 Quarterly Release
+7.4,7413-2024.q4.5,2024.Q4.5 Quarterly Release
+7.4,7413-2024.q4.6,2024.Q4.6 Quarterly Release
+7.4,7413-2024.q4.7,2024.Q4.7 Quarterly Release
+7.4,7413-2025.q1.0,2025.Q1.0 Quarterly Release (LTS)
+7.4,7413-2025.q1.1,2025.Q1.1 Quarterly Release (LTS)
+7.4,7413-2025.q1.2,2025.Q1.2 Quarterly Release (LTS)
+7.4,7413-2025.q1.3,2025.Q1.3 Quarterly Release (LTS)
+7.4,7413-2025.q1.4,2025.Q1.4 Quarterly Release (LTS)
+7.4,7413-2025.q1.5,2025.Q1.5 Quarterly Release (LTS)
+7.4,7413-2025.q1.6,2025.Q1.6 Quarterly Release (LTS)
+7.4,7413-2025.q1.7,2025.Q1.7 Quarterly Release (LTS)
+7.4,7413-2025.q1.8,2025.Q1.8 Quarterly Release (LTS)
+7.4,7413-2025.q1.9,2025.Q1.9 Quarterly Release (LTS)
+7.4,7413-2025.q1.10,2025.Q1.10 Quarterly Release (LTS)
+7.4,7413-2025.q1.11,2025.Q1.11 Quarterly Release (LTS)
+7.4,7413-2025.q1.12,2025.Q1.12 Quarterly Release (LTS)
+7.4,7413-2025.q1.13,2025.Q1.13 Quarterly Release (LTS)
+7.4,7413-2025.q1.14,2025.Q1.14 Quarterly Release (LTS)
+7.4,7413-2025.q1.15,2025.Q1.15 Quarterly Release (LTS)
+7.4,7413-2025.q1.16,2025.Q1.16 Quarterly Release (LTS)
+7.4,7413-2025.q1.17,2025.Q1.17 Quarterly Release (LTS)
+7.4,7413-2025.q1.18,2025.Q1.18 Quarterly Release (LTS)
+7.4,7413-2025.q1.19,2025.Q1.19 Quarterly Release (LTS)
+7.4,7413-2025.q1.20,2025.Q1.20 Quarterly Release (LTS)
+7.4,7413-2025.q1.21,2025.Q1.21 Quarterly Release (LTS)
+7.4,7413-2025.q1.22,2025.Q1.22 Quarterly Release (LTS)
+7.4,7413-2025.q1.23,2025.Q1.23 Quarterly Release (LTS)
+7.4,7413-2025.q1.24,2025.Q1.24 Quarterly Release (LTS)
+7.4,7413-2025.q1.25,2025.Q1.25 Quarterly Release (LTS)
+7.4,7413-2025.q1.26,2025.Q1.26 Quarterly Release (LTS)
+7.4,7413-2025.q1.27,2025.Q1.27 Quarterly Release (LTS)
+7.4,7413-2025.q1.28,2025.Q1.28 Quarterly Release (LTS)
+7.4,7413-2025.q1.29,2025.Q1.29 Quarterly Release (LTS)
+7.4,7413-2025.q2.0,2025.Q2.0 Quarterly Release
+7.4,7413-2025.q2.1,2025.Q2.1 Quarterly Release
+7.4,7413-2025.q2.2,2025.Q2.2 Quarterly Release
+7.4,7413-2025.q2.3,2025.Q2.3 Quarterly Release
+7.4,7413-2025.q2.4,2025.Q2.4 Quarterly Release
+7.4,7413-2025.q2.5,2025.Q2.5 Quarterly Release
+7.4,7413-2025.q2.6,2025.Q2.6 Quarterly Release
+7.4,7413-2025.q2.7,2025.Q2.7 Quarterly Release
+7.4,7413-2025.q2.8,2025.Q2.8 Quarterly Release
+7.4,7413-2025.q2.9,2025.Q2.9 Quarterly Release
+7.4,7413-2025.q2.10,2025.Q2.10 Quarterly Release
+7.4,7413-2025.q2.11,2025.Q2.11 Quarterly Release
+7.4,7413-2025.q2.12,2025.Q2.12 Quarterly Release
+7.4,7413-2025.q3.0,2025.Q3.0 Quarterly Release
+7.4,7413-2025.q3.1,2025.Q3.1 Quarterly Release
+7.4,7413-2025.q3.2,2025.Q3.2 Quarterly Release
+7.4,7413-2025.q3.3,2025.Q3.3 Quarterly Release
+7.4,7413-2025.q3.4,2025.Q3.4 Quarterly Release
+7.4,7413-2025.q3.5,2025.Q3.5 Quarterly Release
+7.4,7413-2025.q3.6,2025.Q3.6 Quarterly Release
+7.4,7413-2025.q3.7,2025.Q3.7 Quarterly Release
+7.4,7413-2025.q3.8,2025.Q3.8 Quarterly Release
+7.4,7413-2025.q3.9,2025.Q3.9 Quarterly Release
+7.4,7413-2025.q3.10,2025.Q3.10 Quarterly Release
+7.4,7413-2025.q4.0,2025.Q4.0 Quarterly Release
+7.4,7413-2025.q4.1,2025.Q4.1 Quarterly Release
+7.4,7413-2025.q4.2,2025.Q4.2 Quarterly Release
+7.4,7413-2025.q4.3,2025.Q4.3 Quarterly Release
+7.4,7413-2025.q4.4,2025.Q4.4 Quarterly Release
+7.4,7413-2025.q4.5,2025.Q4.5 Quarterly Release
+7.4,7413-2025.q4.6,2025.Q4.6 Quarterly Release
+7.4,7413-2025.q4.7,2025.Q4.7 Quarterly Release
+7.4,7413-2025.q4.8,2025.Q4.8 Quarterly Release
+7.4,7413-2025.q4.9,2025.Q4.9 Quarterly Release
+7.4,7413-2025.q4.10,2025.Q4.10 Quarterly Release
+7.4,7413-2025.q4.11,2025.Q4.11 Quarterly Release
+7.4,7413-2025.q4.12,2025.Q4.12 Quarterly Release
+7.4,7413-2026.q1.0,2026.Q1.0 Quarterly Release (LTS)
+7.4,7413-2026.q1.1,2026.Q1.1 Quarterly Release (LTS)
+7.4,7413-2026.q1.2,2026.Q1.2 Quarterly Release (LTS)
+7.4,7413-2026.q1.3,2026.Q1.3 Quarterly Release (LTS)
+7.4,7413-2026.q1.4,2026.Q1.4 Quarterly Release (LTS)
+7.4,7413-2026.q1.5,2026.Q1.5 Quarterly Release (LTS)
+7.4,7413-2026.q1.6,2026.Q1.6 Quarterly Release (LTS)
+7.4,7413-2026.q1.7,2026.Q1.7 Quarterly Release (LTS)
+7.4,7413-2026.q1.8,2026.Q1.8 Quarterly Release (LTS)
+7.4,7413-2026.q1.9,2026.Q1.9 Quarterly Release (LTS)
+7.4,7413-2026.q1.10,2026.Q1.10 Quarterly Release (LTS)
+7.4,7413-2026.q1.11,2026.Q1.11 Quarterly Release (LTS)
+7.4,7413-2026.q1.12,2026.Q1.12 Quarterly Release (LTS)
+7.4,7413-2026.q1.13,2026.Q1.13 Quarterly Release (LTS)
+7.4,7413-2026.q2.0,2026.Q2.0 Quarterly Release
+7.4,7413-2026.q2.1,2026.Q2.1 Quarterly Release
+7.4,7413-2026.q2.2,2026.Q2.2 Quarterly Release
+7.4,7413-2026.q2.3,2026.Q2.3 Quarterly Release
+7.4,7413-2026.q2.4,2026.Q2.4 Quarterly Release
+7.4,7413-2026.q2.5,2026.Q2.5 Quarterly Release
+7.4,7413-2026.q2.6,2026.Q2.6 Quarterly Release
+7.4,7413-2026.q2.7,2026.Q2.7 Quarterly Release
+7.4,7413-2026.q2.8,2026.Q2.8 Quarterly Release
+7.4,7413-2026.q2.9,2026.Q2.9 Quarterly Release
+7.4,7413-2026.q2.10,2026.Q2.10 Quarterly Release
+7.4,7413-2026.q2.11,2026.Q2.11 Quarterly Release
+7.4,7413-2026.q2.12,2026.Q2.12 Quarterly Release
+7.4,7413-2026.q3.0,2026.Q3.0 Quarterly Release
+7.4,7413-2026.q3.1,2026.Q3.1 Quarterly Release
+7.4,7413-2026.q3.2,2026.Q3.2 Quarterly Release
+7.4,7413-2026.q3.3,2026.Q3.3 Quarterly Release
+7.4,7413-2026.q3.4,2026.Q3.4 Quarterly Release
+7.4,7413-2026.q3.5,2026.Q3.5 Quarterly Release
+7.4,7413-2026.q3.6,2026.Q3.6 Quarterly Release
+7.4,7413-2026.q3.7,2026.Q3.7 Quarterly Release
+7.4,7413-2026.q3.8,2026.Q3.8 Quarterly Release
