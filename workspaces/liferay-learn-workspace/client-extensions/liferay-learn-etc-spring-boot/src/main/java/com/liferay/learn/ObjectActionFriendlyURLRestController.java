@@ -204,7 +204,6 @@ public class ObjectActionFriendlyURLRestController extends BaseRestController {
 			objectEntryJSONObject, _objectInfoMap.get(objectName));
 
 		for (Map.Entry<String, ObjectInfo> entry : _objectInfoMap.entrySet()) {
-
 			ObjectInfo objectInfo = entry.getValue();
 
 			if (!Objects.equals(objectName, objectInfo.getParentObjectName())) {
