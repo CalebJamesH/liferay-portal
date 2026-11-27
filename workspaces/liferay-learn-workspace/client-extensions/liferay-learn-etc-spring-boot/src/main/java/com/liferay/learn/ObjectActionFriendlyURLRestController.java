@@ -167,7 +167,7 @@ public class ObjectActionFriendlyURLRestController extends BaseRestController {
 		return false;
 	}
 
-	private String _patchFriendlyURL(
+	private String _patch(
 		String friendlyURLPath, JSONObject objectEntryJSONObject,
 		ObjectInfo objectInfo) {
 
@@ -199,14 +199,13 @@ public class ObjectActionFriendlyURLRestController extends BaseRestController {
 		JSONObject objectEntryJSONObject, String objectName,
 		String parentFriendlyURLPath) {
 
-		String friendlyURLPath = _patchFriendlyURL(
+		String friendlyURLPath = _patch(
 			_getFriendlyURLPath(objectEntryJSONObject, parentFriendlyURLPath),
 			objectEntryJSONObject, _objectInfoMap.get(objectName));
 
-		for (Map.Entry<String, ObjectInfo> objectInfoEntry :
-				_objectInfoMap.entrySet()) {
+		for (Map.Entry<String, ObjectInfo> entry : _objectInfoMap.entrySet()) {
 
-			ObjectInfo objectInfo = objectInfoEntry.getValue();
+			ObjectInfo objectInfo = entry.getValue();
 
 			if (!Objects.equals(objectName, objectInfo.getParentObjectName())) {
 				continue;
@@ -232,7 +231,7 @@ public class ObjectActionFriendlyURLRestController extends BaseRestController {
 
 			for (int i = 0; i < itemsJSONArray.length(); i++) {
 				_propagateFriendlyURL(
-					itemsJSONArray.getJSONObject(i), objectInfoEntry.getKey(),
+					itemsJSONArray.getJSONObject(i), entry.getKey(),
 					friendlyURLPath);
 			}
 		}
